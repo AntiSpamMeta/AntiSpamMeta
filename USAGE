@@ -1,0 +1,29 @@
+a-access commands:
+ ;join <channel>
+ ;part <channel>[ :<reason>]
+ ;quit[ <reason>]
+ ;rehash
+   re-reads config files
+ ;rehash exempts
+   re-reads exempts.txt
+
+d-access commands:
+ ;sl <anything>
+   sends a raw line
+ ;ev <anything>
+   evaluates perl code
+
+t-access commands:
+ ;say <something>
+   says something in the channel where the command was given
+ ;do <something>
+
+o-access commands:
+ ;exempt <something>
+   prevents sending alerts if <something> matches the nick/ident/host
+ ;remove <nick>
+   removes nick from the channel
+
+always-granted commands:
+ !ops[ <message>]
+   gets op attention

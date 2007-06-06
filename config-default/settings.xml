@@ -1,0 +1,36 @@
+<settings>
+  <altnicks>
+    <altnick>AntiSpamMeta_</altnick>
+    <altnick>AntiSpamMeta2</altnick>
+  </altnicks>
+  <autojoins>
+    <autojoin>##asb-nexus</autojoin>
+    <autojoin>##asb-testing</autojoin>
+    <autojoin>##asb-meta</autojoin>
+    <autojoin>#baadf00d</autojoin>
+    <autojoin>##linux</autojoin>
+    <autojoin>##linux-ops</autojoin>
+    <autojoin>#wikipedia</autojoin>
+    <autojoin>#wikimedia-ops</autojoin>
+    <autojoin>#wikipedia-en</autojoin>
+    <autojoin>#religion</autojoin>
+    <autojoin>#wikipedia-en-roads-us</autojoin>
+    <autojoin>##windows</autojoin>
+    <autojoin>#wikimedia-commons</autojoin>
+  </autojoins>
+  <log>
+    <dir>logs/$chan</dir>
+    <filefmt>$chan-%m-%d-%Y.log</filefmt>
+    <timefmt>%B %d %T  </timefmt>
+    <zone>GMT</zone>
+  </log>
+  <nick>AntiSpamMeta</nick>
+  <pass></pass>
+  <port>6667</port>
+  <realname>I am a new AntiSpamBot in the making.</realname>
+  <server>
+    <host>irc.freenode.net</host>
+  </server>
+  <username>MetaBot</username>
+  <lookupexpire>2419200</lookupexpire>
+</settings>

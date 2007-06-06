@@ -1,0 +1,67 @@
+<commands>
+  <command cmd="^;join (.*)" flag="a">
+  <![CDATA[
+    $conn->join($1);
+  ]]>
+  </command>
+  <command cmd="^;part (.*)" flag="a">
+  <![CDATA[
+    $conn->part($1);
+  ]]>
+  </command>
+  <command cmd="^;sl (.*)" flag="d">
+  <![CDATA[
+    $conn->sl($1);
+  ]]>
+  </command>
+  <command cmd="^;quit ?(.*)" flag="a">
+  <![CDATA[
+    $conn->quit($1);
+  ]]>
+  </command>
+  <command cmd="^;ev (.*)" flag="d">
+  <![CDATA[
+    eval $1; warn $@ if $@;
+  ]]>
+  </command>
+  <command cmd="^;rehash$" flag="a">
+  <![CDATA[
+    readXML();
+    $conn->privmsg($event->{to}->[0], 'config files were re-read');
+  ]]>
+  </command>
+  <command cmd="^;say (.*)" flag="t">
+  <![CDATA[
+    $conn->privmsg($event->{to}->[0], $1);
+  ]]>
+  </command>
+  <command cmd="^;do (.*)" flag="t">
+  <![CDATA[
+    $conn->me($event->{to}->[0], $1);
+  ]]>
+  </command>
+  <command cmd="^;exempt (.*)" flag="o">
+  <![CDATA[
+    push(@::eline, $1);
+    "$1\n" >> io 'exempt.txt';
+    $conn->privmsg($event->{to}->[0], "$1 exempted");
+  ]]>
+  </command>
+  <command cmd="^\!ops *(.*)">
+  <![CDATA[
+    my $hilite=commaAndify(getAlert($event->{to}->[0], 'opalert', 'hilights'));
+    $conn->privmsg($_, "$hilite: $event->{nick} wants your attention ($1) ") foreach getAlert($event->{to}->[0], 'opalert', 'msgs');
+  ]]>
+  </command>
+  <command cmd="^;re(load|hash) exempts" flag="a">
+  <![CDATA[
+    @eline=io('exempt.txt')->getlines;
+    chomp @eline;
+  ]]>
+  </command>
+  <command cmd="^;remove (.*)$" flag="o">
+  <![CDATA[
+    $conn->sl("remove $event->{to}->[0] $1");
+  ]]>
+  </command>
+</commands>
