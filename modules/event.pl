@@ -234,6 +234,38 @@ sub whois_end {
   $::idqueue{$who} = [];
 }
 
+sub whois_user {
+  my ($conn, $event2) = @_;
+  my $lnick = lc $event2->{args}->[1]
+  unless (defined($::sn{$lnick})) {
+    $::sn{$lnick} = {};
+  }
+  $::sn{$lnick}{gecos} = $event2->{args}->[5];
+  $::sn{$lnick}{user} = $event2->{args}->[2];
+  $::sn{$lnick}{host} = $event2->{args}->[3];
+  if (defined( $::needgeco{$lnick} )) {
+    inspect(shift($::needgeco{$lnick}));
+    delete $::needgeco{$lnick} if $::needgeco{$lnick} eq ();
+  }
+}
+#<<< :kubrick.freenode.net 311 AntiSpamMeta AfterDeath i=icxcnika atheme/troll/about.linux.afterdeath * :[[User:WHeimbigner]]
+#Trying to handle event 'whoisuser'.
+#Handler for 'whoisuser' called.
+#<<< :kubrick.freenode.net 319 AntiSpamMeta AfterDeath :#nslu2-general @#bash @##asb-testing +#vandalism-en-wp +#thetestwiki #arbchat #wikipedia-social #wikipedia-en #wikimedia-stewards #wikimedia-irc @##krypt77 #wikipedia #freenode #hyperion ##linux #gentoo #debian ##windows #defocus #atheme.org #freenode-dev +##asb-nexus #houseofhack ##linux-ops @#baadf00d #wikimedia-ops #ubuntu ##socialites
+#Trying to handle event 'whoischannels'.
+#Handler for 'whoischannels' called.
+#<<< :kubrick.freenode.net 312 AntiSpamMeta AfterDeath irc.freenode.net :http://freenode.net/
+#Trying to handle event 'whoisserver'.
+#Handler for 'whoisserver' called.
+#<<< :kubrick.freenode.net 320 AntiSpamMeta AfterDeath :is identified to services
+#Trying to handle event 'whoisvworld'.
+#Handler for 'whoisvworld' called.
+#<<< :kubrick.freenode.net 318 AntiSpamMeta afterdeath :End of /WHOIS list.
+#Trying to handle event 'endofwhois'.
+#Handler for 'endofwhois' called.
+
+
+
 sub on_bannedfromchan {
   my ($conn, $event) = @_;
   $conn->privmsg('ChanServ', "unban $event->{args}->[1]");

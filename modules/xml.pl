@@ -15,10 +15,11 @@ sub readXML {
   $::users    = $xs1->XMLin( "$p/users.xml",    ForceArray => 'person' );
   $::xusers   = $::users->{person};
   $::commands = $xs1->XMLin( "$p/commands.xml", ForceArray => [qw/command/]);
+  $::mysql    = $xs1->XMLin( "$p/mysql.xml",    ForceArray => [] );
 }
 
 sub writeXML {
-  my ( $p ) = @_;
+  my ( $p ) = $::cset; #@_;
   $p = 'default' if $p eq '';
   $p = "config-$p";
   $xs1->XMLout($::settings, RootName => 'settings', KeyAttr => ['id'],
@@ -29,6 +30,20 @@ sub writeXML {
   $xs1->XMLout($::channels, RootName => 'channels', KeyAttr => ['id']) > io("$p/channels.xml");
   $xs1->XMLout($::users,    RootName => 'people',   KeyAttr => ['id']) > io("$p/users.xml");
   $xs1->XMLout($::commands, RootName => 'commands', KeyAttr => ['id']) > io("$p/commands.xml");
+}
+
+sub writeChannels {
+  my ( $p ) = $::cset; #@_;
+  $p = 'default' if $p eq '';
+  $p = "config-$p";
+  $xs1->XMLout($::channels, RootName => 'channels', KeyAttr => ['id']) > io("$p/channels.xml");
+}
+
+sub writeUsers {
+  my ( $p ) = $::cset; #@_;
+  $p = 'default' if $p eq '';
+  $p = "config-$p";
+  $xs1->XMLout($::users,    RootName => 'people',   KeyAttr => ['id']) > io("$p/users.xml");
 }
 
 sub Xml::killsub {

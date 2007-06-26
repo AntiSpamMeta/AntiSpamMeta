@@ -1,4 +1,38 @@
 <commands>
+  <command cmd="^;query (\S+) (\S+)$">
+  <![CDATA[
+    my $channel = $1;
+    my @nuh = split(/(\!|\@)/, $2);
+    my $result = sql_query($channel, $nuh[0], $nuh[2], $nuh[4]);
+    $conn->privmsg($event->{to}->[0], "$result results found.");
+  ]]>
+  </command>
+  <command cmd="^;hilight (\S+) (\S+) ?(\S*)$" flag="a">
+  <![CDATA[
+    my $chan = $1;
+    my $nick = $2;
+    my $level= $3;
+    if ($level eq '') { $level = 'low'; }
+    my @tmphl = @{$::channels->{channel}->{$chan}->{hilights}->{$level}};
+    push(@tmphl, $nick);
+    $::channels->{channel}->{$chan}->{hilights}->{$level} = \@tmphl;
+    writeChannels();
+    $conn->privmsg($event->{to}->[0], "$nick added to $level risk hilights for $chan");
+  ]]>
+  </command>
+  <command cmd="^;dehilight (\S+) (\S+)" flag="a">
+  <![CDATA[
+    my $chan = $1;
+    my $nick = $2;
+    foreach my $risk ( keys %::RISKS ) {
+      my @ppl = @{$::channels->{channel}->{$chan}->{hilights}->{$risk}};
+      @ppl = grep { lc $_ ne lc $nick } @ppl;
+      $::channels->{channel}->{$chan}->{hilights}->{$level} = \@ppl;
+    }
+    writeUsers();
+    $conn->privmsg($event->{to}->[0], "kthxbai $nick");
+  ]]>
+  </command>
   <command cmd="^;join (.*)" flag="a">
   <![CDATA[
     $conn->join($1);
@@ -57,11 +91,6 @@
   <![CDATA[
     @eline=io('exempt.txt')->getlines;
     chomp @eline;
-  ]]>
-  </command>
-  <command cmd="^;remove (.*)$" flag="o">
-  <![CDATA[
-    $conn->sl("remove $event->{to}->[0] $1");
   ]]>
   </command>
 </commands>

@@ -13,7 +13,7 @@ use POSIX qw(strftime);
 @::eline=();
 $::pass = '';
 
-my @modules = qw/Xml Util Inspect Services Log Command Event Classes Actions/;
+my @modules = qw/Xml Util Inspect Services Log Command Event Classes Actions Mysql/;
 
 require 'modules/' . lc $_ . '.pl' foreach @modules;
 
@@ -46,6 +46,7 @@ sub init {
   $host = ${$::settings->{server}}[rand @{$::settings->{server}}];
   print "Connecting to $host\n";
   $irc->debug($debug);
+  sql_connect();
   $conn = $irc->newconn( Server => $host,
                          Port => $::settings->{port} || '6667',
                          Nick => $::settings->{nick},

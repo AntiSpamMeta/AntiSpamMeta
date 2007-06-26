@@ -17,6 +17,7 @@
     <autojoin>#wikipedia-en-roads-us</autojoin>
     <autojoin>##windows</autojoin>
     <autojoin>#wikimedia-commons</autojoin>
+    <autojoin>#wikimedia-commons-social</autojoin>
   </autojoins>
   <log>
     <dir>logs/$chan</dir>

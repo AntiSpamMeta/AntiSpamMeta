@@ -1,10 +1,12 @@
 <people>
-  <person id="afterdeath" flags="oda" host="atheme/troll/about.linux.afterdeath" />
-  <person id="bumm13" flags="o" host="IDENTIFY" />
+  <person id="afterdeath" flags="oda" host="IDENTIFY" />
   <person id="filiated" flags="oda" host="IDENTIFY" />
   <person id="ocee" host="unaffiliated/ocee" />
   <person id="wildpikachu" host="about/linux/staff/wildpikachu" />
   <person id="slowking_man" host="IDENTIFY" flags="o" />
-  <person id="crazytales2" host="IDENTIFY" flags="oda" />
+  <person id="cchan" host="IDENTIFY" flags="oda" />
   <person id="mark_ryan" host="wikimedia/mark" flags="o" />
+  <person id="dmcdevit" host="IDENTIFY" flags="oa" />
+  <person id="seanw" host="freenode/staff/wikimedia.sean-whitton" flags="oa" />
+  <person id="st47" host="IDENTIFY" flags="oa" />
 </people>

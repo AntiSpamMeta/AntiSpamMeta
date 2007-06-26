@@ -6,7 +6,7 @@ use strict;
 my %sf;
 my %oq;
 
-my %RISKS =
+%::RISKS =
 (
   'debug'  => 10,
   'info'   => 20,
@@ -91,8 +91,8 @@ sub getAlert {
   my ($c, $risk, $t) = @_;
   @_ = ();
   $c = lc $c;
-  foreach my $prisk ( keys %RISKS) {
-    if ( $RISKS{$risk} >= $RISKS{$prisk} ) {
+  foreach my $prisk ( keys %::RISKS) {
+    if ( $::RISKS{$risk} >= $::RISKS{$prisk} ) {
       push( @_, @{$::channels->{channel}->{master}->{$t}->{$prisk}} ) if defined $::channels->{channel}->{master}->{$t}->{$prisk};
       push( @_, @{cs($c)->{$t}->{$prisk}} ) if defined cs($c)->{$t}->{$prisk};
     }
