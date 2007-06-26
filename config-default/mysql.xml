@@ -1,0 +1,8 @@
+<mysql>
+  <user>USER</user>
+  <pass>PASS</pass>
+  <db>asm_main</db>
+  <table>alertlog</table>
+  <host>localhost</host>
+  <port>3307</port>
+</mysql>
