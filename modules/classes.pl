@@ -1,10 +1,9 @@
 use strict;
 use warnings;
-use Data::Dumper;
-#package Classes;
 
 sub Classes::dnsbl {
   our (%aonx, $id, %dct, $event, $chan, $rev);
+  return unless index($event->{host}, '/') == -1;
     if (defined $rev) {
       my $iaddr = hostip( "$rev$aonx{$id}{content}" );
       my @dnsbl = unpack( 'C4', $iaddr ) if defined $iaddr;

@@ -8,7 +8,7 @@ sub doServices {
     print "NickServ: $event->{args}->[0]\n";
     if ( $event->{args}->[0] eq 'This nickname is owned by someone else' )
     {
-      $conn->privmsg( 'NickServ', "identify $::pass" );
+      $conn->privmsg( 'NickServ', "identify $::settings->{pass}" );
     }
     elsif ( $event->{args}->[0] eq 'Password accepted - you are now recognized' )
     {

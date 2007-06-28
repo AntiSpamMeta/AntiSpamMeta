@@ -1,19 +1,35 @@
 use warnings;
 use strict;
 
+package ASM::Log;
+
 use String::Interpolate qw(interpolate);
+use IO::All;
+use POSIX qw(strftime);
+use Data::Dumper;
+
+sub new
+{
+  my $module = shift;
+  my $config = shift;
+  my $self = {};
+  $self->{CONFIG} = $config;
+  bless($self);
+  return $self;
+}
 
 sub logg
 {
+  my $self = shift;
   my ($event) = @_;
+  my $cfg = $self->{CONFIG};
   my @chans = @{$event->{to}};
-  my $fh;
   @chans = ( $event->{args}->[0] ) if ($event->{type} eq 'kick');
-  my @time = ($::settings->{log}->{zone} eq 'local') ? localtime : gmtime;
-  foreach my $chan ( @chans)
+  my @time = ($cfg->{zone} eq 'local') ? localtime : gmtime;
+  foreach my $chan ( @chans )
   {
     $chan = lc $chan;
-    io(interpolate($::settings->{log}->{dir}))->mkpath;
+    io(interpolate($cfg->{dir}))->mkpath;
     $_='';
     $_ =    "<$event->{nick}> $event->{args}->[0]"                     if $event->{type} eq 'public';
     $_ = "*** $event->{nick} has joined $chan"                         if $event->{type} eq 'join';
@@ -26,13 +42,9 @@ sub logg
     $_ = "*** $event->{nick} sets mode: ".join(" ",@{$event->{args}})  if $event->{type} eq 'mode';
     $_ = "*** $event->{nick} changes topic to \"$event->{args}->[0]\"" if $event->{type} eq 'topic';
     print Dumper($event) if ($_ eq '');
-    $_ = interpolate(strftime($::settings->{log}->{timefmt}, @time)) . $_ . "\n" unless $_ eq '';
-    $_ >> io(interpolate($::settings->{log}->{dir}).'/'.interpolate(strftime($::settings->{log}->{filefmt}, @time))) unless ($_ eq '');
+    $_ = interpolate(strftime($cfg->{timefmt}, @time)) . $_ . "\n" unless $_ eq '';
+    $_ >> io(interpolate($cfg->{dir}).'/'.interpolate(strftime($cfg->{filefmt}, @time))) unless ($_ eq '');
   }
-}
-
-sub Log::killsub {
-  undef &logg;
 }
 
 return 1;

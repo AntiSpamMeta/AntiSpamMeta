@@ -13,7 +13,6 @@ sub readXML {
                            GroupTags  => { altnicks => 'altnick', server => 'host', autojoins=> 'autojoin' });
   $::channels = $::xs1->XMLin( "$p/channels.xml", ForceArray => [qw/event debug info low medium high/] );
   $::users    = $::xs1->XMLin( "$p/users.xml",    ForceArray => 'person' );
-  $::xusers   = $::users->{person};
   $::commands = $::xs1->XMLin( "$p/commands.xml", ForceArray => [qw/command/]);
   $::mysql    = $::xs1->XMLin( "$p/mysql.xml",    ForceArray => [] );
 }

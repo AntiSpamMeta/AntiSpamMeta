@@ -3,8 +3,7 @@ use strict;
 
 use List::Util qw(first);
 
-#my @ignored = ();
-@::ignored = ();
+%::ignored = ();
 
 sub inspect {
   our ($conn, $event) = @_;
@@ -23,9 +22,9 @@ sub inspect {
   $rev = join('.', reverse(unpack('C4', $iaddr))).'.' if (defined $iaddr);
   %monx = defined($::channels->{channel}->{master}->{event}) ? %{$::channels->{channel}->{master}->{event}} : ();
   ## NB: isn't there a better way to do this with grep, somehow?
-  foreach ( @::ignored ) {
-    return if (lc $event->{nick} eq $_);
-  }
+#  foreach ( @::ignored ) {
+#    return if (lc $event->{nick} eq $_);
+#  }
   foreach $chan ( @{$event->{to}} ) {
     next unless $chan =~ /^#/;
     %conx = defined($::channels->{channel}->{lc $chan}->{event}) ? %{$::channels->{channel}->{lc $chan}->{event}} : ();
@@ -44,7 +43,7 @@ sub inspect {
   delete $dct{$_} foreach @override;
   foreach $chan (@{$event->{to}}) {
     foreach $id ( keys %dct ) {
-      sql_record($chan, $event->{nick}, $event->{user}, $event->{host}, $::sn{lc $event->{nick}}->{gecos}, $dct{$id}{risk}, $id, $dct{$id}{reason});
+      $::db->record($chan, $event->{nick}, $event->{user}, $event->{host}, $::sn{lc $event->{nick}}->{gecos}, $dct{$id}{risk}, $id, $dct{$id}{reason});
       $txtz = "$dct{$id}{risk} risk threat: ".
               "Detected $event->{nick} $dct{$id}{reason} in $chan ";
       $txtz = $txtz . commaAndify(getAlert(lc $chan, $dct{$id}{risk}, 'hilights')) if (getAlert(lc $chan, $dct{$id}{risk}, 'hilights'));
@@ -61,9 +60,11 @@ sub inspect {
            $conn->schedule(int($dct{$id}{time}), sub { print "Timer called!\n"; o_send($lconn,$lunmode); });
         }
       }
-      $conn->privmsg($_, $txtz) foreach getAlert($chan, $dct{$id}{risk}, 'msgs');
-      push(@::ignored, lc $event->{nick});
-      $conn->schedule(15, sub { @::ignored = grep { lc $_ ne lc $nick } @::ignored; });
+      unless (defined($::ignored{lc $event->{nick}}) && ($::ignored{lc $event->{nick}} >= $::RISKS{$dct{$id}{risk}})) {
+        $conn->privmsg($_, $txtz) foreach getAlert($chan, $dct{$id}{risk}, 'msgs');
+        $::ignored{lc $nick} = $::RISKS{$dct{$id}{risk}};
+        $conn->schedule(15, sub { delete($::ignored{lc $nick})});
+      }
     }
   }
 }

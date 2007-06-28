@@ -12,11 +12,11 @@ sub do_command
   foreach my $command ( @{$::commands->{command}} )
   {
     if (defined($command->{flag})) {
-      next unless defined($::xusers->{$nick});
-      next unless defined($::xusers->{$nick}->{flags});
-      next unless (grep {$_ eq $command->{flag}} split('', $::xusers->{$nick}->{flags}));
-      if ($::xusers->{$nick}->{host} ne 'IDENTIFY') {
-        next unless leq($::xusers->{$nick}->{host}, $event->{host});
+      next unless defined($::users->{person}->{$nick});
+      next unless defined($::users->{person}->{$nick}->{flags});
+      next unless (grep {$_ eq $command->{flag}} split('', $::users->{person}->{$nick}->{flags}));
+      if ($::users->{person}->{$nick}->{host} ne 'IDENTIFY') {
+        next unless leq($::users->{person}->{$nick}->{host}, $event->{host});
       }
       else {
         if ( $cmd =~ /$command->{cmd}/ ){

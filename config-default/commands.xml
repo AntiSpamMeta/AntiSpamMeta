@@ -3,7 +3,7 @@
   <![CDATA[
     my $channel = $1;
     my @nuh = split(/(\!|\@)/, $2);
-    my $result = sql_query($channel, $nuh[0], $nuh[2], $nuh[4]);
+    my $result = $::db->query($channel, $nuh[0], $nuh[2], $nuh[4]);
     $conn->privmsg($event->{to}->[0], "$result results found.");
   ]]>
   </command>
@@ -12,8 +12,7 @@
     my $nick = lc $1;
     my $host = $2;
     if ($host eq '') { $host = 'IDENTIFY'; }
-    $::xusers->{$nick} = { 'host' => $host };
-    $::users->{person} = $::xusers;
+    $::users->{person}->{$nick} = { 'host' => $host };
     writeUsers();
     $conn->privmsg($event->{to}->[0], "Hiya $nick");
   ]]>
@@ -22,10 +21,9 @@
   <![CDATA[
     my $nick = lc $1;
     my $flags = $2;
-    if ($flags eq '') { delete($::xusers->{$nick}->{flags}); } else {
-      $::xusers->{$nick}->{flags} = $flags;
+    if ($flags eq '') { delete($::users->{person}->{$nick}->{flags}); } else {
+      $::users->{person}->{$nick}->{flags} = $flags;
     }
-    $::users->{person} = $::xusers;
     writeUsers();
     $conn->privmsg($event->{to}->[0], "Flags for $nick set to $flags");
   ]]>
@@ -33,8 +31,7 @@
   <command cmd="^;user del (\S+)$" flag="d">
   <![CDATA[
     my $nick = lc $1;
-    delete($::xusers->{$nick});
-    $::users->{person} = $::xusers;
+    delete($::users->{person}->{$nick});
     writeUsers();
     $conn->privmsg($event->{to}->[0], "Byebye $nick");
   ]]>
@@ -42,8 +39,8 @@
   <command cmd="^;user flags show (\S+)$" flag="d">
   <![CDATA[
     my $nick = lc $1;
-    if (defined($::xusers->{$nick}->{flags})) {
-      $conn->privmsg($event->{to}->[0], "Flags for $nick: $::xusers->{$nick}->{flags}");
+    if (defined($::users->{person}->{$nick}->{flags})) {
+      $conn->privmsg($event->{to}->[0], "Flags for $nick: $::users->{person}->{$nick}->{flags}");
     } else {
       $conn->privmsg($event->{to}->[0], "$nick has no flags");
     }

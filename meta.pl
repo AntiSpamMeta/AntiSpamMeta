@@ -8,7 +8,6 @@ use Net::IRC;
 use Data::Dumper;
 use IO::All;
 use Getopt::Long;
-use POSIX qw(strftime);
 
 @::eline=();
 $::pass = '';
@@ -42,17 +41,22 @@ sub init {
               'config|c:s' => \$::cset
             );
   readXML();
+  $::log = ASM::Log->new($::settings->{log});
   $::pass = $::settings->{pass} if $::pass eq '';
   $host = ${$::settings->{server}}[rand @{$::settings->{server}}];
   print "Connecting to $host\n";
   $irc->debug($debug);
-  sql_connect();
+  $::db = ASM::DB->new($::mysql->{db}, $::mysql->{host}, $::mysql->{port}, $::mysql->{user}, $::mysql->{pass}, $::mysql->{table});
+#  $::dbh = DBI->connect("DBI:mysql:database=$::mysql->{db};host=$::mysql->{host};port=$::mysql->{port}",
+#                        $::mysql->{user}, $::mysql->{pass});
+#
+#  sql_connect();
   $conn = $irc->newconn( Server => $host,
                          Port => $::settings->{port} || '6667',
                          Nick => $::settings->{nick},
                          Ircname => $::settings->{realname},
                          Username => $::settings->{username},
-                         Password => $::pass,
+                         Password => $::settings->{pass},
 			 Pacing => 1 );
   $conn->debug($debug);
   registerHandlers($conn);

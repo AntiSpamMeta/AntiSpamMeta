@@ -43,7 +43,7 @@ sub on_join {
       $conn->sl("whois $nick");
     }
   }   
-  logg( $event );
+  $::log->logg( $event );
   if ( $#leven ne -1 ) {
     my $ld = ( ( maxlen($nick, $leven[0]) - distance($nick, $leven[0]) ) / maxlen($nick, $leven[0]) );
     my $mx = $leven[0];
@@ -66,7 +66,7 @@ sub on_part
   my ($conn, $event) = @_;
   inspect( $conn, $event );
   my $nick = lc $event->{nick};
-  logg( $event );
+  $::log->logg( $event );
   if (defined($::sn{$nick}) && defined($::sn{$nick}->{mship})) {
     my @mship = @{$::sn{$nick}->{mship}};
     @mship = grep { lc $_ ne lc $event->{to}->[0] } @mship;
@@ -96,7 +96,7 @@ sub on_public
 {
   my ($conn, $event) = @_;
   inspect( $conn, $event );
-  logg( $event );
+  $::log->logg( $event );
   do_command( $conn, $event )
 }
 
@@ -104,7 +104,7 @@ sub on_notice
 {
   my ($conn, $event) = @_;
   inspect( $conn, $event );
-  logg( $event );
+  $::log->logg( $event );
   doServices($conn, $event);
 }
 
@@ -126,7 +126,7 @@ sub on_quit
   $event->{to} = \@channels;
   delete($::sn{lc $event->{nick}});
   inspect( $conn, $event );
-  logg ( $event );
+  $::log->logg ( $event );
 }
 
 sub blah
@@ -176,7 +176,7 @@ sub irc_topic {
     {
       $::sc{lc $event->{to}->[0]}{topic}{text} = $event->{args}->[0];
     }
-    logg($event);
+    $::log->logg($event);
   }
 }
 
@@ -196,7 +196,7 @@ sub on_nick {
   delete( $::sn{lc $event->{nick}});
   $event->{to} = \@channels;
   inspect($conn, $event);
-  logg($event)
+  $::log->logg($event)
 }
 
 sub on_kick {
@@ -205,7 +205,7 @@ sub on_kick {
     $conn->join($event->{args}->[0]);
   }
   my $nick = lc $event->{to}->[0];
-  logg( $event );
+  $::log->logg( $event );
   my @mship = @{$::sn{$nick}->{mship}};
   @mship = grep { lc $_ ne lc $event->{args}->[0] } @mship;
   if ( @mship ) {
@@ -250,7 +250,7 @@ sub on_mode
         $::sc{$chan}{users}{lc $ex[1]}{voice}=0;
       }
     }
-    logg($event);
+    $::log->logg($event);
   }
 }
 
@@ -330,49 +330,9 @@ sub on_whoreply
   $::sc{lc $chan}{users}{lc $nick}{voice} = $voice;
 }
 
-#<<< :kubrick.freenode.net 311 AntiSpamMeta AfterDeath i=icxcnika atheme/troll/about.linux.afterdeath * :[[User:WHeimbigner]]
-#Trying to handle event 'whoisuser'.
-#Handler for 'whoisuser' called.
-#<<< :kubrick.freenode.net 319 AntiSpamMeta AfterDeath :#nslu2-general @#bash @##asb-testing +#vandalism-en-wp +#thetestwiki #arbchat #wikipedia-social #wikipedia-en #wikimedia-stewards #wikimedia-irc @##krypt77 #wikipedia #freenode #hyperion ##linux #gentoo #debian ##windows #defocus #atheme.org #freenode-dev +##asb-nexus #houseofhack ##linux-ops @#baadf00d #wikimedia-ops #ubuntu ##socialites
-#Trying to handle event 'whoischannels'.
-#Handler for 'whoischannels' called.
-#<<< :kubrick.freenode.net 312 AntiSpamMeta AfterDeath irc.freenode.net :http://freenode.net/
-#Trying to handle event 'whoisserver'.
-#Handler for 'whoisserver' called.
-#<<< :kubrick.freenode.net 320 AntiSpamMeta AfterDeath :is identified to services
-#Trying to handle event 'whoisvworld'.
-#Handler for 'whoisvworld' called.
-#<<< :kubrick.freenode.net 318 AntiSpamMeta afterdeath :End of /WHOIS list.
-#Trying to handle event 'endofwhois'.
-#Handler for 'endofwhois' called.
-
-
-
 sub on_bannedfromchan {
   my ($conn, $event) = @_;
   $conn->privmsg('ChanServ', "unban $event->{args}->[1]");
-}
-
-sub Event::killsub {
-  undef &on_connect;
-  undef &on_join;
-  undef &on_part;
-  undef &on_msg;
-  undef &on_notice;
-  undef &on_errnickinuse;
-  undef &on_quit;
-  undef &on_names;
-  undef &on_nick;
-  undef &on_kick;
-  undef &on_mode;
-  undef &on_ctcp;
-  undef &on_bannedfromchan;
-  undef &blah;
-  undef &irc_users;
-  undef &irc_topic;
-  undef &whois_identified;
-  undef &whois_end;
-  undef &on_public;
 }
 
 return 1;
