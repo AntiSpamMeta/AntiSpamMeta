@@ -18,6 +18,7 @@ sub on_join {
   my $chan = lc $event->{to}->[0];
   if ( leq($conn->{_nick}, $nick) ) {
     $::sc{$chan} = {};
+    $conn->sl("who $chan");
     $conn->privmsg('ChanServ', "op $chan" ) if (defined cs($chan)->{op}) && (cs($chan)->{op} eq 'yes');
   }
   $::sc{$chan}{users}{$nick} = {};
@@ -25,8 +26,16 @@ sub on_join {
   $::sc{$chan}{users}{$nick}{op} = 0;
   $::sc{$chan}{users}{$nick}{voice} = 0;
   if (defined($::sn{$nick})) {
+    my @mship = ();
+    if (defined($::sn{$nick}->{mship})) {
+      @mship = @{$::sn{$nick}->{mship}};
+    }
+    @mship = (@mship, $chan);
+    $::sn{$nick}->{mship} = \@mship;
     inspect( $conn, $event );
   } else {
+    $::sn{$nick} = {};
+    $::sn{$nick}->{mship} = [ $chan ];
     if (defined($::needgeco{$nick})) {
       $::needgeco{$nick} = [ @{$::needgeco{$nick}}, $evcopy ];
     } else {
@@ -58,6 +67,15 @@ sub on_part
   inspect( $conn, $event );
   my $nick = lc $event->{nick};
   logg( $event );
+  if (defined($::sn{$nick}) && defined($::sn{$nick}->{mship})) {
+    my @mship = @{$::sn{$nick}->{mship}};
+    @mship = grep { lc $_ ne lc $event->{to}->[0] } @mship;
+    if ( @mship ) {
+      $::sn{$nick}->{mship} = \@mship;
+    } else {
+      delete($::sn{$nick});
+    }
+  }
   if ( leq( $conn->{_nick}, $nick ) )
   {
     delete( $::sc{lc $event->{to}->[0]} );
@@ -106,6 +124,7 @@ sub on_quit
     push ( @channels, $_ ) if delete $::sc{lc $_}{users}{lc $event->{nick}};
   }
   $event->{to} = \@channels;
+  delete($::sn{lc $event->{nick}});
   inspect( $conn, $event );
   logg ( $event );
 }
@@ -185,7 +204,23 @@ sub on_kick {
   if (lc $event->{to}->[0] eq lc $::settings->{nick}) {
     $conn->join($event->{args}->[0]);
   }
+  my $nick = lc $event->{to}->[0];
   logg( $event );
+  my @mship = @{$::sn{$nick}->{mship}};
+  @mship = grep { lc $_ ne lc $event->{args}->[0] } @mship;
+  if ( @mship ) {
+    $::sn{$nick}->{mship} = \@mship;
+  } else {
+    delete($::sn{$nick});
+  }
+  if ( leq( $conn->{_nick}, $nick ) )
+  {
+    delete( $::sc{lc $event->{args}->[0]} );
+  }
+  else
+  {
+    delete( $::sc{lc $event->{args}->[0]}{users}{$nick} );
+  }
 }
 
 sub on_mode
@@ -263,6 +298,38 @@ sub whois_user {
     delete $::needgeco{$lnick};
   }
 }
+
+sub on_whoreply
+{
+  my ($conn, $event) = @_;
+  my ($tgt, $chan, $user, $host, $server, $nick, $flags, $hops_and_gecos) = @{$event->{args}};
+  my ($voice, $op) = (0, 0);
+  my ($hops, $gecos);
+  $op = 1 if ( $flags =~ /\@/ );
+  $voice = 1 if ($flags =~ /\+/);
+  if ($hops_and_gecos =~ /^(\d+) (.*)$/) {
+    $hops = $1;
+    $gecos = $2;
+  } else {
+    $hops = "0";
+    $gecos = "";
+  }
+  $::sn{lc $nick} = {} unless defined $::sn{lc $nick};
+  my @mship=();
+  if (defined($::sn{lc $nick}->{mship})) {
+    @mship = @{$::sn{lc $nick}->{mship}};
+  }
+  @mship = grep { lc $_ ne lc $chan } @mship;
+  @mship = (@mship, $chan);
+  $::sn{lc $nick}->{mship} = \@mship;
+  $::sn{lc $nick}->{gecos} = $gecos;
+  $::sn{lc $nick}->{user} = $user;
+  $::sn{lc $nick}->{host} = $host;
+  $::sc{lc $chan}{users}{lc $nick} = {};
+  $::sc{lc $chan}{users}{lc $nick}{op} = $op;
+  $::sc{lc $chan}{users}{lc $nick}{voice} = $voice;
+}
+
 #<<< :kubrick.freenode.net 311 AntiSpamMeta AfterDeath i=icxcnika atheme/troll/about.linux.afterdeath * :[[User:WHeimbigner]]
 #Trying to handle event 'whoisuser'.
 #Handler for 'whoisuser' called.

@@ -93,6 +93,7 @@ sub registerHandlers {
   $conn->add_handler('320', \&whois_identified);
   $conn->add_handler('318', \&whois_end);
   $conn->add_handler('311', \&whois_user);
+  $conn->add_handler('352', \&on_whoreply);
 }
 
 init();

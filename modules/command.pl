@@ -14,7 +14,7 @@ sub do_command
     if (defined($command->{flag})) {
       next unless defined($::xusers->{$nick});
       next unless defined($::xusers->{$nick}->{flags});
-      next unless defined(grep {$_ eq $command->{flag}} split('', $::xusers->{$nick}->{flags}));
+      next unless (grep {$_ eq $command->{flag}} split('', $::xusers->{$nick}->{flags}));
       if ($::xusers->{$nick}->{host} ne 'IDENTIFY') {
         next unless leq($::xusers->{$nick}->{host}, $event->{host});
       }
@@ -22,7 +22,7 @@ sub do_command
         if ( $cmd =~ /$command->{cmd}/ ){
           push (@{$::idqueue{$nick}}, [$cmd, $command, $event]);
           $conn->sl("whois $nick $nick");
-          next;
+          last;
         }
       }
     }
@@ -30,6 +30,7 @@ sub do_command
       print "$event->{from} told me: $cmd \n";
       eval $command->{content};
       warn $@ if $@;
+      last;
     }
   }
 }

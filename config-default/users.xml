@@ -1,12 +1,11 @@
 <people>
-  <person id="afterdeath" flags="oda" host="IDENTIFY" />
-  <person id="filiated" flags="oda" host="IDENTIFY" />
-  <person id="ocee" host="unaffiliated/ocee" />
-  <person id="wildpikachu" host="about/linux/staff/wildpikachu" />
-  <person id="slowking_man" host="IDENTIFY" flags="o" />
-  <person id="cchan" host="IDENTIFY" flags="oda" />
-  <person id="mark_ryan" host="wikimedia/mark" flags="o" />
-  <person id="dmcdevit" host="IDENTIFY" flags="oa" />
-  <person id="seanw" host="freenode/staff/wikimedia.sean-whitton" flags="oa" />
-  <person id="st47" host="IDENTIFY" flags="oa" />
+  <person id="afterdeath" flags="odat" host="IDENTIFY" />
+  <person id="filiated" flags="odat" host="IDENTIFY" />
+  <person id="wildpikachu" host="about/linux/staff/wildpikachu" flags="odat" />
+  <person id="slowking_man" host="IDENTIFY" flags="ot" />
+  <person id="cchan" host="IDENTIFY" flags="odat" />
+  <person id="mark_ryan" host="wikimedia/mark" flags="ot" />
+  <person id="dmcdevit" host="IDENTIFY" flags="oat" />
+  <person id="seanw" host="freenode/staff/wikimedia.sean-whitton" flags="oat" />
+  <person id="st47" host="IDENTIFY" flags="oat" />
 </people>

@@ -7,6 +7,15 @@
     $conn->privmsg($event->{to}->[0], "$result results found.");
   ]]>
   </command>
+  <command cmd="^;autoban (\S+)$" flag="a">
+  <![CDATA[
+    my $chan = $1;
+    my $set = $::channels->{channel}->{$chan}->{op};
+    if ($set eq "no") { $set = "when"; } else { $set = "no"; }
+    $::channels->{channel}->{$chan}->{op} = $set;
+    $conn->privmsg($event->{to}->[0], "Operator action for $chan set to \"$set\".");
+  ]]>
+  </command>
   <command cmd="^;hilight (\S+) (\S+) ?(\S*)$" flag="a">
   <![CDATA[
     my $chan = $1;
@@ -33,14 +42,28 @@
     $conn->privmsg($event->{to}->[0], "kthxbai $nick");
   ]]>
   </command>
-  <command cmd="^;join (.*)" flag="a">
+  <command cmd="^;join (\S+)" flag="a">
   <![CDATA[
-    $conn->join($1);
+    my $chan = $1;
+    unless (defined($::channels->{channel}->{$chan})) {
+      $::channels->{channel}->{$chan} = { 'op' => 'no' };
+      writeChannels();
+    }
+    $conn->join($chan);
+    my @autojoins = @{$::settings->{autojoins}};
+    @autojoins = (@autojoins, $chan);
+    $::settings->{autojoins} = \@autojoins;
+    writeSettings();
   ]]>
   </command>
-  <command cmd="^;part (.*)" flag="a">
+  <command cmd="^;part (\S+)" flag="a">
   <![CDATA[
-    $conn->part($1);
+    my $chan = $1;
+    $conn->part($chan);
+    my @autojoins = @{$::settings->{autojoins}};
+    @autojoins = grep { lc $_ ne lc $chan } @autojoins;
+    $::settings->{autojoins} = \@autojoins;
+    writeSettings();
   ]]>
   </command>
   <command cmd="^;sl (.*)" flag="d">
