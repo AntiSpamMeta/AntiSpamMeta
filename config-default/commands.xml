@@ -7,6 +7,48 @@
     $conn->privmsg($event->{to}->[0], "$result results found.");
   ]]>
   </command>
+  <command cmd="^;user add (\S+) ?(\S*)$" flag="d">
+  <![CDATA[
+    my $nick = lc $1;
+    my $host = $2;
+    if ($host eq '') { $host = 'IDENTIFY'; }
+    $::xusers->{$nick} = { 'host' => $host };
+    $::users->{person} = $::xusers;
+    writeUsers();
+    $conn->privmsg($event->{to}->[0], "Hiya $nick");
+  ]]>
+  </command>
+  <command cmd="^;user flags set (\S+) ?(\S*)$" flag="d">
+  <![CDATA[
+    my $nick = lc $1;
+    my $flags = $2;
+    if ($flags eq '') { delete($::xusers->{$nick}->{flags}); } else {
+      $::xusers->{$nick}->{flags} = $flags;
+    }
+    $::users->{person} = $::xusers;
+    writeUsers();
+    $conn->privmsg($event->{to}->[0], "Flags for $nick set to $flags");
+  ]]>
+  </command>
+  <command cmd="^;user del (\S+)$" flag="d">
+  <![CDATA[
+    my $nick = lc $1;
+    delete($::xusers->{$nick});
+    $::users->{person} = $::xusers;
+    writeUsers();
+    $conn->privmsg($event->{to}->[0], "Byebye $nick");
+  ]]>
+  </command>
+  <command cmd="^;user flags show (\S+)$" flag="d">
+  <![CDATA[
+    my $nick = lc $1;
+    if (defined($::xusers->{$nick}->{flags})) {
+      $conn->privmsg($event->{to}->[0], "Flags for $nick: $::xusers->{$nick}->{flags}");
+    } else {
+      $conn->privmsg($event->{to}->[0], "$nick has no flags");
+    }
+  ]]>
+  </command>
   <command cmd="^;autoban (\S+)$" flag="a">
   <![CDATA[
     my $chan = $1;
