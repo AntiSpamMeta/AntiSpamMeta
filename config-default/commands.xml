@@ -16,12 +16,51 @@
     $conn->privmsg($event->{to}->[0], "Operator action for $chan set to \"$set\".");
   ]]>
   </command>
+  <command cmd="^;target (\S+) (\S+) ?(\S*)$" flag="a">
+  <![CDATA[
+    my $chan = $1;
+    my $nick = $2;
+    my $level= $3;
+    if ($level eq '') { $level = 'low'; }
+    unless (defined($::channels->{channel}->{$chan}->{msgs})) {
+      $::channels->{channel}->{$chan}->{msgs} = {};
+    }
+    unless (defined($::channels->{channel}->{$chan}->{msgs}->{$level})) {
+      $::channels->{channel}->{$chan}->{msgs}->{$level} = [];
+    }
+    my @tmphl = @{$::channels->{channel}->{$chan}->{msgs}->{$level}};
+    push(@tmphl, $nick);
+    $::channels->{channel}->{$chan}->{msgs}->{$level} = \@tmphl;
+    writeChannels();
+    $conn->privmsg($event->{to}->[0], "$nick added to $level risk messages for $chan");
+  ]]>
+  </command>
+  <command cmd="^;detarget (\S+) (\S+)" flag="a">
+  <![CDATA[
+    my $chan = $1;
+    my $nick = $2;
+    foreach my $risk ( keys %::RISKS ) {
+      next unless defined($::channels->{channel}->{$chan}->{msgs}->{$risk});
+      my @ppl = @{$::channels->{channel}->{$chan}->{msgs}->{$risk}};
+      @ppl = grep { lc $_ ne lc $nick } @ppl;
+      $::channels->{channel}->{$chan}->{msgs}->{$risk} = \@ppl;
+    }
+    writeChannels();
+    $conn->privmsg($event->{to}->[0], "no moar msgs for $nick");
+  ]]>
+  </command>
   <command cmd="^;hilight (\S+) (\S+) ?(\S*)$" flag="a">
   <![CDATA[
     my $chan = $1;
     my $nick = $2;
     my $level= $3;
     if ($level eq '') { $level = 'low'; }
+    unless (defined($::channels->{channel}->{$chan}->{hilights})) {
+      $::channels->{channel}->{$chan}->{hilights} = {};
+    }
+    unless (defined($::channels->{channel}->{$chan}->{hilights}->{$level})) {
+      $::channels->{channel}->{$chan}->{hilights}->{$level} = [];
+    }
     my @tmphl = @{$::channels->{channel}->{$chan}->{hilights}->{$level}};
     push(@tmphl, $nick);
     $::channels->{channel}->{$chan}->{hilights}->{$level} = \@tmphl;
@@ -34,11 +73,12 @@
     my $chan = $1;
     my $nick = $2;
     foreach my $risk ( keys %::RISKS ) {
+      next unless defined($::channels->{channel}->{$chan}->{hilights}->{$risk});
       my @ppl = @{$::channels->{channel}->{$chan}->{hilights}->{$risk}};
       @ppl = grep { lc $_ ne lc $nick } @ppl;
-      $::channels->{channel}->{$chan}->{hilights}->{$level} = \@ppl;
+      $::channels->{channel}->{$chan}->{hilights}->{$risk} = \@ppl;
     }
-    writeUsers();
+    writeChannels();
     $conn->privmsg($event->{to}->[0], "kthxbai $nick");
   ]]>
   </command>

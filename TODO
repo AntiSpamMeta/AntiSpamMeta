@@ -1,6 +1,1 @@
-- skeleton channel definition command for getting it ready for new channels
-- "target" and "untarget" commands
-/ whois people that join, to get geco info
 - add users / modify user flags
-- make ;join automatically add the channel to the autojoins
-- command to change op-related channel management setting op="blah"
