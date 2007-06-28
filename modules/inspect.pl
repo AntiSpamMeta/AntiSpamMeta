@@ -10,7 +10,7 @@ sub inspect {
   our ($conn, $event) = @_;
   my (%conx, %monx);
   our (%aonx, %dct, $rev, $chan, $id);
-  %aonx=(); %dct=(); $rev; $chan=""; $id="";
+  %aonx=(); %dct=(); $chan=""; $id="";
   my (@dnsbl, @unpakt, @uniq, @cut);
   my ($match, $txtz, $iaddr);
   my @override = [];
@@ -44,7 +44,7 @@ sub inspect {
   delete $dct{$_} foreach @override;
   foreach $chan (@{$event->{to}}) {
     foreach $id ( keys %dct ) {
-      sql_record($chan, $event->{nick}, $event->{user}, $event->{host}, $dct{$id}{risk}, $id, $dct{$id}{reason});
+      sql_record($chan, $event->{nick}, $event->{user}, $event->{host}, $::sn{lc $event->{nick}}->{gecos}, $dct{$id}{risk}, $id, $dct{$id}{reason});
       $txtz = "$dct{$id}{risk} risk threat: ".
               "Detected $event->{nick} $dct{$id}{reason} in $chan ";
       $txtz = $txtz . commaAndify(getAlert(lc $chan, $dct{$id}{risk}, 'hilights')) if (getAlert(lc $chan, $dct{$id}{risk}, 'hilights'));

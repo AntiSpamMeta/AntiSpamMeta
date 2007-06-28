@@ -97,12 +97,30 @@ sub Classes::host {
   }
 }
 
+sub Classes::gecos {
+  our (%aonx, $id, %dct, $event, $chan);
+  if ( lc $::sn{lc $event->{nick}}->{gecos} eq lc $aonx{$id}{content} ) {
+    $dct{$id} = $aonx{$id};
+  }
+}
+
+sub Classes::nuhg {
+  our (%aonx, $id, %dct, $event, $chan);
+  my $match = $event->{from} . '!' . $::sn{lc $event->{nick}}->{gecos};
+  if ( (defined $aonx{$id}{nocase}) && ($aonx{$id}{nocase}) ) {
+    $dct{$id}=$aonx{$id} if ($match =~ /$aonx{$id}{content}/i);
+  } else {
+    $dct{$id}=$aonx{$id} if ($match =~ /$aonx{$id}{content}/);
+  }
+}
+
 sub Classes::killsub {
   undef &Classes::dnsbl;
   undef &Classes::floodqueue;
   undef &Classes::nickspam;
   undef &Classes::re;
 }
+
 #$VAR1 = bless( {
 #                 'to' => [
 #                           '##asb-testing'

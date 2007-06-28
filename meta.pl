@@ -92,6 +92,7 @@ sub registerHandlers {
   $conn->add_handler('cfinger', \&on_ctcp);
   $conn->add_handler('320', \&whois_identified);
   $conn->add_handler('318', \&whois_end);
+  $conn->add_handler('311', \&whois_user);
 }
 
 init();

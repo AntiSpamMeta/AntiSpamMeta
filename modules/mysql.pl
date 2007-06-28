@@ -6,14 +6,15 @@ sub sql_connect
 {
   $::dbh = DBI->connect("DBI:mysql:database=$::mysql->{db};host=$::mysql->{host};port=$::mysql->{port}",
                         $::mysql->{user}, $::mysql->{pass});
+  $::dbh->{mysql_auto_reconnect} = 1;
 }
 
 sub sql_record
 {
-  my ($channel, $nick, $user, $host, $level, $id, $reason) = @_;
-  $::dbh->do("INSERT INTO $::mysql->{table} (channel, nick, user, host, level, id, reason) VALUES (" .
+  my ($channel, $nick, $user, $host, $gecos, $level, $id, $reason) = @_;
+  $::dbh->do("INSERT INTO $::mysql->{table} (channel, nick, user, host, gecos, level, id, reason) VALUES (" .
              $::dbh->quote($channel) . ", " . $::dbh->quote($nick) . ", " . $::dbh->quote($user) .
-             ", " . $::dbh->quote($host) . ", " . $::dbh->quote($level) . ", " .
+             ", " . $::dbh->quote($host) . ", " . $::dbh->quote($gecos) . ", " . $::dbh->quote($level) . ", " .
              $::dbh->quote($id) . ", " . $::dbh->quote($reason) . ");");
 }
 

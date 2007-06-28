@@ -51,6 +51,7 @@
       <low>JonathanD</low>
       <low>Cpudan80</low>
     </hilights>
+    <msgs></msgs>
   </channel>
   <channel id="#baadf00d" op="yes">
     <hilights></hilights>
@@ -99,6 +100,8 @@
       <low>ST47</low>
       <low>AndrewB</low>
       <low>stylus</low>
+      <low>Martinp23</low>
+      <low>Soms</low>
     </hilights>
     <msgs>
       <debug>#wikimedia-ops</debug>
@@ -112,6 +115,7 @@
       <low>Pilotguy</low>
       <low>ST47</low>
       <low>seanw</low>
+      <low>Martinp23</low>
     </hilights>
     <msgs>
       <debug>#wikimedia-ops</debug>

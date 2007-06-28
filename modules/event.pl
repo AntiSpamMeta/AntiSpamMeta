@@ -12,6 +12,8 @@ my @leven = ();
 
 sub on_join {
   my ($conn, $event) = @_;
+  my %evcopyx = %{$event};
+  my $evcopy = \%evcopyx;
   my $nick = lc $event->{nick};
   my $chan = lc $event->{to}->[0];
   if ( leq($conn->{_nick}, $nick) ) {
@@ -22,7 +24,16 @@ sub on_join {
   $::sc{$chan}{users}{$nick}{hostmask} = $event->{userhost};
   $::sc{$chan}{users}{$nick}{op} = 0;
   $::sc{$chan}{users}{$nick}{voice} = 0;
-  inspect( $conn, $event );
+  if (defined($::sn{$nick})) {
+    inspect( $conn, $event );
+  } else {
+    if (defined($::needgeco{$nick})) {
+      $::needgeco{$nick} = [ @{$::needgeco{$nick}}, $evcopy ];
+    } else {
+      $::needgeco{$nick} = [ $evcopy ];
+      $conn->sl("whois $nick");
+    }
+  }   
   logg( $event );
   if ( $#leven ne -1 ) {
     my $ld = ( ( maxlen($nick, $leven[0]) - distance($nick, $leven[0]) ) / maxlen($nick, $leven[0]) );
@@ -162,6 +173,8 @@ sub on_nick {
       push ( @channels, lc $_ );
     }
   }
+  $::sn{lc $event->{args}->[0]} = $::sn{lc $event->{nick}};
+  delete( $::sn{lc $event->{nick}});
   $event->{to} = \@channels;
   inspect($conn, $event);
   logg($event)
@@ -236,16 +249,18 @@ sub whois_end {
 
 sub whois_user {
   my ($conn, $event2) = @_;
-  my $lnick = lc $event2->{args}->[1]
+  my $lnick = lc $event2->{args}->[1];
   unless (defined($::sn{$lnick})) {
     $::sn{$lnick} = {};
   }
-  $::sn{$lnick}{gecos} = $event2->{args}->[5];
-  $::sn{$lnick}{user} = $event2->{args}->[2];
-  $::sn{$lnick}{host} = $event2->{args}->[3];
+  $::sn{$lnick}->{gecos} = $event2->{args}->[5];
+  $::sn{$lnick}->{user} = $event2->{args}->[2];
+  $::sn{$lnick}->{host} = $event2->{args}->[3];
   if (defined( $::needgeco{$lnick} )) {
-    inspect(shift($::needgeco{$lnick}));
-    delete $::needgeco{$lnick} if $::needgeco{$lnick} eq ();
+    foreach my $event (@{$::needgeco{$lnick}}) {
+      inspect($conn, $event);
+    }
+    delete $::needgeco{$lnick};
   }
 }
 #<<< :kubrick.freenode.net 311 AntiSpamMeta AfterDeath i=icxcnika atheme/troll/about.linux.afterdeath * :[[User:WHeimbigner]]
