@@ -1,9 +1,9 @@
 X modularize Mysql.pl - DONE
-- modularize Events.pl
+/ modularize Events.pl
 - modularize Actions.pl
-- modularize Classes.pl
-- modularize Command.pl
+/ modularize Classes.pl
+/ modularize Command.pl
 - modularize Inspect.pl
 X modularize Log.pl - DONE
-- modularize Services.pl
-- modularize Util.pl
+/ modularize Services.pl
+/ modularize Util.pl

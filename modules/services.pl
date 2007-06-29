@@ -1,8 +1,16 @@
+package ASM::Services;
 use warnings;
 use strict;
 
+sub new
+{
+  my $self = {};
+  bless($self);
+  return $self;
+}
+
 sub doServices {
-  my ($conn, $event) = @_;
+  my ($self, $conn, $event) = @_;
   if ($event->{from} eq 'NickServ!NickServ@services.')
   {
     print "NickServ: $event->{args}->[0]\n";
@@ -28,7 +36,7 @@ sub doServices {
     print "ChanServ: $event->{args}->[0] \n";
     if ($event->{args}->[0] =~ /You are already opped on \[.(.*).\]/)
     {
-      doQueue($conn, $1);
+      $::oq->doQueue($conn, $1);
     }
     elsif ( $event->{args}->[0] =~ /^All.*bans matching.*have been cleared on(.*)/)
     {

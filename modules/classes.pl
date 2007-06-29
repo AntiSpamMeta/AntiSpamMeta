@@ -1,39 +1,74 @@
+package ASM::Classes;
+
 use strict;
 use warnings;
+my %sf = ();
 
-sub Classes::dnsbl {
-  our (%aonx, $id, %dct, $event, $chan, $rev);
+sub new
+{
+  my $module = shift;
+  my $self = {};
+  my $tbl = {
+    "dnsbl" => \&dnsbl,
+    "floodqueue" => \&floodqueue,
+    "nickspam" => \&nickspam,
+    "splitflood" => \&splitflood,
+    "re" => \&re,
+    "nick" => \&nick,
+    "ident" => \&ident,
+    "host" => \&host,
+    "gecos" => \&gecos,
+    "nuhg" => \&nuhg,
+  };
+  $self->{ftbl} = $tbl;
+  bless($self);
+  return $self;
+}
+
+sub check {
+  my $self = shift;
+  my $item = shift;
+  return $self->{ftbl}->{$item}->(@_);
+}
+
+sub dnsbl {
+  my ($xchk, $id, $event, $chan, $rev) = @_;
+  my %chk = %{$xchk};
   return unless index($event->{host}, '/') == -1;
-    if (defined $rev) {
-      my $iaddr = hostip( "$rev$aonx{$id}{content}" );
-      my @dnsbl = unpack( 'C4', $iaddr ) if defined $iaddr;
-      $dct{$id} = $aonx{$id} if (@dnsbl);
-    }
+  if (defined $rev) {
+    my $iaddr = gethostbyname( "$rev$chk{content}" );
+    my @dnsbl = unpack( 'C4', $iaddr ) if defined $iaddr;
+    return 1 if (@dnsbl);
+  }
+  return 0;
 }
 
-sub Classes::floodqueue {
-  our (%aonx, $id, %dct, $event, $chan);
-  my @cut=split(/:/, $aonx{$id}{content});
-  $dct{$id} = $aonx{$id} if ( flood_add( $chan, $id, $event->{host}, int($cut[1]) ) == int($cut[0]) );
+sub floodqueue {
+  my ($xchk, $id, $event, $chan, $rev) = @_;
+  my %chk = %{$xchk};
+  my @cut = split(/:/, $chk{content});
+  return 1 if ( flood_add( $chan, $id, $event->{host}, int($cut[1]) ) == int($cut[0]) );
+  return 0;
 }
 
-sub Classes::nickspam {
-  our (%aonx, $id, %dct, $event, $chan);
-     my @cut = split(/:/, $aonx{$id}{content});
-     if ( length $event->{args}->[0] >= int($cut[0]) ) {
-       %_ = map { $_=>$_ } lc keys %{$::sc{lc $chan}{users}};
-       my @uniq = grep( $_{$_}, split( / /, lc $event->{args}->[0]) );
-       $dct{$id} = $aonx{$id} if ( $#{ @uniq } >= int($cut[1]) );
-     }
+sub nickspam {
+  my ($chk, $id, $event, $chan) = @_;
+  my @cut = split(/:/, $chk->{content});
+  if ( length $event->{args}->[0] >= int($cut[0]) ) {
+    %_ = map { $_=>$_ } lc keys %{$::sc{lc $chan}{users}};
+    my @uniq = grep( $_{$_}, split( / / , lc $event->{args}->[0]) );
+    return 1 if ( $#{ @uniq } >= int($cut[1]) );
+  }
+  return 0;
 }
 
 my %cf=();
 my %bs=();
 
-sub Classes::splitflood {
-  our (%aonx, $id, %dct, $event, $chan);
+sub splitflood {
+  my ($chk, $id, $event, $chan) = @_;
   my $text;
-  my @cut = split(/:/, $aonx{$id}{content});
+  my @cut = split(/:/, $chk->{content});
   $cf{$id}{timeout}=int($cut[1]);
   if ($event->{type} =~ /^(public|notice|part|caction)$/) {
     $text=$event->{args}->[0];
@@ -41,8 +76,7 @@ sub Classes::splitflood {
   return unless defined($text);
   return unless length($text) >= 10;
   if (defined($bs{$id}{$text}) && (time <= $bs{$id}{$text} + 600)) {
-    $dct{$id}=$aonx{$id};
-    return;
+    return 1;
   }
   push( @{$cf{$id}{$chan}{$text}}, time );
   foreach my $nid ( keys %cf ) {
@@ -58,84 +92,89 @@ sub Classes::splitflood {
     }
   }
   if ( $#{ @{$cf{$id}{$chan}{$text}}}+1 == int($cut[0]) ) {
-    $dct{$id}=$aonx{$id};
     $bs{$id}{$text} = time;
+    return 1;
   }
+  return 0;
 } 
 
-sub Classes::re {
-  our (%aonx, $id, %dct, $event, $chan);
-     my $match = $event->{args}->[0];
-     $match = $event->{nick} if ($event->{type} eq 'join');
-     if ( (defined $aonx{$id}{nocase}) && ($aonx{$id}{nocase}) ) {
-       $dct{$id}=$aonx{$id} if ($match =~ /$aonx{$id}{content}/i);
-     }
-     else {
-       $dct{$id}=$aonx{$id} if ($match =~ /$aonx{$id}{content}/);
-     }
-}
-
-sub Classes::nick {
-  our (%aonx, $id, %dct, $event, $chan);
-  if ( lc $event->{nick} eq lc $aonx{$id}{content} ) {
-    $dct{$id} = $aonx{$id};
-  }
-}
-
-sub Classes::ident {
-  our (%aonx, $id, %dct, $event, $chan);
-  if ( lc $event->{user} eq lc $aonx{$id}{content} ) {
-    $dct{$id} = $aonx{$id};
-  }
-}
-
-sub Classes::host {
-  our (%aonx, $id, %dct, $event, $chan);
-  if ( lc $event->{host} eq lc $aonx{$id}{content} ) {
-    $dct{$id} = $aonx{$id};
-  }
-}
-
-sub Classes::gecos {
-  our (%aonx, $id, %dct, $event, $chan);
-  if ( lc $::sn{lc $event->{nick}}->{gecos} eq lc $aonx{$id}{content} ) {
-    $dct{$id} = $aonx{$id};
-  }
-}
-
-sub Classes::nuhg {
-  our (%aonx, $id, %dct, $event, $chan);
-  my $match = $event->{from} . '!' . $::sn{lc $event->{nick}}->{gecos};
-  if ( (defined $aonx{$id}{nocase}) && ($aonx{$id}{nocase}) ) {
-    $dct{$id}=$aonx{$id} if ($match =~ /$aonx{$id}{content}/i);
+sub re {
+  my ($chk, $id, $event, $chan) = @_;
+  my $match = $event->{args}->[0];
+  $match = $event->{nick} if ($event->{type} eq 'join');
+  if ( defined($chk->{nocase}) ) {
+    return 1 if ($match =~ /$chk->{content}/i);
   } else {
-    $dct{$id}=$aonx{$id} if ($match =~ /$aonx{$id}{content}/);
+    return 1 if ($match =~ /$chk->{content}/);
+  }
+  return 0;
+}
+
+sub nick {
+  my ($chk, $id, $event, $chan) = @_;
+  if ( lc $event->{nick} eq lc $chk->{content} ) {
+    return 1;
+  }
+  return 0;
+}
+
+sub ident {
+  my ( $chk, $id, $event, $chan) = @_;
+  if ( lc $event->{user} eq lc $chk->{content} ) {
+    return 1;
+  }
+  return 0;
+}
+
+sub host {
+  my ( $chk, $id, $event, $chan) = @_;
+  if ( lc $event->{host} eq lc $chk->{content} ) {
+    return 1;
+  }
+  return 0;
+}
+
+sub gecos {
+  my ( $chk, $id, $event, $chan) = @_;
+  if ( lc $::sn{lc $event->{nick}}->{gecos} eq lc $chk->{content} ) {
+    return 1;
+  }
+  return 0;
+}
+
+sub nuhg {
+  my ( $chk, $id, $event, $chan) = @_;
+  my $match = $event->{from} . '!' . $::sn{lc $event->{nick}}->{gecos};
+  if ( defined($chk->{nocase}) ) {
+    return 1 if ($match =~ /$chk->{content}/i);
+  } else {
+    return 1 if ($match =~ /$chk->{content}/);
+  }
+  return 0;
+}
+
+sub flood_add {
+    my ( $chan, $id, $host, $to ) = @_;
+    push( @{$sf{$id}{$chan}{$host}}, time );
+    while ( time >= $sf{$id}{$chan}{$host}[0] + $to ) {
+      last if ( $#{ $sf{$id}{$chan}{$host} } == 0 );
+      shift( @{$sf{$id}{$chan}{$host}} );
+    }
+    return $#{ @{$sf{$id}{$chan}{$host}}}+1;
+}
+
+sub flood_process {
+  for my $id ( keys %sf ) {
+    for my $chan ( keys %{$sf{$id}} ) {
+      for my $host ( keys %{$sf{$id}{$chan}} ) {
+        next unless defined $sf{$id}{$chan}{$host}[0];
+        while ( time >= $sf{$id}{$chan}{$host}[0] + $sf{$id}{'timeout'} ) {
+          last if ( $#{ $sf{$id}{$chan}{$host} } == 0 );
+          shift ( @{$sf{$id}{$chan}{$host}} );
+        }
+      }
+    }
   }
 }
-
-sub Classes::killsub {
-  undef &Classes::dnsbl;
-  undef &Classes::floodqueue;
-  undef &Classes::nickspam;
-  undef &Classes::re;
-}
-
-#$VAR1 = bless( {
-#                 'to' => [
-#                           '##asb-testing'
-#                         ],
-#                 'format' => 'mode',
-#                 'from' => 'ChanServ!ChanServ@services.',
-#                 'user' => 'ChanServ',
-#                 'args' => [
-#                             '+o',
-#                             'AntiSpamMetaBeta',
-#                             ''
-#                           ],
-#                 'nick' => 'ChanServ',
-#                 'type' => 'mode',
-#                 'userhost' => 'ChanServ@services.',
-#                 'host' => 'services.'
-#               }, 'Net::IRC::Event' );
 
 return 1;

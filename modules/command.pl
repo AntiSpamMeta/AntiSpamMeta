@@ -1,9 +1,18 @@
+package ASM::Commander;
 use warnings;
 use strict;
 
-sub do_command
+sub new
 {
-  my ($conn, $event) = @_;
+  my $module = shift;
+  my $self = {};
+  bless($self);
+  return $self;
+}
+
+sub command
+{
+  my ($self, $conn, $event) = @_;
   my $args = $event->{args}->[0];
   my $from = $event->{from};
   my $cmd = $args;
@@ -35,8 +44,4 @@ sub do_command
   }
 }
 
-sub Command::killsub {
-  undef &do_command;
-}
-
-return 1;
+1;

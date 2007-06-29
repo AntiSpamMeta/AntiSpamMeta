@@ -1,5 +1,4 @@
-#warning: if you add a function, put it into killsub!
-
+package ASM::Util;
 use warnings;
 use strict;
 
@@ -15,6 +14,14 @@ my %oq;
   'high'   => 50,
   'opalert'=> 9001 #OVER NINE THOUSAND!!!
 );
+sub new
+{
+  my $module = shift;
+  my $self = {};
+  bless ($self);
+  return $self;
+}
+
 #leaves room for more levels if for some reason we end up needing more
 #theoretically, you should be able to change those numbers without any damage
 
@@ -27,7 +34,7 @@ sub maxlen {
 
 #cs: returns the xml settings for the specified chan, or default if there aren't any settings for that chan
 sub cs {
-  my ($chan) = @_;
+  my ($module, $chan) = @_;
   $chan = lc $chan;
   return $::channels->{channel}->{$chan} if ( defined($::channels->{channel}->{$chan}) );
   return $::channels->{channel}->{default};
@@ -88,19 +95,20 @@ sub flood_process {
 }
 
 sub getAlert {
-  my ($c, $risk, $t) = @_;
+  my ($module, $c, $risk, $t) = @_;
   @_ = ();
   $c = lc $c;
   foreach my $prisk ( keys %::RISKS) {
     if ( $::RISKS{$risk} >= $::RISKS{$prisk} ) {
       push( @_, @{$::channels->{channel}->{master}->{$t}->{$prisk}} ) if defined $::channels->{channel}->{master}->{$t}->{$prisk};
-      push( @_, @{cs($c)->{$t}->{$prisk}} ) if defined cs($c)->{$t}->{$prisk};
+      push( @_, @{cs($module, $c)->{$t}->{$prisk}} ) if defined cs($module, $c)->{$t}->{$prisk};
     }
   }
   return @_;
 }
 
 sub commaAndify {
+  my $module = shift;
   my @seq = @_;
   my $len = ($#seq);
   my $last = $seq[$len];
@@ -108,32 +116,6 @@ sub commaAndify {
   return $seq[0] if $len eq 0;
   return join( ' and ', $seq[0], $seq[1] ) if $len eq 1;
   return join( ', ', splice(@seq,0,$len) ) . ', and ' . $last;
-}
-
-sub parse_modes
-{
-  my ( $n ) = @_;
-  my @args = @{$n};
-  my @modes = split '', shift @args;
-  my @new_modes=();
-  my $t;
-  foreach my $c ( @modes ) {
-    if (($c eq '-') || ($c eq '+')) {
-      $t=$c;
-    }
-    else {
-      if ( defined( grep( /[abdefhIJkloqv]/,($c) ) ) ) { #modes that take args
-        push (@new_modes, [$t.$c, shift @args]);
-      }
-      elsif ( defined( grep( /[cgijLmnpPQrRstz]/, ($c) ) ) ) {
-        push (@new_modes, [$t.$c]);
-      }
-      else {
-        die "Unknown mode $c !\n";
-      }
-    }
-  }
-  return \@new_modes;
 }
 
 sub leq {
@@ -146,20 +128,6 @@ sub seq {
   return 0 unless defined($n1);
   return 0 unless defined($n2);
   return ($n1 eq $n2);
-}
-
-sub Util::killsub {
-  undef &cs;
-  undef &hostip;
-  undef &o_send;
-  undef &doQueue;
-  undef &flood_add;
-  undef &flood_process;
-  undef &getAlert;
-  undef &commaAndify;
-  undef &parse_modes;
-  undef &leq;
-  undef &seq;
 }
 
 return 1;

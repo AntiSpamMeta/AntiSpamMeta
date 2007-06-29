@@ -1,22 +1,81 @@
+package ASM::Event;
 use warnings;
 use strict;
 
+use Data::Dumper;
 use Text::LevenshteinXS qw(distance);
+#require 'modules/inspect.pl';
 
+sub cs {
+  my ($chan) = @_;
+  $chan = lc $chan;
+  return $::channels->{channel}->{$chan} if ( defined($::channels->{channel}->{$chan}) );
+  return $::channels->{channel}->{default};
+}
+
+sub maxlen {
+  my ($a, $b) = @_;
+  my ($la, $lb) = (length($a), length($b));
+  return $la if ($la > $lb);
+  return $lb;
+}
+
+sub new
+{
+  my $module = shift;
+  my ($conn, $inspector) = @_;
+  my $self = {};
+  $self->{CONN} = $conn;
+  $self->{INSPECTOR} = $inspector;
+  print "Installing handler routines...\n";
+  $conn->add_default_handler(\&blah);
+  $conn->add_handler('bannedfromchan', \&on_bannedfromchan);
+  $conn->add_handler('mode', \&on_mode);
+  $conn->add_handler('join', sub { on_join( $self, @_ ) } ); #\&on_join);
+  $conn->add_handler('part', \&on_part);
+  $conn->add_handler('quit', \&on_quit);
+  $conn->add_handler('nick', \&on_nick);
+  $conn->add_handler('notice', \&on_notice);
+  $conn->add_handler('caction', \&on_public);
+  $conn->add_handler('msg', \&on_msg);
+  $conn->add_handler('namreply', \&on_names);
+  $conn->add_handler('endofnames', \&on_names);
+  $conn->add_handler('public', \&on_public);
+  $conn->add_handler('376', \&on_connect);
+  $conn->add_handler('topic', \&irc_topic);
+  $conn->add_handler('topicinfo', \&irc_topic);
+  $conn->add_handler('nicknameinuse', \&on_errnickinuse);
+  $conn->add_handler('kick', \&on_kick);
+  $conn->add_handler('cping', \&on_ctcp);
+  $conn->add_handler('cversion', \&on_ctcp);
+  $conn->add_handler('csource', \&on_ctcp);
+  $conn->add_handler('ctime', \&on_ctcp);
+  $conn->add_handler('cdcc', \&on_ctcp);
+  $conn->add_handler('cuserinfo', \&on_ctcp);
+  $conn->add_handler('cclientinfo', \&on_ctcp);
+  $conn->add_handler('cfinger', \&on_ctcp);
+  $conn->add_handler('320', \&whois_identified);
+  $conn->add_handler('318', \&whois_end);
+  $conn->add_handler('311', \&whois_user);
+  $conn->add_handler('352', \&on_whoreply);
+  bless($self);
+  return $self;
+}
+  
 sub on_connect {
   my ($conn, $event) = @_; # need to check for no services
-  $conn->privmsg( 'NickServ', "ghost $::settings->{nick} $::pass" ) if lc $event->{args}->[0] ne lc $::settings->{nick};
+  $conn->privmsg( 'NickServ', "ghost $::settings->{nick} $::settings->{pass}" ) if lc $event->{args}->[0] ne lc $::settings->{nick};
 }
 
 my @leven = ();
 
 sub on_join {
-  my ($conn, $event) = @_;
+  my ($self, $conn, $event) = @_;
   my %evcopyx = %{$event};
   my $evcopy = \%evcopyx;
   my $nick = lc $event->{nick};
   my $chan = lc $event->{to}->[0];
-  if ( leq($conn->{_nick}, $nick) ) {
+  if ( lc $conn->{_nick} eq lc $nick)  {
     $::sc{$chan} = {};
     $conn->sl("who $chan");
     $conn->privmsg('ChanServ', "op $chan" ) if (defined cs($chan)->{op}) && (cs($chan)->{op} eq 'yes');
@@ -32,7 +91,7 @@ sub on_join {
     }
     @mship = (@mship, $chan);
     $::sn{$nick}->{mship} = \@mship;
-    inspect( $conn, $event );
+    $::inspector->inspect( $conn, $event );
   } else {
     $::sn{$nick} = {};
     $::sn{$nick}->{mship} = [ $chan ];
@@ -64,7 +123,7 @@ sub on_join {
 sub on_part
 {
   my ($conn, $event) = @_;
-  inspect( $conn, $event );
+  $::inspector->inspect( $conn, $event );
   my $nick = lc $event->{nick};
   $::log->logg( $event );
   if (defined($::sn{$nick}) && defined($::sn{$nick}->{mship})) {
@@ -76,7 +135,7 @@ sub on_part
       delete($::sn{$nick});
     }
   }
-  if ( leq( $conn->{_nick}, $nick ) )
+  if ( lc $conn->{_nick} eq lc $nick )
   {
     delete( $::sc{lc $event->{to}->[0]} );
   }
@@ -89,23 +148,23 @@ sub on_part
 sub on_msg
 {
   my ($conn, $event) = @_;
-  do_command ($conn, $event)
+  $::commander->command($conn, $event);
 }
 
 sub on_public
 {
   my ($conn, $event) = @_;
-  inspect( $conn, $event );
+  $::inspector->inspect( $conn, $event );
   $::log->logg( $event );
-  do_command( $conn, $event )
+  $::commander->command( $conn, $event );
 }
 
 sub on_notice
 {
   my ($conn, $event) = @_;
-  inspect( $conn, $event );
+  $::inspector->inspect( $conn, $event );
   $::log->logg( $event );
-  doServices($conn, $event);
+  $::services->doServices($conn, $event);
 }
 
 sub on_errnickinuse
@@ -125,14 +184,14 @@ sub on_quit
   }
   $event->{to} = \@channels;
   delete($::sn{lc $event->{nick}});
-  inspect( $conn, $event );
-  $::log->logg ( $event );
+  $::inspector->inspect( $conn, $event );
+  $::log->logg( $event );
 }
 
 sub blah
 {
   my ($self, $event) = @_;
-  inspect($self, $event);
+  $::inspector->inspect($self, $event);
 }
 
 sub irc_users
@@ -157,7 +216,7 @@ sub on_names {
 
 sub irc_topic {
   my ($conn, $event) = @_;
-  inspect($conn, $event) if ($event->{format} ne 'server');
+  $::inspector->inspect($conn, $event) if ($event->{format} ne 'server');
   if ($event->{format} eq 'server')
   {
     if ($event->{type} eq 'topic')
@@ -195,7 +254,7 @@ sub on_nick {
   $::sn{lc $event->{args}->[0]} = $::sn{lc $event->{nick}};
   delete( $::sn{lc $event->{nick}});
   $event->{to} = \@channels;
-  inspect($conn, $event);
+  $::inspector->inspect($conn, $event);
   $::log->logg($event)
 }
 
@@ -223,6 +282,32 @@ sub on_kick {
   }
 }
 
+sub parse_modes
+{
+  my ( $n ) = @_;
+  my @args = @{$n};
+  my @modes = split '', shift @args;
+  my @new_modes=();
+  my $t;
+  foreach my $c ( @modes ) {
+    if (($c eq '-') || ($c eq '+')) {
+      $t=$c;
+    }
+    else {
+      if ( defined( grep( /[abdefhIJkloqv]/,($c) ) ) ) { #modes that take args
+        push (@new_modes, [$t.$c, shift @args]);
+      }
+      elsif ( defined( grep( /[cgijLmnpPQrRstz]/, ($c) ) ) ) {
+        push (@new_modes, [$t.$c]);
+      }
+      else {
+        die "Unknown mode $c !\n";
+      }
+    }
+  }
+  return \@new_modes;
+}
+
 sub on_mode
 {
   my ($conn, $event) = @_;
@@ -234,7 +319,7 @@ sub on_mode
       if ( $ex[0] eq '+o' ) {
         $::sc{$chan}{users}{lc $ex[1]}{op}=1;
         if (lc $ex[1] eq lc $::settings->{nick}) {
-          doQueue($conn, $chan);
+          $::oq->doQueue($conn, $chan);
           if ( $::channels->{channel}->{$chan}->{op} eq "when" ) {
             $conn->schedule(600, sub { print "Deop timer called!\n"; $conn->privmsg('ChanServ', "op $chan -". $::settings->{nick})});
           }
@@ -257,7 +342,7 @@ sub on_mode
 sub on_ctcp
 {
   my ($conn, $event) = @_;
-  inspect($conn, $event);
+  $::inspector->inspect($conn, $event);
 }
 
 sub whois_identified {
@@ -293,7 +378,7 @@ sub whois_user {
   $::sn{$lnick}->{host} = $event2->{args}->[3];
   if (defined( $::needgeco{$lnick} )) {
     foreach my $event (@{$::needgeco{$lnick}}) {
-      inspect($conn, $event);
+      $::inspector->inspect($conn, $event);
     }
     delete $::needgeco{$lnick};
   }

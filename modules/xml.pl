@@ -1,7 +1,9 @@
+package ASM::XML;
 use warnings;
 use strict;
 
 use XML::Simple qw(:strict);
+use IO::All;
 
 $::xs1 = XML::Simple->new( KeyAttr => ['id'], Cache => [ qw/storable memcopy/ ]);
 
@@ -50,11 +52,6 @@ sub writeSettings {
   $p = 'default' if $p eq '';
   $p = "config-$p";
   $::xs1->XMLout($::settings, RootName => 'settings', GroupTags => { altnicks => 'altnick', server => 'host', autojoins => 'autojoin' }, NoAttr => 1) > io("$p/settings.xml");
-}
-
-sub Xml::killsub {
-  undef &readXML;
-  undef &writeXML;
 }
 
 return 1;

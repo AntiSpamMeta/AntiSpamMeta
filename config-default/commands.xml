@@ -13,7 +13,7 @@
     my $host = $2;
     if ($host eq '') { $host = 'IDENTIFY'; }
     $::users->{person}->{$nick} = { 'host' => $host };
-    writeUsers();
+    ASM::XML->writeUsers();
     $conn->privmsg($event->{to}->[0], "Hiya $nick");
   ]]>
   </command>
@@ -24,7 +24,7 @@
     if ($flags eq '') { delete($::users->{person}->{$nick}->{flags}); } else {
       $::users->{person}->{$nick}->{flags} = $flags;
     }
-    writeUsers();
+    ASM::XML->writeUsers();
     $conn->privmsg($event->{to}->[0], "Flags for $nick set to $flags");
   ]]>
   </command>
@@ -32,7 +32,7 @@
   <![CDATA[
     my $nick = lc $1;
     delete($::users->{person}->{$nick});
-    writeUsers();
+    ASM::XML->writeUsers();
     $conn->privmsg($event->{to}->[0], "Byebye $nick");
   ]]>
   </command>
@@ -70,7 +70,7 @@
     my @tmphl = @{$::channels->{channel}->{$chan}->{msgs}->{$level}};
     push(@tmphl, $nick);
     $::channels->{channel}->{$chan}->{msgs}->{$level} = \@tmphl;
-    writeChannels();
+    ASM::XML->writeChannels();
     $conn->privmsg($event->{to}->[0], "$nick added to $level risk messages for $chan");
   ]]>
   </command>
@@ -84,7 +84,7 @@
       @ppl = grep { lc $_ ne lc $nick } @ppl;
       $::channels->{channel}->{$chan}->{msgs}->{$risk} = \@ppl;
     }
-    writeChannels();
+    ASM::XML->writeChannels();
     $conn->privmsg($event->{to}->[0], "no moar msgs for $nick");
   ]]>
   </command>
@@ -103,7 +103,7 @@
     my @tmphl = @{$::channels->{channel}->{$chan}->{hilights}->{$level}};
     push(@tmphl, $nick);
     $::channels->{channel}->{$chan}->{hilights}->{$level} = \@tmphl;
-    writeChannels();
+    ASM::XML->writeChannels();
     $conn->privmsg($event->{to}->[0], "$nick added to $level risk hilights for $chan");
   ]]>
   </command>
@@ -117,7 +117,7 @@
       @ppl = grep { lc $_ ne lc $nick } @ppl;
       $::channels->{channel}->{$chan}->{hilights}->{$risk} = \@ppl;
     }
-    writeChannels();
+    ASM::XML->writeChannels();
     $conn->privmsg($event->{to}->[0], "kthxbai $nick");
   ]]>
   </command>
@@ -126,13 +126,13 @@
     my $chan = $1;
     unless (defined($::channels->{channel}->{$chan})) {
       $::channels->{channel}->{$chan} = { 'op' => 'no' };
-      writeChannels();
+      ASM::XML->writeChannels();
     }
     $conn->join($chan);
     my @autojoins = @{$::settings->{autojoins}};
     @autojoins = (@autojoins, $chan);
     $::settings->{autojoins} = \@autojoins;
-    writeSettings();
+    ASM::XML->writeSettings();
   ]]>
   </command>
   <command cmd="^;part (\S+)" flag="a">
@@ -142,7 +142,7 @@
     my @autojoins = @{$::settings->{autojoins}};
     @autojoins = grep { lc $_ ne lc $chan } @autojoins;
     $::settings->{autojoins} = \@autojoins;
-    writeSettings();
+    ASM::XML->writeSettings();
   ]]>
   </command>
   <command cmd="^;sl (.*)" flag="d">
