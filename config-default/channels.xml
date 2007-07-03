@@ -38,7 +38,9 @@
       <opalert>numist</opalert>
       <opalert>PhilKC</opalert>
     </hilights>
-    <msgs opalert="##linux-ops" />
+    <msgs>
+      <opalert>##linux-ops</opalert>
+    </msgs>
   </channel>
   <channel id="##windows" op="no">
     <hilights>
@@ -62,6 +64,11 @@
       <debug>Shadow_mil</debug>
       <debug>newmanbe</debug>
     </hilights>
+  </channel>
+  <channel id="#wikimedia" op="no">
+    <msgs>
+      <low>#wikimedia-ops</low>
+    </msgs>
   </channel>
   <channel id="#wikimedia-commons" op="no">
     <hilights>
@@ -102,12 +109,16 @@
       <low>stylus</low>
       <low>Martinp23</low>
       <low>Soms</low>
+      <low>Daniel-Bryant</low>
+      <low>amidaniel</low>
+      <low>Gracenotes</low>
+      <low>SWATJester</low>
     </hilights>
     <msgs>
       <debug>#wikimedia-ops</debug>
     </msgs>
   </channel>
-  <channel id="#wikipedia-en" op="no">
+  <channel id="#wikipedia-en" op="yes">
     <hilights>
       <debug>White_Cat</debug>
       <low>AppleBoy</low>
@@ -142,7 +153,12 @@
       <debug>#wikimedia-ops</debug>
     </msgs>
   </channel>
-  <channel id="default" op="yes">
+  <channel id="#wikipedia-social" op="no">
+    <msgs>
+      <low>#wikimedia-ops</low>
+    </msgs>
+  </channel>
+  <channel id="default" op="no">
     <event id="flood-15to45" action="none" class="floodqueue" reason="flooding 15 to 45" risk="low" time="0" type="public">15:45</event>
   </channel>
   <channel id="master">
@@ -152,7 +168,7 @@
     <event id="dcc" action="ban" class="re" override="dcc-medium" reason="using the DC.C SE.ND exploit" risk="high" time="0" type="public">^DCC SEND |\bDCC SEND &quot;?[A-Za-z0-9]+&quot;? \d+ \d+ \d+</event>
     <event id="dcc-medium" action="ban" class="re" reason="using the DC.C SE.ND exploit" risk="medium" time="0" type="public">DCC SEND </event>
     <event id="dcc-topic" action="ban" class="re" reason="setting a bad topic" risk="medium" time="0" type="topic">\bDCC SEND </event>
-    <event id="ddos_countdown" action="none" class="re" reasion="doing the ddos countdown thing" risk="medium" time="0" type="public">^... DDOS COUNTDOWN ...$</event>
+    <event id="ddos_countdown" action="none" class="re" reason="doing the ddos countdown thing" risk="medium" time="0" type="public">^... DDOS COUNTDOWN.*</event>
     <event id="dosrequest" action="none" class="re" reason="requesting a DoS" risk="medium" time="0" type="public">via paypal if you DoS somone for</event>
     <event id="dronebl" action="ban" class="dnsbl" override="ahbl" reason="in dnsbl.dronebl.org" risk="info" time="0" type="join">dnsbl.dronebl.org</event>
     <event id="efnet_rbl" action="none" class="dnsbl" reason="in rbl.efnet.org" risk="info" time="0" type="join">rbl.efnet.org</event>
@@ -167,16 +183,16 @@
     <event id="last_measure_regex" action="kban" class="re" reason="posting what appears to be a last measure link" risk="medium" time="0" type="public">http://\S+\.on\.nimp\.org</event>
     <event id="lesbian" action="ban" class="re" reason="bad nick match (lesbian..)" risk="medium" time="0" type="join">^lesbian..$</event>
     <event id="magical" action="none" class="ident" reason="typical w00t ident" risk="info" time="0" type="join">i=magical</event>
-    <event id="massflood" action="ban" class="splitflood" reason="distributed flooding" risk="medium" time="0" type="public,part,caction">5:3</event>
+    <event id="massflood" action="ban" class="splitflood" reason="distributed flooding" risk="high" time="0" type="public,part,caction">5:3</event>
     <event id="massflood2" action="ban" class="splitflood" reason="distributed flooding" risk="medium" time="0" type="caction">5:3</event>
-    <event id="nick_cupid" action="ban" class="re" reason="bad nick match (cupid..)" risk="medium" time="0" type="join">^cupid..$</event>
-    <event id="nick_mudkip" action="ban" class="re" reason="bad nick match (mudkip..)" risk="medium" time="0" type="join">MUDKIP..</event>
     <event id="nickspam" action="ban" class="nickspam" reason="nickspamming" risk="high" time="0" type="public">150:20</event>
     <event id="notice" action="ban" class="re" reason="sending a notice to the channel" risk="high" time="0" type="notice">.*</event>
     <event id="redarmyoflol" action="ban" class="re" reason="parting with 'red army of lol'" risk="low" time="0" type="part">RED ARMY OF LOL</event>
     <event id="sms_spam" action="none" class="re" reason="spam link / virus" risk="low" time="0" type="public">\.com/sms.exe</event>
     <event id="weirdspam_1" action="none" class="re" reason="wwe mass murderer nonsense" risk="medium" time="0" type="public">hello sir, my name is Chris Benoit and I am a WWE MASS MURDERER.</event>
     <event id="wikifags2" action="none" class="re" nocase="nocase" reason="saying 'sure are a lot of wikifag'..." risk="low" time="0" type="public">sure are a ?lot of wikifag</event>
+    <event id="dcc-part" action="ban" class="re" reason="using the DC.C SE.ND exploit in a part message" risk="high" time="0" type="part">DCC SEND </event>
+    <event id="levenflood" action="none" class="levenflood" reason="levenshtein flood match" risk="debug" time="0" type="public" override="flood-5to3">contentisuseless</event>
     <hilights>
       <debug>AfterDeath</debug>
     </hilights>

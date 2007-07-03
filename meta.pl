@@ -1,6 +1,12 @@
 #!/usr/bin/perl -w
 
 use lib '/home/icxcnika/AntiSpamMeta';
+#use Devel::Profiler
+#  package_filter => sub {
+#			my $pkg = shift;
+#			return 0 if $pkg =~ /^XML::Simple/;
+#			return 1;
+#		    };
 use warnings;
 use strict;
 use Net::IRC;
@@ -8,12 +14,13 @@ use Data::Dumper;
 use IO::All;
 use Getopt::Long;
 
-@::eline=();
+%::eline=();
 $::pass = '';
 
-my @modules = qw/Xml Util Inspect Services Log Command Event Classes Actions Mysql OperQueue/;
-
+BEGIN {
+my @modules = qw/Xml Util Inspect Event Services Log Command Classes Actions Mysql OperQueue/;
 require 'modules/' . lc $_ . '.pl' foreach @modules;
+}
 
 sub init {
   my ( $conn, $host );
@@ -45,8 +52,11 @@ sub init {
   $::commander = ASM::Commander->new();
   $::event = ASM::Event->new($conn, $::inspector);
   $::classes = ASM::Classes->new();
-  @::eline=io('exempt.txt')->getlines;
-  chomp @::eline;
+  my @eline=io('exempt.txt')->getlines;
+  chomp @eline;
+  foreach my $item (@eline) {
+    $::eline{lc $item} = 1;
+  }
   $irc->start();
 }
 

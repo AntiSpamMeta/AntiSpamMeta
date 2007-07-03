@@ -20,8 +20,8 @@
     <autojoin>#wikimedia-commons-social</autojoin>
   </autojoins>
   <log>
-    <dir>logs/$chan</dir>
-    <filefmt>$chan-%m-%d-%Y.log</filefmt>
+    <dir>logs/</dir>
+    <filefmt>-%m-%d-%Y.log</filefmt>
     <timefmt>%B %d %T  </timefmt>
     <zone>GMT</zone>
   </log>

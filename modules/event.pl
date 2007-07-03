@@ -67,7 +67,7 @@ sub on_connect {
   $conn->privmsg( 'NickServ', "ghost $::settings->{nick} $::settings->{pass}" ) if lc $event->{args}->[0] ne lc $::settings->{nick};
 }
 
-my @leven = ();
+#my @leven = ();
 
 sub on_join {
   my ($self, $conn, $event) = @_;
@@ -103,21 +103,21 @@ sub on_join {
     }
   }   
   $::log->logg( $event );
-  if ( $#leven ne -1 ) {
-    my $ld = ( ( maxlen($nick, $leven[0]) - distance($nick, $leven[0]) ) / maxlen($nick, $leven[0]) );
-    my $mx = $leven[0];
-    foreach my $item ( @leven ) {
-      next if $nick eq $item; # avoid dups
-      my $tld = ( ( maxlen($nick, $item) - distance($nick, $item) ) / maxlen($nick, $item) );
-      if ($tld > $ld) {
-        $ld = $tld;
-        $mx = $item;
-      }
-    }
-    print "Best match for $nick was $mx with $ld\n"
-  }
-  push(@leven, $nick);
-  shift @leven if $#leven > 5;
+#  if ( $#leven ne -1 ) {
+#    my $ld = ( ( maxlen($nick, $leven[0]) - distance($nick, $leven[0]) ) / maxlen($nick, $leven[0]) );
+#    my $mx = $leven[0];
+#    foreach my $item ( @leven ) {
+#      next if $nick eq $item; # avoid dups
+#      my $tld = ( ( maxlen($nick, $item) - distance($nick, $item) ) / maxlen($nick, $item) );
+#      if ($tld > $ld) {
+#        $ld = $tld;
+#        $mx = $item;
+#      }
+#    }
+#    print "Best match for $nick was $mx with $ld\n"
+#  }
+#  push(@leven, $nick);
+#  shift @leven if $#leven > 5;
 }
 	
 sub on_part
@@ -265,14 +265,16 @@ sub on_kick {
   }
   my $nick = lc $event->{to}->[0];
   $::log->logg( $event );
-  my @mship = @{$::sn{$nick}->{mship}};
-  @mship = grep { lc $_ ne lc $event->{args}->[0] } @mship;
-  if ( @mship ) {
-    $::sn{$nick}->{mship} = \@mship;
-  } else {
-    delete($::sn{$nick});
+  if (defined($::sn{$nick}) && defined($::sn{$nick}->{mship})) {
+    my @mship = @{$::sn{$nick}->{mship}};
+    @mship = grep { lc $_ ne lc $event->{to}->[0] } @mship;
+    if ( @mship ) {
+      $::sn{$nick}->{mship} = \@mship;
+    } else {
+      delete($::sn{$nick});
+    }
   }
-  if ( leq( $conn->{_nick}, $nick ) )
+  if ( lc $conn->{_nick} eq lc $nick )
   {
     delete( $::sc{lc $event->{args}->[0]} );
   }

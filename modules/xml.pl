@@ -11,12 +11,11 @@ sub readXML {
   my ( $p ) = $::cset; #@_;
   $p = 'default' if $p eq '';
   $p = "config-$p";
-  $::settings = $::xs1->XMLin( "$p/settings.xml", ForceArray => [qw/host/],
-                           GroupTags  => { altnicks => 'altnick', server => 'host', autojoins=> 'autojoin' });
-  $::channels = $::xs1->XMLin( "$p/channels.xml", ForceArray => [qw/event debug info low medium high/] );
-  $::users    = $::xs1->XMLin( "$p/users.xml",    ForceArray => 'person' );
+  $::settings = $::xs1->XMLin( "$p/settings.xml", ForceArray => ['host'], 'GroupTags' => { altnicks => 'altnick', server => 'host', autojoins => 'autojoin' });
+  $::channels = $::xs1->XMLin( "$p/channels.xml", ForceArray => [qw/event debug info low medium high/]);
+  $::users    = $::xs1->XMLin( "$p/users.xml",    ForceArray => 'person');
   $::commands = $::xs1->XMLin( "$p/commands.xml", ForceArray => [qw/command/]);
-  $::mysql    = $::xs1->XMLin( "$p/mysql.xml",    ForceArray => [] );
+  $::mysql    = $::xs1->XMLin( "$p/mysql.xml",    ForceArray => []);
 }
 
 sub writeXML {

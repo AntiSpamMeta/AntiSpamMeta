@@ -26,6 +26,9 @@ sub record
 {
   my $self = shift;
   my ($channel, $nick, $user, $host, $gecos, $level, $id, $reason) = @_;
+  if (! defined($gecos)) {
+    $gecos = "NOT_DEFINED";
+  }
   my $dbh = $self->{DBH};
   $dbh->do("INSERT INTO $self->{TABLE} (channel, nick, user, host, gecos, level, id, reason) VALUES (" .
              $dbh->quote($channel) . ", " . $dbh->quote($nick) . ", " . $dbh->quote($user) .

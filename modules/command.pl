@@ -25,7 +25,7 @@ sub command
       next unless defined($::users->{person}->{$nick}->{flags});
       next unless (grep {$_ eq $command->{flag}} split('', $::users->{person}->{$nick}->{flags}));
       if ($::users->{person}->{$nick}->{host} ne 'IDENTIFY') {
-        next unless leq($::users->{person}->{$nick}->{host}, $event->{host});
+        next unless (lc $::users->{person}->{$nick}->{host} eq lc $event->{host});
       }
       else {
         if ( $cmd =~ /$command->{cmd}/ ){

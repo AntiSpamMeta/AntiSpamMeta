@@ -2,6 +2,8 @@ package ASM::Classes;
 
 use strict;
 use warnings;
+use Text::LevenshteinXS qw(distance);
+
 my %sf = ();
 
 sub new
@@ -19,6 +21,7 @@ sub new
     "host" => \&host,
     "gecos" => \&gecos,
     "nuhg" => \&nuhg,
+    "levenflood" => \&levenflood,
   };
   $self->{ftbl} = $tbl;
   bless($self);
@@ -29,6 +32,40 @@ sub check {
   my $self = shift;
   my $item = shift;
   return $self->{ftbl}->{$item}->(@_);
+}
+
+my %ls = ();
+sub levenflood {
+  my ($xchk, $id, $event, $chan) = @_;
+  my $text;
+  if ($event->{type} =~ /^(public|notice|part|caction)$/) {
+    $text=$event->{args}->[0];
+  }
+  return 0 unless defined($text);
+  return 0 unless length($text) >= 30;
+  if ( ! defined($ls{$chan}) ) {
+    $ls{$chan} = [ $text ];
+    return 0;
+  }
+  my @leven = @{$ls{$chan}};
+  my $ret = 0;
+  if ( $#leven >= 5 ) {
+    my $mx = 0;
+    foreach my $item ( @leven ) {
+      next unless length($text) eq length($item);
+      my $tld = distance($text, $item);
+      if ($tld <= 4) {
+        $mx = $mx + 1;
+      }
+    }
+    if ($mx >= 5) {
+      $ret = 1;
+    }
+  }
+  push(@leven, $text);
+  shift @leven if $#leven > 10;
+  $ls{$chan} = \@leven;
+  return $ret;
 }
 
 sub dnsbl {
@@ -176,5 +213,6 @@ sub flood_process {
     }
   }
 }
+
 
 return 1;
