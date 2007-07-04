@@ -179,8 +179,8 @@
   <command cmd="^;exempt (.*)" flag="o">
   <![CDATA[
     $::eline{lc $1} = 1;
-    "lc $1\n" >> io 'exempt.txt';
-    $conn->privmsg($event->{to}->[0], "lc $1 exempted");
+    lc $1 . "\n" >> io 'exempt.txt';
+    $conn->privmsg($event->{to}->[0], lc $1 . " exempted");
   ]]>
   </command>
   <command cmd="^\!ops *(.*)">
@@ -197,6 +197,14 @@
     foreach my $item (@eline) {
 	$::eline{lc $item} = 1;
     }
+  ]]>
+  </command>
+  <command cmd="^;blacklist (.*)" flag="o">
+  <![CDATA[
+    my $str = lc $1;
+    push(@::string_blacklist, $str);
+    "$str\n" >> io 'string_blacklist.txt';
+    $conn->privmsg($event->{to}->[0], "$str blacklisted");
   ]]>
   </command>
 </commands>

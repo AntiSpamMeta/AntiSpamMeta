@@ -3,6 +3,7 @@ use warnings;
 use strict;
 
 use Data::Dumper;
+use List::Util qw(first);
 
 %::ignored = ();
 sub new
@@ -23,7 +24,7 @@ sub inspect {
   my @override = [];
   our $unmode='';
   my $nick = lc $event->{nick};
-  return if (defined($::eline{$nick}) || defined($::eline{lc $event->{user}}) || defined(lc $event->{host}));
+  return if (defined($::eline{$nick}) || defined($::eline{lc $event->{user}}) || defined($::eline{lc $event->{host}}));
   $iaddr = gethostbyname($event->{host});
   $rev = join('.', reverse(unpack('C4', $iaddr))).'.' if (defined $iaddr);
   %monx = defined($::channels->{channel}->{master}->{event}) ? %{$::channels->{channel}->{master}->{event}} : ();

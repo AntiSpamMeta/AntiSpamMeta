@@ -1,6 +1,7 @@
 package ASM::Commander;
 use warnings;
 use strict;
+use IO::All;
 
 sub new
 {

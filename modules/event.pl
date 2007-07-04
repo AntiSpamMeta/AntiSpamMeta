@@ -4,6 +4,7 @@ use strict;
 
 use Data::Dumper;
 use Text::LevenshteinXS qw(distance);
+use IO::All;
 #require 'modules/inspect.pl';
 
 sub cs {
@@ -77,6 +78,7 @@ sub on_join {
   my $chan = lc $event->{to}->[0];
   if ( lc $conn->{_nick} eq lc $nick)  {
     $::sc{$chan} = {};
+    mkdir($::settings->{log}->{dir} . $chan);
     $conn->sl("who $chan");
     $conn->privmsg('ChanServ', "op $chan" ) if (defined cs($chan)->{op}) && (cs($chan)->{op} eq 'yes');
   }

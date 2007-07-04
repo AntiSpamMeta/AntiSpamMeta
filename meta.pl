@@ -16,6 +16,7 @@ use Getopt::Long;
 
 %::eline=();
 $::pass = '';
+@::string_blacklist=();
 
 BEGIN {
 my @modules = qw/Xml Util Inspect Event Services Log Command Classes Actions Mysql OperQueue/;
@@ -32,6 +33,7 @@ sub init {
               'config|c:s' => \$::cset
             );
   ASM::XML->readXML();
+  mkdir($::settings->{log}->{dir});
   $::log = ASM::Log->new($::settings->{log});
   $::pass = $::settings->{pass} if $::pass eq '';
   $host = ${$::settings->{server}}[rand @{$::settings->{server}}];
@@ -57,6 +59,9 @@ sub init {
   foreach my $item (@eline) {
     $::eline{lc $item} = 1;
   }
+  my @strbl = io('string_blacklist.txt')->getlines;
+  chomp @strbl;
+  @::string_blacklist = @strbl;
   $irc->start();
 }
 

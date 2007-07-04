@@ -193,6 +193,7 @@
     <event id="wikifags2" action="none" class="re" nocase="nocase" reason="saying 'sure are a lot of wikifag'..." risk="low" time="0" type="public">sure are a ?lot of wikifag</event>
     <event id="dcc-part" action="ban" class="re" reason="using the DC.C SE.ND exploit in a part message" risk="high" time="0" type="part">DCC SEND </event>
     <event id="levenflood" action="none" class="levenflood" reason="levenshtein flood match" risk="debug" time="0" type="public" override="flood-5to3">contentisuseless</event>
+    <event id="blacklist" action="none" class="strbl" reason="sending pm matching string blacklist" risk="low" time="0" type="public">blah</event>
     <hilights>
       <debug>AfterDeath</debug>
     </hilights>
