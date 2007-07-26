@@ -4,7 +4,8 @@
   <person id="dmcdevit" flags="oat" host="IDENTIFY" />
   <person id="filiated" flags="odat" host="IDENTIFY" />
   <person id="mark_ryan" flags="ot" host="wikimedia/mark" />
-  <person id="seanw" flags="oat" host="freenode/staff/wikimedia.sean-whitton" />
+  <person id="sean_william" flags="a" host="IDENTIFY" />
+  <person id="seanw" flags="odat" host="freenode/staff/wikimedia.sean-whitton" />
   <person id="slowking_man" flags="ot" host="IDENTIFY" />
   <person id="st47" flags="oat" host="IDENTIFY" />
   <person id="wildpikachu" flags="odat" host="about/linux/staff/wildpikachu" />

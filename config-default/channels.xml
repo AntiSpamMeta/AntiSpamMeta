@@ -1,6 +1,9 @@
 <channels>
   <channel id="##asb-meta" op="no" />
-  <channel id="##asb-nexus" op="when" />
+  <channel id="##asb-nexus" op="when">
+    <hilights></hilights>
+    <msgs></msgs>
+  </channel>
   <channel id="##asb-testing" op="when">
     <hilights>
       <low>a</low>
@@ -16,7 +19,6 @@
     <hilights>
       <low>WildPikachu</low>
       <low>nalioth</low>
-      <low>seanw</low>
       <low>quux</low>
       <low>denny</low>
       <low>Fieldy</low>
@@ -31,16 +33,13 @@
   <channel id="##linux-ops" op="no">
     <hilights>
       <opalert>WildPikachu</opalert>
-      <opalert>seanw</opalert>
       <opalert>quux</opalert>
       <opalert>denny</opalert>
       <opalert>Fieldy</opalert>
       <opalert>numist</opalert>
       <opalert>PhilKC</opalert>
     </hilights>
-    <msgs>
-      <opalert>##linux-ops</opalert>
-    </msgs>
+    <msgs opalert="##linux-ops" />
   </channel>
   <channel id="##windows" op="no">
     <hilights>
@@ -48,10 +47,10 @@
       <low>quux</low>
       <low>HentaiXP</low>
       <low>TechSalvager</low>
-      <low>seanw</low>
       <low>njan</low>
       <low>JonathanD</low>
       <low>Cpudan80</low>
+      <low>AndrewB</low>
     </hilights>
     <msgs></msgs>
   </channel>
@@ -64,8 +63,12 @@
       <debug>Shadow_mil</debug>
       <debug>newmanbe</debug>
     </hilights>
+    <msgs></msgs>
   </channel>
   <channel id="#wikimedia" op="no">
+    <hilights>
+      <debug>Mbimmler</debug>
+    </hilights>
     <msgs>
       <low>#wikimedia-ops</low>
     </msgs>
@@ -91,28 +94,28 @@
     <msgs></msgs>
   </channel>
   <channel id="#wikipedia" op="no">
-    <event id="autorem_2" action="fmod_wiki" class="re" override="autoremove" reason="on chanserv autoremove" risk="info" time="0" type="raw">^mode \S+ \+b (.*)$</event>
-    <event id="part_fags" action="ban" class="re" reason="parted with 'Fags!'" risk="low" time="0" type="part">.*Fags! Fags! Fags!.*</event>
     <hilights>
-      <low>seanw</low>
+      <debug>Cbrown1023</debug>
+      <debug>Sean_William</debug>
+      <debug>ST47</debug>
+      <info>Karlprof</info>
       <low>Pilotguy</low>
       <low>Eagle-101</low>
       <low>Mbimmler</low>
       <low>skenmy</low>
       <low>Ral315</low>
-      <low>Karlprof</low>
       <low>tomaw</low>
       <low>Fabexplosive</low>
       <low>Krimpet</low>
-      <low>ST47</low>
       <low>AndrewB</low>
       <low>stylus</low>
       <low>Martinp23</low>
-      <low>Soms</low>
       <low>Daniel-Bryant</low>
       <low>amidaniel</low>
       <low>Gracenotes</low>
       <low>SWATJester</low>
+      <low>njan</low>
+      <low>mike42</low>
     </hilights>
     <msgs>
       <debug>#wikimedia-ops</debug>
@@ -121,12 +124,12 @@
   <channel id="#wikipedia-en" op="yes">
     <hilights>
       <debug>White_Cat</debug>
+      <debug>Cometstyles</debug>
       <low>AppleBoy</low>
       <low>Soms</low>
-      <low>Pilotguy</low>
       <low>ST47</low>
-      <low>seanw</low>
       <low>Martinp23</low>
+      <low>Cbrown1023</low>
     </hilights>
     <msgs>
       <debug>#wikimedia-ops</debug>
@@ -142,7 +145,6 @@
   </channel>
   <channel id="#wikipedia-overflow" op="no">
     <hilights>
-      <low>seanw</low>
       <low>Eagle-101</low>
       <low>Mbimmler</low>
       <low>Pilotguy</low>
@@ -154,9 +156,15 @@
     </msgs>
   </channel>
   <channel id="#wikipedia-social" op="no">
+    <hilights>
+      <debug>ST47</debug>
+    </hilights>
     <msgs>
       <low>#wikimedia-ops</low>
     </msgs>
+  </channel>
+  <channel id="Mbimmler">
+    <hilights></hilights>
   </channel>
   <channel id="default" op="no">
     <event id="flood-15to45" action="none" class="floodqueue" reason="flooding 15 to 45" risk="low" time="0" type="public">15:45</event>
@@ -164,15 +172,15 @@
   <channel id="master">
     <event id="autoremove" action="none" class="re" reason="on chanserv autoremove" risk="info" time="0" type="part">requested by ChanServ</event>
     <event id="badurl1" action="ban" class="re" reason="sending spam url" risk="medium" time="0" type="public">tinyurl\.com/ypvk4n</event>
+    <event id="blacklist" action="none" class="strbl" reason="sending pm matching string blacklist" risk="low" time="0" type="public">blah</event>
     <event id="ctcp-dcc" action="ban" class="re" reason="ctcp-dcc" risk="high" time="0" type="cdcc">.*</event>
     <event id="dcc" action="ban" class="re" override="dcc-medium" reason="using the DC.C SE.ND exploit" risk="high" time="0" type="public">^DCC SEND |\bDCC SEND &quot;?[A-Za-z0-9]+&quot;? \d+ \d+ \d+</event>
     <event id="dcc-medium" action="ban" class="re" reason="using the DC.C SE.ND exploit" risk="medium" time="0" type="public">DCC SEND </event>
+    <event id="dcc-part" action="ban" class="re" reason="using the DC.C SE.ND exploit in a part message" risk="high" time="0" type="part">DCC SEND </event>
     <event id="dcc-topic" action="ban" class="re" reason="setting a bad topic" risk="medium" time="0" type="topic">\bDCC SEND </event>
     <event id="ddos_countdown" action="none" class="re" reason="doing the ddos countdown thing" risk="medium" time="0" type="public">^... DDOS COUNTDOWN.*</event>
-    <event id="dosrequest" action="none" class="re" reason="requesting a DoS" risk="medium" time="0" type="public">via paypal if you DoS somone for</event>
     <event id="dronebl" action="ban" class="dnsbl" override="ahbl" reason="in dnsbl.dronebl.org" risk="info" time="0" type="join">dnsbl.dronebl.org</event>
     <event id="efnet_rbl" action="none" class="dnsbl" reason="in rbl.efnet.org" risk="info" time="0" type="join">rbl.efnet.org</event>
-    <event id="exoticforum" action="ban" class="re" reason="link spam" risk="low" time="0" type="public">http://exotics\.ezbbforum\.com</event>
     <event id="flood-10to30" action="none" class="floodqueue" reason="flooding (10 messages per 30 seconds)" risk="low" time="0" type="public">10:30</event>
     <event id="flood-5to3" action="quiet" class="floodqueue" reason="flooding (5 messages per 3 seconds)" risk="low" time="10" type="public">5:3</event>
     <event id="genspam1" action="none" class="re" reason="generic spamming" risk="debug" time="0" type="public">([^ ]{4,} +)\1{5,}</event>
@@ -181,21 +189,18 @@
     <event id="keylogger" action="ban" class="re" override="keylogger-medium" reason="using the norton start-key-logger exploit" risk="high" time="0" type="public">^startkeylogger$|^stopkeylogger$</event>
     <event id="keylogger-medium" action="ban" class="re" reason="using the norton start-key-logger exploit" risk="medium" time="0" type="public">\bstartkeylogger\b|\bstopkeylogger\b</event>
     <event id="last_measure_regex" action="kban" class="re" reason="posting what appears to be a last measure link" risk="medium" time="0" type="public">http://\S+\.on\.nimp\.org</event>
-    <event id="lesbian" action="ban" class="re" reason="bad nick match (lesbian..)" risk="medium" time="0" type="join">^lesbian..$</event>
+    <event id="levenflood" action="none" class="levenflood" override="flood-5to3" reason="levenshtein flood match" risk="debug" time="0" type="public">contentisuseless</event>
     <event id="magical" action="none" class="ident" reason="typical w00t ident" risk="info" time="0" type="join">i=magical</event>
     <event id="massflood" action="ban" class="splitflood" reason="distributed flooding" risk="high" time="0" type="public,part,caction">5:3</event>
-    <event id="massflood2" action="ban" class="splitflood" reason="distributed flooding" risk="medium" time="0" type="caction">5:3</event>
     <event id="nickspam" action="ban" class="nickspam" reason="nickspamming" risk="high" time="0" type="public">150:20</event>
     <event id="notice" action="ban" class="re" reason="sending a notice to the channel" risk="high" time="0" type="notice">.*</event>
     <event id="redarmyoflol" action="ban" class="re" reason="parting with 'red army of lol'" risk="low" time="0" type="part">RED ARMY OF LOL</event>
     <event id="sms_spam" action="none" class="re" reason="spam link / virus" risk="low" time="0" type="public">\.com/sms.exe</event>
-    <event id="weirdspam_1" action="none" class="re" reason="wwe mass murderer nonsense" risk="medium" time="0" type="public">hello sir, my name is Chris Benoit and I am a WWE MASS MURDERER.</event>
-    <event id="wikifags2" action="none" class="re" nocase="nocase" reason="saying 'sure are a lot of wikifag'..." risk="low" time="0" type="public">sure are a ?lot of wikifag</event>
-    <event id="dcc-part" action="ban" class="re" reason="using the DC.C SE.ND exploit in a part message" risk="high" time="0" type="part">DCC SEND </event>
-    <event id="levenflood" action="none" class="levenflood" reason="levenshtein flood match" risk="debug" time="0" type="public" override="flood-5to3">contentisuseless</event>
-    <event id="blacklist" action="none" class="strbl" reason="sending pm matching string blacklist" risk="low" time="0" type="public">blah</event>
+    <event id="wikifags2" action="none" class="re" reason="saying 'sure are a lot of wikifag'..." risk="low" time="0" type="public">(?i)^sure are a ?lot of .*fags? in here</event>
     <hilights>
       <debug>AfterDeath</debug>
+      <low>alindeman</low>
+      <low>seanw</low>
     </hilights>
     <msgs>
       <debug>##asb-nexus</debug>

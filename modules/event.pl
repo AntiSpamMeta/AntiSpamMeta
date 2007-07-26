@@ -5,7 +5,6 @@ use strict;
 use Data::Dumper;
 use Text::LevenshteinXS qw(distance);
 use IO::All;
-#require 'modules/inspect.pl';
 
 sub cs {
   my ($chan) = @_;
@@ -32,7 +31,7 @@ sub new
   $conn->add_default_handler(\&blah);
   $conn->add_handler('bannedfromchan', \&on_bannedfromchan);
   $conn->add_handler('mode', \&on_mode);
-  $conn->add_handler('join', sub { on_join( $self, @_ ) } ); #\&on_join);
+  $conn->add_handler('join', \&on_join);
   $conn->add_handler('part', \&on_part);
   $conn->add_handler('quit', \&on_quit);
   $conn->add_handler('nick', \&on_nick);
@@ -49,7 +48,7 @@ sub new
   $conn->add_handler('kick', \&on_kick);
   $conn->add_handler('cping', \&on_ctcp);
   $conn->add_handler('cversion', \&on_ctcp);
-  $conn->add_handler('csource', \&on_ctcp);
+  $conn->add_handler('csource', \&on_ctcp_source);
   $conn->add_handler('ctime', \&on_ctcp);
   $conn->add_handler('cdcc', \&on_ctcp);
   $conn->add_handler('cuserinfo', \&on_ctcp);
@@ -71,7 +70,7 @@ sub on_connect {
 #my @leven = ();
 
 sub on_join {
-  my ($self, $conn, $event) = @_;
+  my ($conn, $event) = @_;
   my %evcopyx = %{$event};
   my $evcopy = \%evcopyx;
   my $nick = lc $event->{nick};
@@ -347,6 +346,14 @@ sub on_ctcp
 {
   my ($conn, $event) = @_;
   $::inspector->inspect($conn, $event);
+}
+
+sub on_ctcp_source
+{
+  my ($conn, $event) = @_;
+  if (lc $event->{args}->[0] eq lc $conn->{_nick}) {
+    $conn->ctcp_reply($event->{nick}, 'SOURCE http://svn.linuxrulz.org/repos/antispammeta/trunk/');
+  }
 }
 
 sub whois_identified {

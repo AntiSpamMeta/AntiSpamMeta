@@ -29,21 +29,22 @@ sub new
   return $self;
 }
 
-sub check {
+sub check
+{
   my $self = shift;
   my $item = shift;
   return $self->{ftbl}->{$item}->(@_);
 }
 
 my %ls = ();
-sub levenflood {
-  my ($xchk, $id, $event, $chan) = @_;
+sub levenflood
+{
+  my ($chk, $id, $event, $chan) = @_;
   my $text;
   if ($event->{type} =~ /^(public|notice|part|caction)$/) {
-    $text=$event->{args}->[0];
+    $text = $event->{args}->[0];
   }
-  return 0 unless defined($text);
-  return 0 unless length($text) >= 30;
+  return 0 unless ( defined($text) && (length($text) >= 30) );
   if ( ! defined($ls{$chan}) ) {
     $ls{$chan} = [ $text ];
     return 0;
@@ -69,12 +70,12 @@ sub levenflood {
   return $ret;
 }
 
-sub dnsbl {
-  my ($xchk, $id, $event, $chan, $rev) = @_;
-  my %chk = %{$xchk};
+sub dnsbl
+{
+  my ($chk, $id, $event, $chan, $rev) = @_;
   return unless index($event->{host}, '/') == -1;
   if (defined $rev) {
-    my $iaddr = gethostbyname( "$rev$chk{content}" );
+    my $iaddr = gethostbyname( "$rev$chk->{content}" );
     my @dnsbl = unpack( 'C4', $iaddr ) if defined $iaddr;
     return 1 if (@dnsbl);
   }
@@ -82,9 +83,8 @@ sub dnsbl {
 }
 
 sub floodqueue {
-  my ($xchk, $id, $event, $chan, $rev) = @_;
-  my %chk = %{$xchk};
-  my @cut = split(/:/, $chk{content});
+  my ($chk, $id, $event, $chan, $rev) = @_;
+  my @cut = split(/:/, $chk->{content});
   return 1 if ( flood_add( $chan, $id, $event->{host}, int($cut[1]) ) == int($cut[0]) );
   return 0;
 }
@@ -102,6 +102,22 @@ sub nickspam {
 
 my %cf=();
 my %bs=();
+my $cfc = 0;
+sub process_cf
+{
+  foreach my $nid ( keys %cf ) {
+    foreach my $xchan ( keys %{$cf{$nid}} ) {
+      next if $xchan eq 'timeout';
+      foreach my $host ( keys %{$cf{$nid}{$xchan}} ) {
+        next unless defined $cf{$nid}{$xchan}{$host}[0];
+        while ( time >= $cf{$nid}{$xchan}{$host}[0] + $cf{$nid}{'timeout'} ) {
+          last if ( $#{ $cf{$nid}{$xchan}{$host} } == 0 );
+          shift ( @{$cf{$nid}{$xchan}{$host}} );
+        }
+      }
+    }
+  }
+}
 
 sub splitflood {
   my ($chk, $id, $event, $chan) = @_;
@@ -117,19 +133,16 @@ sub splitflood {
     return 1;
   }
   push( @{$cf{$id}{$chan}{$text}}, time );
-  foreach my $nid ( keys %cf ) {
-    foreach my $xchan ( keys %{$cf{$nid}} ) {
-      next if $xchan eq 'timeout';
-      foreach my $host ( keys %{$cf{$nid}{$xchan}} ) {
-        next unless defined $cf{$nid}{$xchan}{$host}[0];
-        while ( time >= $cf{$nid}{$xchan}{$host}[0] + $cf{$nid}{'timeout'} ) {
-          last if ( $#{ $cf{$nid}{$xchan}{$host} } == 0 );
-          shift ( @{$cf{$nid}{$xchan}{$host}} );
-        }
-      }
-    }
+  while ( time >= $cf{$id}{$chan}{$text}[0] + $cf{$id}{'timeout'} ) {
+    last if ( $#{$cf{$id}{$chan}{$text}} == 0 );
+    shift ( @{$cf{$id}{$chan}{$text}} );
   }
-  if ( $#{ @{$cf{$id}{$chan}{$text}}}+1 == int($cut[0]) ) {
+  $cfc = $cfc + 1;
+  if ( $cfc >= 100 ) {
+    $cfc = 0;
+    process_cf();
+  }
+  if ( $#{@{$cf{$id}{$chan}{$text}}}+1 == int($cut[0]) ) {
     $bs{$id}{$text} = time;
     return 1;
   }
@@ -140,11 +153,7 @@ sub re {
   my ($chk, $id, $event, $chan) = @_;
   my $match = $event->{args}->[0];
   $match = $event->{nick} if ($event->{type} eq 'join');
-  if ( defined($chk->{nocase}) ) {
-    return 1 if ($match =~ /$chk->{content}/i);
-  } else {
-    return 1 if ($match =~ /$chk->{content}/);
-  }
+  return 1 if ($match =~ /$chk->{content}/);
   return 0;
 }
 
@@ -196,27 +205,34 @@ sub gecos {
 sub nuhg {
   my ( $chk, $id, $event, $chan) = @_;
   my $match = $event->{from} . '!' . $::sn{lc $event->{nick}}->{gecos};
-  if ( defined($chk->{nocase}) ) {
-    return 1 if ($match =~ /$chk->{content}/i);
-  } else {
-    return 1 if ($match =~ /$chk->{content}/);
-  }
+  return 1 if ($match =~ /$chk->{content}/);
   return 0;
 }
 
-sub flood_add {
+my $sfc = 0;
+
+sub flood_add
+{
     my ( $chan, $id, $host, $to ) = @_;
     push( @{$sf{$id}{$chan}{$host}}, time );
     while ( time >= $sf{$id}{$chan}{$host}[0] + $to ) {
       last if ( $#{ $sf{$id}{$chan}{$host} } == 0 );
       shift( @{$sf{$id}{$chan}{$host}} );
     }
+    $sf{$id}{'timeout'} = $to;
+    $sfc = $sfc + 1;
+    if ($sfc > 100) {
+      $sfc = 0;
+      flood_process();
+    }
     return $#{ @{$sf{$id}{$chan}{$host}}}+1;
 }
 
-sub flood_process {
+sub flood_process
+{
   for my $id ( keys %sf ) {
     for my $chan ( keys %{$sf{$id}} ) {
+      next if $chan eq 'timeout';
       for my $host ( keys %{$sf{$id}{$chan}} ) {
         next unless defined $sf{$id}{$chan}{$host}[0];
         while ( time >= $sf{$id}{$chan}{$host}[0] + $sf{$id}{'timeout'} ) {
@@ -228,5 +244,4 @@ sub flood_process {
   }
 }
 
-
-return 1;
+1;

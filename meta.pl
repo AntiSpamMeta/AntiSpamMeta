@@ -54,6 +54,7 @@ sub init {
   $::commander = ASM::Commander->new();
   $::event = ASM::Event->new($conn, $::inspector);
   $::classes = ASM::Classes->new();
+  $::actions = ASM::Actions->new();
   my @eline=io('exempt.txt')->getlines;
   chomp @eline;
   foreach my $item (@eline) {

@@ -14,6 +14,36 @@ my %oq;
   'high'   => 50,
   'opalert'=> 9001 #OVER NINE THOUSAND!!!
 );
+
+%::COLORS =
+(
+  'white'   => '00',
+  'black'   => '01',
+  'blue'    => '02',
+  'green'   => '03',
+  'red'     => '04',
+  'brown'   => '05',
+  'purple'  => '06',
+  'orange'  => '07',
+  'yellow'  => '08',
+  'ltgreen' => '09',
+  'teal'    => '10',
+  'ltcyan'  => '11',
+  'ltblue'  => '12',
+  'pink'    => '13',
+  'grey'    => '14',
+  'ltgrey'  => '15',
+);
+
+%::RCOLOR =
+(
+  $::RISKS{debug}  => $::COLORS{purple},
+  $::RISKS{info}   => $::COLORS{blue},
+  $::RISKS{low}    => $::COLORS{green},
+  $::RISKS{medium} => $::COLORS{orange},
+  $::RISKS{high}   => $::COLORS{red},
+);
+
 sub new
 {
   my $module = shift;

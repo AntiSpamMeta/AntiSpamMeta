@@ -1,35 +1,57 @@
+package ASM::Actions;
 use strict;
 use warnings;
 
-#package Actions;
+sub new
+{
+  my $module = shift;
+  my $self = {};
+  my $tbl = {
+    "ban" => \&ban,
+    "kban" => \&kban,
+    "kick" => \&kick,
+    "none" => \&none,
+   "quiet" => \&quiet,
+  };
+  $self->{ftbl} = $tbl;
+  bless($self);
+  return $self;
+}
 
-sub Actions::ban {
+sub do
+{
+  my $self = shift;
+  my $item = shift;
+  return $self->{ftbl}->{$item}->(@_);
+}
+
+sub ban {
   my ($conn, $event, $chan) = @_;
   $::oq->o_send( $conn, "mode $chan +b *!*\@$event->{host}" );
   return "mode $chan -b *!*\@$event->{host}";
 }
 
-sub Actions::kban {
+sub kban {
   my ($conn, $event, $chan) = @_;
   $::oq->o_send($conn, "mode $chan +b *!*\@$event->{host}");
   $::oq->o_send($conn, "kick $chan $event->{nick} :Spamming");
   return "mode $chan -b *!*\@$event->{host}";
 }
 
-sub Actions::kick {
+sub kick {
   my ($conn, $event, $chan) = @_;
   $::oq->o_send($conn, "kick $chan $event->{nick} :Spamming");
   return "";
 }
 
-sub Actions::none {
+sub none {
   return "";
 }
 
-sub Actions::quiet {
+sub quiet {
   my ($conn, $event, $chan) = @_;
   $::oq->o_send( $conn, "mode $chan +b %*!*\@$event->{host}" );
   return "mode $chan -b %*!*\@$event->{host}";
 }
 
-return 1;
+1;

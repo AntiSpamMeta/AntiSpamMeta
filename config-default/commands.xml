@@ -1,4 +1,9 @@
 <commands>
+  <command cmd="^;help$">
+  <![CDATA[
+    $conn->privmsg($event->{to}->[0], "help is at http://meta.wikimedia.org/wiki/User:WHeimbigner/AntiSpamMeta");
+  ]]>
+  </command>
   <command cmd="^;query (\S+) (\S+)$">
   <![CDATA[
     my $channel = $1;
@@ -178,15 +183,16 @@
   </command>
   <command cmd="^;exempt (.*)" flag="o">
   <![CDATA[
-    $::eline{lc $1} = 1;
-    lc $1 . "\n" >> io 'exempt.txt';
-    $conn->privmsg($event->{to}->[0], lc $1 . " exempted");
+    my $x = lc $1;
+    $::eline{$x} = 1;
+    $x . "\n" >> io 'exempt.txt';
+    $conn->privmsg($event->{to}->[0], $x . " exempted");
   ]]>
   </command>
   <command cmd="^\!ops *(.*)">
   <![CDATA[
     my $hilite=ASM::Util->commaAndify(ASM::Util->getAlert($event->{to}->[0], 'opalert', 'hilights'));
-    $conn->privmsg($_, "$hilite: $event->{nick} wants your attention ($1) ") foreach ASM::Util->getAlert($event->{to}->[0], 'opalert', 'msgs');
+    $conn->privmsg($_, "[$event->{to}->[0]] - $event->{nick} wants op attention ($1) $hilite") foreach ASM::Util->getAlert($event->{to}->[0], 'opalert', 'msgs');
   ]]>
   </command>
   <command cmd="^;re(load|hash) exempts" flag="a">
