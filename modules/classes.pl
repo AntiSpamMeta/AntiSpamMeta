@@ -3,6 +3,7 @@ package ASM::Classes;
 use strict;
 use warnings;
 use Text::LevenshteinXS qw(distance);
+use Data::Dumper;
 
 my %sf = ();
 
@@ -93,9 +94,10 @@ sub nickspam {
   my ($chk, $id, $event, $chan) = @_;
   my @cut = split(/:/, $chk->{content});
   if ( length $event->{args}->[0] >= int($cut[0]) ) {
-    %_ = map { $_=>$_ } lc keys %{$::sc{lc $chan}{users}};
-    my @uniq = grep( $_{$_}, split( / / , lc $event->{args}->[0]) );
-    return 1 if ( $#{ @uniq } >= int($cut[1]) );
+    my %users = %{$::sc{lc $chan}->{users}};
+    my %x = map { $_=>$_ } keys %users;
+    my @uniq = grep( $x{$_}, split( /[ ,]+/ , lc $event->{args}->[0]) );
+    return 1 if ( @uniq >= int($cut[1]) );
   }
   return 0;
 }

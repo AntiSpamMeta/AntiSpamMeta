@@ -4,6 +4,11 @@
     $conn->privmsg($event->{to}->[0], "help is at http://meta.wikimedia.org/wiki/User:WHeimbigner/AntiSpamMeta");
   ]]>
   </command>
+  <command cmd="^;db$">
+  <![CDATA[
+    $conn->privmsg($event->{to}->[0], "db is at http://antispammeta.net/query.html");
+  ]]>
+  </command>
   <command cmd="^;query (\S+) (\S+)$">
   <![CDATA[
     my $channel = $1;
@@ -22,15 +27,22 @@
     $conn->privmsg($event->{to}->[0], "Hiya $nick");
   ]]>
   </command>
-  <command cmd="^;user flags set (\S+) ?(\S*)$" flag="d">
+  <command cmd="^;user flags (\S+)(?: (\S+))?$" flag="d">
   <![CDATA[
     my $nick = lc $1;
     my $flags = $2;
-    if ($flags eq '') { delete($::users->{person}->{$nick}->{flags}); } else {
+    if ($flags eq '') {
+      if (defined($::users->{person}->{$nick}->{flags})) {
+        $conn->privmsg($event->{to}->[0], "Flags for $nick: $::users->{person}->{$nick}->{flags}");
+      } else {
+        $conn->privmsg($event->{to}->[0], "$nick has no flags");
+      }
+#      delete($::users->{person}->{$nick}->{flags});
+    } else {
       $::users->{person}->{$nick}->{flags} = $flags;
+      ASM::XML->writeUsers();
+      $conn->privmsg($event->{to}->[0], "Flags for $nick set to $flags");
     }
-    ASM::XML->writeUsers();
-    $conn->privmsg($event->{to}->[0], "Flags for $nick set to $flags");
   ]]>
   </command>
   <command cmd="^;user del (\S+)$" flag="d">
@@ -41,7 +53,7 @@
     $conn->privmsg($event->{to}->[0], "Byebye $nick");
   ]]>
   </command>
-  <command cmd="^;user flags show (\S+)$" flag="d">
+<!--  <command cmd="^;user flags show (\S+)$" flag="a">
   <![CDATA[
     my $nick = lc $1;
     if (defined($::users->{person}->{$nick}->{flags})) {
@@ -50,7 +62,7 @@
       $conn->privmsg($event->{to}->[0], "$nick has no flags");
     }
   ]]>
-  </command>
+  </command> -->
   <command cmd="^;autoban (\S+)$" flag="a">
   <![CDATA[
     my $chan = $1;
@@ -65,6 +77,11 @@
     my $chan = $1;
     my $nick = $2;
     my $level= $3;
+    my $link = ASM::Util->getLink(lc $chan);
+    if ( lc $link ne lc $chan ) {
+      $conn->privmsg($event->{to}->[0], "Error: $chan is linked to $link - use $link instead.");
+      return;
+    }
     if ($level eq '') { $level = 'low'; }
     unless (defined($::channels->{channel}->{$chan}->{msgs})) {
       $::channels->{channel}->{$chan}->{msgs} = {};
@@ -83,6 +100,11 @@
   <![CDATA[
     my $chan = $1;
     my $nick = $2;
+    my $link = ASM::Util->getLink(lc $chan);
+    if ( lc $link ne lc $chan ) {
+      $conn->privmsg($event->{to}->[0], "Error: $chan is linked to $link - use $link instead.");
+      return;
+    }
     foreach my $risk ( keys %::RISKS ) {
       next unless defined($::channels->{channel}->{$chan}->{msgs}->{$risk});
       my @ppl = @{$::channels->{channel}->{$chan}->{msgs}->{$risk}};
@@ -90,7 +112,25 @@
       $::channels->{channel}->{$chan}->{msgs}->{$risk} = \@ppl;
     }
     ASM::XML->writeChannels();
-    $conn->privmsg($event->{to}->[0], "no moar msgs for $nick");
+    $conn->privmsg($event->{to}->[0], "$nick removed from targets for $chan");
+  ]]>
+  </command>
+  <command cmd="^;showhilights (\S+)$" flag="a">
+  <![CDATA[
+    my $nick = lc $1;
+    my @channels = ();
+    foreach my $chan (keys(%{$::channels->{channel}})) {
+      foreach my $level (keys(%{$::channels->{channel}->{$chan}->{hilights}})) {
+        if (grep(/^${nick}$/i, @{$::channels->{channel}->{$chan}->{hilights}->{$level}})) {
+          push @channels, $chan . " ($level)";
+        }
+      }
+    }
+    if (! @channels) {
+      $conn->privmsg($event->{to}->[0], "$nick isn't on any hilights");
+    } else {
+      $conn->privmsg($event->{to}->[0], "$nick is hilighted for " . join(', ', @channels));
+    }
   ]]>
   </command>
   <command cmd="^;hilight (\S+) (\S+) ?(\S*)$" flag="a">
@@ -99,6 +139,11 @@
     my $nick = $2;
     my $level= $3;
     if ($level eq '') { $level = 'low'; }
+    my $link = ASM::Util->getLink(lc $chan);
+    if ( lc $link ne lc $chan ) {
+      $conn->privmsg($event->{to}->[0], "Error: $chan is linked to $link - use $link instead.");
+      return;
+    }
     unless (defined($::channels->{channel}->{$chan}->{hilights})) {
       $::channels->{channel}->{$chan}->{hilights} = {};
     }
@@ -116,6 +161,11 @@
   <![CDATA[
     my $chan = $1;
     my $nick = $2;
+    my $link = ASM::Util->getLink(lc $chan);
+    if ( lc $link ne lc $chan ) {
+      $conn->privmsg($event->{to}->[0], "Error: $chan is linked to $link - use $link instead.");
+      return;
+    }
     foreach my $risk ( keys %::RISKS ) {
       next unless defined($::channels->{channel}->{$chan}->{hilights}->{$risk});
       my @ppl = @{$::channels->{channel}->{$chan}->{hilights}->{$risk}};
@@ -123,7 +173,7 @@
       $::channels->{channel}->{$chan}->{hilights}->{$risk} = \@ppl;
     }
     ASM::XML->writeChannels();
-    $conn->privmsg($event->{to}->[0], "kthxbai $nick");
+    $conn->privmsg($event->{to}->[0], "Removing hilights for $nick in $chan");
   ]]>
   </command>
   <command cmd="^;join (\S+)" flag="a">
@@ -189,10 +239,13 @@
     $conn->privmsg($event->{to}->[0], $x . " exempted");
   ]]>
   </command>
-  <command cmd="^\!ops *(.*)">
+  <command cmd="^\!ops (#\S+)? ?(.*)">
   <![CDATA[
-    my $hilite=ASM::Util->commaAndify(ASM::Util->getAlert($event->{to}->[0], 'opalert', 'hilights'));
-    $conn->privmsg($_, "[$event->{to}->[0]] - $event->{nick} wants op attention ($1) $hilite") foreach ASM::Util->getAlert($event->{to}->[0], 'opalert', 'msgs');
+    my $tgt = $event->{to}->[0];
+    $tgt = $1 if (defined($1));
+    my $msg = $2;
+    my $hilite=ASM::Util->commaAndify(ASM::Util->getAlert($tgt, 'opalert', 'hilights'));
+    $conn->privmsg($_, "[$tgt] - $event->{nick} wants op attention ($msg) $hilite") foreach ASM::Util->getAlert($tgt, 'opalert', 'msgs');
   ]]>
   </command>
   <command cmd="^;re(load|hash) exempts" flag="a">

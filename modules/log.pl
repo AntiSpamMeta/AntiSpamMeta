@@ -27,6 +27,9 @@ sub logg
   foreach my $chan ( @chans )
   {
     $chan = lc $chan;
+    if (substr($chan, 0, 1) eq '@') {
+      $chan = substr($chan, 1);
+    }
     my $path = ">>$cfg->{dir}${chan}/${chan}" . strftime($cfg->{filefmt}, @time);
     $_ = '';
     $_ =    "<$event->{nick}> $event->{args}->[0]"                      if $event->{type} eq 'public';

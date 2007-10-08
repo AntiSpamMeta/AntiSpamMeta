@@ -1,4 +1,5 @@
 package ASM::Util;
+use Array::Utils qw(:all);
 use warnings;
 use strict;
 
@@ -7,6 +8,7 @@ my %oq;
 
 %::RISKS =
 (
+  'disable'=> -1, #this isn't really an alert
   'debug'  => 10,
   'info'   => 20,
   'low'    => 30,
@@ -66,8 +68,22 @@ sub maxlen {
 sub cs {
   my ($module, $chan) = @_;
   $chan = lc $chan;
-  return $::channels->{channel}->{$chan} if ( defined($::channels->{channel}->{$chan}) );
-  return $::channels->{channel}->{default};
+  return $::channels->{channel}->{default} unless defined($::channels->{channel}->{$chan});
+  if ( defined($::channels->{channel}->{$chan}->{link}) ) {
+    return $::channels->{channel}->{ $::channels->{channel}->{$chan}->{link} };
+  }
+  return $::channels->{channel}->{$chan};
+}
+
+sub getLink
+{
+  my ($module, $chan) = @_;
+  $chan = lc $chan;
+  my $link = $::channels->{channel}->{$chan}->{link};
+  if ( defined($link) ) {
+    return $link;
+  }
+  return $chan;
 }
 
 #this item is a stub, dur
@@ -126,15 +142,20 @@ sub flood_process {
 
 sub getAlert {
   my ($module, $c, $risk, $t) = @_;
-  @_ = ();
+  my @disable = ();
+  my @x = ();
   $c = lc $c;
   foreach my $prisk ( keys %::RISKS) {
     if ( $::RISKS{$risk} >= $::RISKS{$prisk} ) {
-      push( @_, @{$::channels->{channel}->{master}->{$t}->{$prisk}} ) if defined $::channels->{channel}->{master}->{$t}->{$prisk};
-      push( @_, @{cs($module, $c)->{$t}->{$prisk}} ) if defined cs($module, $c)->{$t}->{$prisk};
+      push( @x, @{$::channels->{channel}->{master}->{$t}->{$prisk}} ) if defined $::channels->{channel}->{master}->{$t}->{$prisk};
+      push( @x, @{cs($module, $c)->{$t}->{$prisk}} ) if defined cs($module, $c)->{$t}->{$prisk};
     }
   }
-  return @_;
+  push( @disable, @{$::channels->{channel}->{master}->{$t}->{disable}} ) if defined $::channels->{channel}->{master}->{$t}->{disable};
+  push( @disable, @{cs($module, $c)->{$t}->{disable}} ) if defined cs($module, $c)->{$t}->{disable};
+  @x = unique(@x);
+  @x = array_diff(@x, @disable);
+  return @x;
 }
 
 sub commaAndify {

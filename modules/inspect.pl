@@ -64,13 +64,13 @@ sub inspect {
            $conn->schedule(int($dct{$id}{time}), sub { $::oq->o_send($lconn,$lunmode); });
         }
       }
-      unless (defined($::ignored{$event->{host}}) && ($::ignored{$event->{host}} >= $::RISKS{$dct{$id}{risk}})) {
+      unless (defined($::ignored{$chan}) && ($::ignored{$chan} >= $::RISKS{$dct{$id}{risk}})) {
         my @tgts = ASM::Util->getAlert($chan, $dct{$id}{risk}, 'msgs');
         foreach my $tgt (@tgts) {
           $conn->privmsg($tgt, $txtz);
         }
-        $::ignored{$event->{host}} = $::RISKS{$dct{$id}{risk}};
-        $conn->schedule(60, sub { delete($::ignored{$event->{host}})});
+        $::ignored{$chan} = $::RISKS{$dct{$id}{risk}};
+        $conn->schedule(45, sub { delete($::ignored{$chan})});
       }
     }
   }

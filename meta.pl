@@ -19,7 +19,7 @@ $::pass = '';
 @::string_blacklist=();
 
 BEGIN {
-my @modules = qw/Xml Util Inspect Event Services Log Command Classes Actions Mysql OperQueue/;
+my @modules = qw/Util Xml Inspect Event Services Log Command Classes Actions Mysql OperQueue/;
 require 'modules/' . lc $_ . '.pl' foreach @modules;
 }
 

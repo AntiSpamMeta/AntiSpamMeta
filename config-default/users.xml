@@ -1,12 +1,21 @@
 <people>
   <person id="afterdeath" flags="odat" host="IDENTIFY" />
+  <person id="alindeman" flags="odat" host="freenode/staff/alindeman" />
+  <person id="andrewb" flags="a" host="freenode/helper/ubuntu.member.AndrewB" />
+  <person id="animum" />
   <person id="cchan" flags="odat" host="IDENTIFY" />
+  <person id="dave2" flags="odat" host="freenode/staff/dave2" />
+  <person id="denny" flags="+a" host="freenode/staff/denny" />
   <person id="dmcdevit" flags="oat" host="IDENTIFY" />
   <person id="filiated" flags="odat" host="IDENTIFY" />
+  <person id="karlprof" flags="a" host="freenode/helper/pdpc.student.karlprof" />
   <person id="mark_ryan" flags="ot" host="wikimedia/mark" />
+  <person id="ompaul" flags="a" host="freenode/staff/gnewsense.ompaul" />
+  <person id="philkc" flags="odat" host="freenode/staff/philkc" />
   <person id="sean_william" flags="a" host="IDENTIFY" />
   <person id="seanw" flags="odat" host="freenode/staff/wikimedia.sean-whitton" />
   <person id="slowking_man" flags="ot" host="IDENTIFY" />
-  <person id="st47" flags="oat" host="IDENTIFY" />
+  <person id="st47" flags="odat" host="IDENTIFY" />
+  <person id="tomaw" flags="odat" host="freenode/staff/tomaw" />
   <person id="wildpikachu" flags="odat" host="about/linux/staff/wildpikachu" />
 </people>

@@ -67,8 +67,6 @@ sub on_connect {
   $conn->privmsg( 'NickServ', "ghost $::settings->{nick} $::settings->{pass}" ) if lc $event->{args}->[0] ne lc $::settings->{nick};
 }
 
-#my @leven = ();
-
 sub on_join {
   my ($conn, $event) = @_;
   my %evcopyx = %{$event};
@@ -80,6 +78,11 @@ sub on_join {
     mkdir($::settings->{log}->{dir} . $chan);
     $conn->sl("who $chan");
     $conn->privmsg('ChanServ', "op $chan" ) if (defined cs($chan)->{op}) && (cs($chan)->{op} eq 'yes');
+    #TODO: make it settable via config. Hardcoded channames ftl.
+    if ($chan eq '##linux') {
+      $conn->schedule(300, \&do_chancount, $chan, 300);
+      #TODO: mark this as a channel we're watching so we don't schedule this multiple times
+    }
   }
   $::sc{$chan}{users}{$nick} = {};
   $::sc{$chan}{users}{$nick}{hostmask} = $event->{userhost};
@@ -104,21 +107,6 @@ sub on_join {
     }
   }   
   $::log->logg( $event );
-#  if ( $#leven ne -1 ) {
-#    my $ld = ( ( maxlen($nick, $leven[0]) - distance($nick, $leven[0]) ) / maxlen($nick, $leven[0]) );
-#    my $mx = $leven[0];
-#    foreach my $item ( @leven ) {
-#      next if $nick eq $item; # avoid dups
-#      my $tld = ( ( maxlen($nick, $item) - distance($nick, $item) ) / maxlen($nick, $item) );
-#      if ($tld > $ld) {
-#        $ld = $tld;
-#        $mx = $item;
-#      }
-#    }
-#    print "Best match for $nick was $mx with $ld\n"
-#  }
-#  push(@leven, $nick);
-#  shift @leven if $#leven > 5;
 }
 	
 sub on_part
@@ -139,6 +127,7 @@ sub on_part
   if ( lc $conn->{_nick} eq lc $nick )
   {
     delete( $::sc{lc $event->{to}->[0]} );
+    on_byechan(lc $event->{to}->[0]);
   }
   else
   {
@@ -278,6 +267,7 @@ sub on_kick {
   if ( lc $conn->{_nick} eq lc $nick )
   {
     delete( $::sc{lc $event->{args}->[0]} );
+    on_byechan(lc $event->{to}->[0]);
   }
   else
   {
@@ -429,6 +419,19 @@ sub on_whoreply
 sub on_bannedfromchan {
   my ($conn, $event) = @_;
   $conn->privmsg('ChanServ', "unban $event->{args}->[1]");
+}
+
+sub on_byechan {
+  my ($chan) = @_;
+  #TODO do del event stuff
+}
+
+sub do_chancount {
+  my ($conn, $chan, $repeat) = @_;
+  my @users = keys(%{$::sc{$chan}{users}});
+  my $count = @users;
+  system('/home/icxcnika/AntiSpamMeta/chancount.pl ' . $chan . sprintf(' %d', $count));
+  $conn->schedule($repeat, \&do_chancount, $chan, $repeat);
 }
 
 return 1;
