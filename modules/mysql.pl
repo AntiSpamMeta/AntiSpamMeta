@@ -6,10 +6,12 @@ use DBI;
 
 sub new {
   my $module = shift;
-  my ($db, $host, $port, $user, $pass, $table) = @_;
+  my ($db, $host, $port, $user, $pass, $table, $dblog) = @_;
   my $self = {};
   $self->{DBH} = DBI->connect("DBI:mysql:database=$db;host=$host;port=$port", $user, $pass);
+  $self->{DBH_LOG} = DBI->connect("DBI:mysql:database=$dblog;host=$host;port=$port", $user, $pass);
   $self->{DBH}->{mysql_auto_reconnect} = 1;
+  $self->{DBH_LOG}->{mysql_auto_reconnect} = 1;
   $self->{TABLE} = $table;
   bless($self);
   return $self;
@@ -21,6 +23,28 @@ sub new {
 #                        $::mysql->{user}, $::mysql->{pass});
 #  $::dbh->{mysql_auto_reconnect} = 1;
 #}
+
+sub raw
+{
+  my $self = shift;
+  my ($conn, $tgt, $dbh, $qry) = @_;
+  my $sth = $dbh->prepare($qry);
+  $sth->execute;
+  my $names = $sth->{'NAME'};
+  my $numFields = $sth->{'NUM_OF_FIELDS'};
+  my $string = "";
+  for (my $i = 0; $i < $numFields; $i++) {
+    $string = $string . sprintf("%s%s", $i ? "," : "", $$names[$i]);
+  }
+  $conn->privmsg($tgt, $string);
+  while (my $ref = $sth->fetchrow_arrayref) {
+    $string = "";
+    for (my $i = 0; $i < $numFields; $i++) {
+      $string = $string . sprintf("%s%s", $i ? "," : "", $$ref[$i]);
+    }
+    $conn->privmsg($tgt, $string);
+  }
+}
 
 sub record
 {
@@ -36,6 +60,46 @@ sub record
              $dbh->quote($id) . ", " . $dbh->quote($reason) . ");");
 }
 
+#FIXME: This function is shit. Also, it doesn't work like I want it to with mode.
+sub logg
+{
+  my $self = shift;
+  my ($event) = @_;
+  my $dbh = $self->{DBH_LOG};
+  my $table = $event->{type};
+  $table = 'action' if ($table eq 'caction');
+  $table = 'privmsg' if ($table eq 'public');
+  my $realtable = $table;
+  $realtable = 'joins' if $realtable eq 'join'; #mysql doesn't like a table named join
+  my $string = 'INSERT INTO `' . $realtable . '` (';
+  if (($table ne 'nick') && ($table ne 'quit')) {
+    $string = $string . 'channel, ';
+  }
+  $string = $string . 'nick, user, host, geco';
+  if ($table ne 'join') {
+    $string = $string . ', content1';
+  }
+  if (($table eq 'kick') || ($table eq 'mode')) {
+    $string = $string . ', content2';
+  }
+  $string = $string . ') VALUES (';
+  if (($table ne 'nick') && ($table ne 'quit')) {
+    $string = $string . $dbh->quote($event->{to}->[0]) . ", ";
+  }
+  my $geco = $::sn{lc $event->{nick}}->{gecos};
+  $string = $string . $dbh->quote($event->{nick}) . ", " . $dbh->quote($event->{user}) . ", " .
+                      $dbh->quote($event->{host}) . ", " . $dbh->quote($geco);
+  if ($table ne 'join') {
+    $string = $string. ', ' . $dbh->quote($event->{args}->[0]);
+  }
+  if (($table eq 'kick') || ($table eq 'mode')) {
+    $string = $string . ', ' . $dbh->quote($event->{args}->[1]);
+  }
+  $string = $string . ');';
+  print $string . "\n" if $::debug;
+  $dbh->do($string);
+}
+  
 sub query
 {
   my $self = shift;

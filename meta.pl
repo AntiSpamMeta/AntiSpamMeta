@@ -32,6 +32,7 @@ sub init {
               'pass|p:s'   => \$::pass,
               'config|c:s' => \$::cset
             );
+  $::debug = $debug;
   ASM::XML->readXML();
   mkdir($::settings->{log}->{dir});
   $::log = ASM::Log->new($::settings->{log});
@@ -39,7 +40,7 @@ sub init {
   $host = ${$::settings->{server}}[rand @{$::settings->{server}}];
   print "Connecting to $host\n";
   $irc->debug($debug);
-  $::db = ASM::DB->new($::mysql->{db}, $::mysql->{host}, $::mysql->{port}, $::mysql->{user}, $::mysql->{pass}, $::mysql->{table});
+  $::db = ASM::DB->new($::mysql->{db}, $::mysql->{host}, $::mysql->{port}, $::mysql->{user}, $::mysql->{pass}, $::mysql->{table}, $::mysql->{dblog});
   $conn = $irc->newconn( Server => $host,
                          Port => $::settings->{port} || '6667',
                          Nick => $::settings->{nick},

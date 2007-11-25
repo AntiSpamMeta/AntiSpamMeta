@@ -17,6 +17,7 @@ sub new
     "floodqueue" => \&floodqueue,
     "nickspam" => \&nickspam,
     "splitflood" => \&splitflood,
+    "advsplitflood" => \&advsplitflood,
     "re" => \&re,
     "nick" => \&nick,
     "ident" => \&ident,
@@ -150,6 +151,37 @@ sub splitflood {
   }
   return 0;
 } 
+
+sub advsplitflood {
+  my ($chk, $id, $event, $chan) = @_;
+  my $text;
+  my @cut = split(/:/, $chk->{content});
+  $cf{$id}{timeout}=int($cut[1]);
+  if ($event->{type} =~ /^(public|notice|part|caction)$/) {
+    $text=$event->{args}->[0];
+  }
+  return unless defined($text);
+  $text=~s/^\d+(.*)\d+$/$1/;
+  return unless length($text) >= 10;
+  if (defined($bs{$id}{$text}) && (time <= $bs{$id}{$text} + 600)) {
+    return 1;
+  }
+  push( @{$cf{$id}{$chan}{$text}}, time );
+  while ( time >= $cf{$id}{$chan}{$text}[0] + $cf{$id}{'timeout'} ) {
+    last if ( $#{$cf{$id}{$chan}{$text}} == 0 );
+    shift ( @{$cf{$id}{$chan}{$text}} );
+  }
+  $cfc = $cfc + 1;
+  if ( $cfc >= 100 ) {
+    $cfc = 0;
+    process_cf();
+  }
+  if ( $#{@{$cf{$id}{$chan}{$text}}}+1 == int($cut[0]) ) {
+    $bs{$id}{$text} = time;
+    return 1;
+  }
+  return 0;
+}
 
 sub re {
   my ($chk, $id, $event, $chan) = @_;

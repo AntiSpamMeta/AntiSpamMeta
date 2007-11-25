@@ -96,11 +96,13 @@ sub on_join {
     @mship = (@mship, $chan);
     $::sn{$nick}->{mship} = \@mship;
     $::inspector->inspect( $conn, $event );
+    $::db->logg($event);
   } else {
     $::sn{$nick} = {};
     $::sn{$nick}->{mship} = [ $chan ];
     if (defined($::needgeco{$nick})) {
       $::needgeco{$nick} = [ @{$::needgeco{$nick}}, $evcopy ];
+      $::db->logg($event);
     } else {
       $::needgeco{$nick} = [ $evcopy ];
       $conn->sl("whois $nick");
@@ -115,6 +117,7 @@ sub on_part
   $::inspector->inspect( $conn, $event );
   my $nick = lc $event->{nick};
   $::log->logg( $event );
+  $::db->logg( $event );
   if (defined($::sn{$nick}) && defined($::sn{$nick}->{mship})) {
     my @mship = @{$::sn{$nick}->{mship}};
     @mship = grep { lc $_ ne lc $event->{to}->[0] } @mship;
@@ -146,6 +149,7 @@ sub on_public
   my ($conn, $event) = @_;
   $::inspector->inspect( $conn, $event );
   $::log->logg( $event );
+  $::db->logg( $event );
   $::commander->command( $conn, $event );
 }
 
@@ -154,6 +158,7 @@ sub on_notice
   my ($conn, $event) = @_;
   $::inspector->inspect( $conn, $event );
   $::log->logg( $event );
+  $::db->logg( $event );
   $::services->doServices($conn, $event);
 }
 
@@ -173,6 +178,7 @@ sub on_quit
     push ( @channels, $_ ) if delete $::sc{lc $_}{users}{lc $event->{nick}};
   }
   $event->{to} = \@channels;
+  $::db->logg( $event );
   delete($::sn{lc $event->{nick}});
   $::inspector->inspect( $conn, $event );
   $::log->logg( $event );
@@ -226,6 +232,7 @@ sub irc_topic {
       $::sc{lc $event->{to}->[0]}{topic}{text} = $event->{args}->[0];
     }
     $::log->logg($event);
+    $::db->logg( $event );
   }
 }
 
@@ -242,10 +249,11 @@ sub on_nick {
     }
   }
   $::sn{lc $event->{args}->[0]} = $::sn{lc $event->{nick}};
+  $::db->logg( $event );
   delete( $::sn{lc $event->{nick}});
   $event->{to} = \@channels;
   $::inspector->inspect($conn, $event);
-  $::log->logg($event)
+  $::log->logg($event);
 }
 
 sub on_kick {
@@ -255,6 +263,7 @@ sub on_kick {
   }
   my $nick = lc $event->{to}->[0];
   $::log->logg( $event );
+  $::db->logg( $event );
   if (defined($::sn{$nick}) && defined($::sn{$nick}->{mship})) {
     my @mship = @{$::sn{$nick}->{mship}};
     @mship = grep { lc $_ ne lc $event->{to}->[0] } @mship;
@@ -380,6 +389,7 @@ sub whois_user {
   if (defined( $::needgeco{$lnick} )) {
     foreach my $event (@{$::needgeco{$lnick}}) {
       $::inspector->inspect($conn, $event);
+      $::db->logg( $event );
     }
     delete $::needgeco{$lnick};
   }

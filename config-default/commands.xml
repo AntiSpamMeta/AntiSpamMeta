@@ -1,4 +1,13 @@
 <commands>
+  <command cmd="^;sql (main|log) (.*)">
+  <![CDATA[
+    my $dbh = $::db->{DBH};
+    if ($1 eq 'log') {
+      $dbh = $::db->{DBH_LOG};
+    }
+    $::db->raw($conn, $event->{to}->[0], $dbh, $2);
+  ]]>
+  </command>
   <command cmd="^;help$">
   <![CDATA[
     $conn->privmsg($event->{to}->[0], "help is at http://meta.wikimedia.org/wiki/User:WHeimbigner/AntiSpamMeta");

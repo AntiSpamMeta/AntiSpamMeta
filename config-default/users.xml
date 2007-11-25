@@ -17,5 +17,6 @@
   <person id="slowking_man" flags="ot" host="IDENTIFY" />
   <person id="st47" flags="odat" host="IDENTIFY" />
   <person id="tomaw" flags="odat" host="freenode/staff/tomaw" />
+  <person id="troubled" flags="oat" host="pdpc/supporter/sustaining/troubled" />
   <person id="wildpikachu" flags="odat" host="about/linux/staff/wildpikachu" />
 </people>

@@ -86,6 +86,17 @@ sub getLink
   return $chan;
 }
 
+sub speak
+{
+  my ($module, $chan) = @_;
+  $chan = lc $chan;
+  if ( defined(cs($module, $chan)->{silence}) && (cs($module, $chan)->{silence} eq "yes") ) {
+    return 0;
+  } else {
+    return 1;
+  }
+}
+
 #this item is a stub, dur
 sub hostip {
   return gethostbyname($_[0]);

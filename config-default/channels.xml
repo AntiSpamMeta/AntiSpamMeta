@@ -6,7 +6,7 @@
     <hilights></hilights>
     <msgs></msgs>
   </channel>
-  <channel id="##asb-testing" op="when">
+  <channel id="##asb-testing" op="when" silence="yes">
     <hilights>
       <disable>ST47</disable>
       <disable>alindeman</disable>
@@ -54,6 +54,7 @@
   <channel id="##tomaw" op="no">
     <hilights></hilights>
   </channel>
+  <channel id="##wikimedia-ops" op="no" />
   <channel id="##windows" op="no">
     <hilights>
       <info>njan</info>
@@ -77,7 +78,7 @@
   <channel id="#defocus" link="#freenode">
     <hilights></hilights>
   </channel>
-  <channel id="#freenode" op="no">
+  <channel id="#freenode" op="no" silence="yes">
     <hilights>
       <debug>tomaw</debug>
       <debug>Dave2</debug>
@@ -100,6 +101,10 @@
       <debug>#freenode-adb</debug>
     </msgs>
   </channel>
+  <channel id="#gentoo" op="no" silence="yes">
+    <hilights></hilights>
+    <msgs></msgs>
+  </channel>
   <channel id="#freenode-adb" op="no">
     <hilights></hilights>
     <msgs></msgs>
@@ -121,6 +126,10 @@
     </hilights>
     <msgs></msgs>
   </channel>
+  <channel id="#ubuntu" op="no" silence="yes">
+    <hilights></hilights>
+    <msgs></msgs>
+  </channel>
   <channel id="#wikimedia" op="no">
     <hilights>
       <debug>Mbimmler</debug>
@@ -128,7 +137,7 @@
       <low>Fabexplosive</low>
     </hilights>
     <msgs>
-      <low>#wikimedia-ops</low>
+      <debug>#wikimedia-ops</debug>
     </msgs>
   </channel>
   <channel id="#wikimedia-commons" op="no">
@@ -164,6 +173,7 @@
       <debug>Mbimmler</debug>
       <info>Karlprof</info>
       <info>Martinp23</info>
+      <info>Pilotguy</info>
       <low>Pilotguy</low>
       <low>Eagle-101</low>
       <low>skenmy</low>
@@ -181,9 +191,11 @@
       <low>njan</low>
       <low>mike42</low>
       <low>Pilotguy</low>
+      <low>kloeri</low>
     </hilights>
     <msgs>
       <debug>#wikimedia-ops</debug>
+      <debug>##wikimedia-ops</debug>
     </msgs>
   </channel>
   <channel id="#wikipedia-bag" op="no">
@@ -195,7 +207,7 @@
     </msgs>
   </channel>
   <channel id="#wikipedia-en" op="yes">
-    <hilights>
+    <hilights none="ST47">
       <debug>Cometstyles</debug>
       <debug>Majorly</debug>
       <debug>Worby</debug>
@@ -205,6 +217,7 @@
       <debug>wimt</debug>
       <debug>werdan7</debug>
       <debug>Animum</debug>
+      <debug>Deskana</debug>
       <low>AppleBoy</low>
       <low>Soms</low>
       <low>Martinp23</low>
@@ -214,12 +227,15 @@
     </hilights>
     <msgs>
       <debug>#wikimedia-ops</debug>
+      <debug>##wikimedia-ops</debug>
     </msgs>
   </channel>
   <channel id="#wikipedia-en-help" op="no">
     <hilights>
       <debug>TheLetterE</debug>
       <debug>werdan7</debug>
+      <debug>GDonato</debug>
+      <debug>TheLetterE</debug>
     </hilights>
     <msgs>
       <debug>#wikimedia-ops</debug>
@@ -251,6 +267,7 @@
   <channel id="#wikipedia-social" op="no">
     <hilights>
       <debug>Golbez</debug>
+      <debug>TheLetterE</debug>
     </hilights>
     <msgs>
       <low>#wikimedia-ops</low>
@@ -263,8 +280,7 @@
   </channel>
   <channel id="master">
     <event id="autoremove" action="none" class="re" reason="on chanserv autoremove" risk="info" time="0" type="part">^requested by ChanServ</event>
-    <event id="badurl1" action="ban" class="re" reason="sending spam url" risk="medium" time="0" type="public">tinyurl\.com/ypvk4n</event>
-    <event id="blacklist" action="none" class="strbl" reason="sending pm matching string blacklist" risk="low" time="0" type="public">blah</event>
+    <event id="blacklist" action="none" class="strbl" reason="sending message containing blacklisted content" risk="low" time="0" type="public">blah</event>
     <event id="ctcp-dcc" action="ban" class="re" reason="ctcp-dcc" risk="high" time="0" type="cdcc">.*</event>
     <event id="dcc" action="ban" class="re" override="dcc-medium" reason="using the DC.C SE.ND exploit" risk="high" time="0" type="public">^DCC SEND |\bDCC SEND &quot;?[A-Za-z0-9]+&quot;? \d+ \d+ \d+</event>
     <event id="dcc-medium" action="ban" class="re" reason="using the DC.C SE.ND exploit" risk="medium" time="0" type="public">DCC SEND </event>
@@ -282,6 +298,7 @@
     <event id="levenflood" action="none" class="levenflood" override="flood-5to3" reason="levenshtein flood match" risk="debug" time="0" type="public">contentisuseless</event>
     <event id="magical" action="none" class="ident" reason="typical w00t ident" risk="info" time="0" type="join">i=magical</event>
     <event id="massflood" action="ban" class="splitflood" reason="distributed flooding" risk="high" time="0" type="public,part,caction">5:3</event>
+    <event id="advflood" action="ban" class="advsplitflood" reason="advanced distributed flooding" risk="debug" time="0" type="public,part,caction">5:3</event>
     <event id="nickspam" action="ban" class="nickspam" reason="nickspamming" risk="high" time="0" type="public">150:20</event>
     <event id="notice" action="ban" class="re" reason="sending a notice to the channel" risk="medium" time="0" type="notice">.*</event>
     <event id="redarmyoflol" action="ban" class="re" reason="parting with 'red army of lol'" risk="low" time="0" type="part">RED ARMY OF LOL</event>
@@ -290,8 +307,10 @@
     <hilights>
       <debug>AfterDeath</debug>
       <debug>ST47</debug>
+      <debug>troubled</debug>
       <low>alindeman</low>
       <low>seanw</low>
+      <medium>dave2</medium>
     </hilights>
     <msgs>
       <debug>##asb-nexus</debug>

@@ -19,6 +19,7 @@ sub command
   my $cmd = $args;
   my $d1;
   my $nick = lc $event->{nick};
+  return 0 unless (ASM::Util->speak($event->{to}->[0]));
   foreach my $command ( @{$::commands->{command}} )
   {
     if (defined($command->{flag})) {
