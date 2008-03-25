@@ -1,0 +1,23 @@
+<dnsbl>
+  <query id="rbl.efnetrbl.org">
+    <response id="127.0.0.1">Open proxy</response>
+    <response id="127.0.0.2">Trojan spreader</response>
+    <response id="127.0.0.3">Trojan infected client</response>
+    <response id="127.0.0.4">TOR exit server</response>
+    <response id="127.0.0.5">Drones / Flooding</response>
+  </query>
+  <query id="dnsbl.dronebl.org">
+    <response id="127.0.0.1">Testing data</response>
+    <response id="127.0.0.2">Sample</response>
+    <response id="127.0.0.3">IRC Drone</response>
+    <response id="127.0.0.4">Tor</response>
+    <response id="127.0.0.5">Bottler</response>
+    <response id="127.0.0.6">Unknown spambot or drone</response>
+    <response id="127.0.0.7">DDOS drone</response> 
+    <response id="127.0.0.8">SOCKS proxy</response> 
+    <response id="127.0.0.9">HTTP proxy</response> 
+    <response id="127.0.0.10">ProxyChain</response> 
+    <response id="127.0.0.11">MediaDefender crap</response> 
+    <response id="127.0.0.255">Unknown</response>
+  </query>
+</dnsbl>

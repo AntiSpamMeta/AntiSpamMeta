@@ -4,6 +4,7 @@ use strict;
 
 #use Data::Dumper;
 #use List::Util qw(first);
+use String::Interpolate qw(interpolate);
 
 %::ignored = ();
 sub new
@@ -45,11 +46,15 @@ sub inspect {
     }
   }
   delete $dct{$_} foreach @override;
+  my $mylastreason = $::lastreason;
+  my $evcontent = $event->{args}->[0];
+  my $evhost = $event->{host};
   foreach $chan (@{$event->{to}}) {
     foreach $id ( keys %dct ) {
-      $::db->record($chan, $event->{nick}, $event->{user}, $event->{host}, $::sn{lc $event->{nick}}->{gecos}, $dct{$id}{risk}, $id, $dct{$id}{reason});
+      my $nicereason = interpolate($dct{$id}{reason});
+      $::db->record($chan, $event->{nick}, $event->{user}, $event->{host}, $::sn{lc $event->{nick}}->{gecos}, $dct{$id}{risk}, $id, $nicereason);
       $txtz = "\x03" . $::RCOLOR{$::RISKS{$dct{$id}{risk}}} . "\u$dct{$id}{risk}\x03 risk threat [\x02$chan\x02]: ".
-              "\x02$event->{nick}\x02 - $dct{$id}{reason}; ping ";
+              "\x02$event->{nick}\x02 - ${nicereason}; ping ";
       $txtz = $txtz . ASM::Util->commaAndify(ASM::Util->getAlert(lc $chan, $dct{$id}{risk}, 'hilights')) if (ASM::Util->getAlert(lc $chan, $dct{$id}{risk}, 'hilights'));
       if (ASM::Util->cs(lc $chan)->{op} ne 'no') {
         if ($event->{type} eq 'topic') { #restore old topic

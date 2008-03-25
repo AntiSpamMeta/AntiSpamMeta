@@ -76,23 +76,36 @@ sub logg
     $string = $string . 'channel, ';
   }
   $string = $string . 'nick, user, host, geco';
-  if ($table ne 'join') {
+  if (($table ne 'join') && ($table ne 'kick')) {
     $string = $string . ', content1';
   }
-  if (($table eq 'kick') || ($table eq 'mode')) {
+  if ($table eq 'mode') {
     $string = $string . ', content2';
   }
+  if ($table eq 'kick') {
+    $string = $string . ', victim_nick, victim_user, victim_host, victim_geco, content1';
+  }
   $string = $string . ') VALUES (';
-  if (($table ne 'nick') && ($table ne 'quit')) {
+  if (($table ne 'nick') && ($table ne 'quit') && ($table ne 'kick')) {
     $string = $string . $dbh->quote($event->{to}->[0]) . ", ";
+  }
+  if ($table eq 'kick') {
+    $string = $string . $dbh->quote($event->{args}->[0]) . ", ";
   }
   my $geco = $::sn{lc $event->{nick}}->{gecos};
   $string = $string . $dbh->quote($event->{nick}) . ", " . $dbh->quote($event->{user}) . ", " .
                       $dbh->quote($event->{host}) . ", " . $dbh->quote($geco);
-  if ($table ne 'join') {
+  if (($table ne 'join') && ($table ne 'kick')) {
     $string = $string. ', ' . $dbh->quote($event->{args}->[0]);
   }
-  if (($table eq 'kick') || ($table eq 'mode')) {
+  if ($table eq 'kick') {
+    $string = $string . ', ' . $dbh->quote($event->{to}->[0]);
+    $string = $string . ', ' . $dbh->quote($::sn{lc $event->{to}->[0]}->{user});
+    $string = $string . ', ' . $dbh->quote($::sn{lc $event->{to}->[0]}->{host});
+    $string = $string . ', ' . $dbh->quote($::sn{lc $event->{to}->[0]}->{gecos});
+    $string = $string . ', ' . $dbh->quote($event->{args}->[1]);
+  }
+  if ($table eq 'mode') {
     $string = $string . ', ' . $dbh->quote($event->{args}->[1]);
   }
   $string = $string . ');';

@@ -79,7 +79,16 @@ sub dnsbl
   if (defined $rev) {
     my $iaddr = gethostbyname( "$rev$chk->{content}" );
     my @dnsbl = unpack( 'C4', $iaddr ) if defined $iaddr;
-    return 1 if (@dnsbl);
+    my $strip;
+    if (@dnsbl) {
+      $strip = sprintf("%s.%s.%s.%s", @dnsbl);
+      print "found host (rev $rev) in $chk->{content} - $strip\n";
+    }
+    if ((@dnsbl) && (defined($::dnsbl->{query}->{$chk->{content}}->{response}->{$strip}))) {
+      $::lastlookup=$::dnsbl->{query}->{$chk->{content}}->{response}->{$strip}->{content};
+      # lol really icky hax
+      return 1;
+    }
   }
   return 0;
 }
