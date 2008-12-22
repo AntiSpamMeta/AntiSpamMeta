@@ -16,8 +16,8 @@
   <person id="richih" flags="hodat" host="freenode/staff/richih" />
   <person id="seanw" flags="hodat" host="freenode/staff-emeritus/wikimedia.sean-whitton" />
   <person id="st47" flags="someguythatfiddleswiththebot" host="IDENTIFY" />
-  <person id="thehelpfulone" flags="ht" host="wikimedia/Thehelpfulone" />
-  <person id="tho|away" flags="ht" host="IDENTIFY" />
+  <person id="thehelpfulone" flags="oath" host="wikimedia/Thehelpfulone" />
+  <person id="tho|away" flags="oath" host="IDENTIFY" />
   <person id="tomaw" flags="hodat" host="freenode/staff/tomaw" />
   <person id="troubled" flags="hodat" host="IDENTIFY" />
   <person id="vorian" flags="hodat" host="freenode/staff/vorian" />
