@@ -1,33 +1,27 @@
 <people>
   <person id="afterdeath" flags="hodat" host="IDENTIFY" />
-  <person id="alindeman" flags="hodat" host="freenode/staff/alindeman" />
-  <person id="andrewb" flags="ha" host="freenode/helper/ubuntu.member.AndrewB" />
-  <person id="animum" />
-  <person id="cchan" flags="hodat" host="IDENTIFY" />
+  <person id="alindeman" flags="hodat" host="freenode/senior-staff-emeritus/alindeman" />
+  <person id="danielb" flags="h" host="IDENTIFY" />
   <person id="dave2" flags="hodat" host="freenode/staff/dave2" />
   <person id="denny" flags="ha" host="freenode/staff/denny" />
-  <person id="dlange" host="freenode/staff/dlange" />
+  <person id="dlange" flags="hodat" host="freenode/staff/dlange" />
   <person id="dmcdevit" flags="hoat" host="IDENTIFY" />
   <person id="errantego" flags="t" host="unaffiliated/errantego" />
-  <person id="filiated" flags="hodat" host="IDENTIFY" />
   <person id="gary" flags="hoa" host="freenode/staff/colchester-lug.gary" />
-  <person id="jonathand" host="freenode/helper/JonathanD" />
-  <person id="karlprof" flags="ha" host="freenode/helper/pdpc.student.karlprof" />
-  <person id="kloeri" flags="oah" host="freenode/staff/kloeri" />
-  <person id="mark_ryan" flags="hot" host="wikimedia/mark" />
-  <person id="monobi" flags="h" host="IDENTIFY" />
-  <person id="ompaul" flags="ha" host="freenode/staff/gnewsense.ompaul" />
-  <person id="philkc" flags="hodat" host="freenode/staff/philkc" />
+  <person id="gdonato" flags="oath" host="IDENTIFY" />
+  <person id="jonathand" flags="hodat" host="freenode/staff/jonathand" />
+  <person id="martinp23" flags="oath" host="IDENTIFY" />
+  <person id="pctony" />
   <person id="pricechild" host="freenode/staff/ubuntu.member.pricechild" />
   <person id="richih" flags="hodat" host="freenode/staff/richih" />
-  <person id="sean_william" flags="ha" host="IDENTIFY" />
-  <person id="seanw" flags="hodat" host="freenode/staff/wikimedia.sean-whitton" />
-  <person id="slowking_man" flags="hot" host="IDENTIFY" />
-  <person id="st47" flags="hodat" host="IDENTIFY" />
+  <person id="seanw" flags="hodat" host="freenode/staff-emeritus/wikimedia.sean-whitton" />
+  <person id="st47" flags="someguythatfiddleswiththebot" host="IDENTIFY" />
+  <person id="thehelpfulone" flags="ht" host="wikimedia/Thehelpfulone" />
+  <person id="tho|away" flags="ht" host="IDENTIFY" />
   <person id="tomaw" flags="hodat" host="freenode/staff/tomaw" />
-  <person id="troubled" flags="hoat" host="pdpc/supporter/sustaining/troubled" />
-  <person id="vorian" host="freenode/staff/ubuntu.member.vorian" />
+  <person id="troubled" flags="hodat" host="IDENTIFY" />
+  <person id="vorian" flags="hodat" host="freenode/staff/vorian" />
+  <person id="werdan7" flags="oat" host="IDENTIFY" />
   <person id="wildpikachu" flags="hodat" host="about/linux/staff/wildpikachu" />
-  <person id="wimt" flags="hoat" host="IDENTIFY" />
-  <person id="zofrex" host="freenode/helper/zofrex" />
+  <person id="wimt" flags="hodat" host="IDENTIFY" />
 </people>

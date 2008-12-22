@@ -19,9 +19,12 @@ sub command
   my $cmd = $args;
   my $d1;
   my $nick = lc $event->{nick};
-  return 0 unless (ASM::Util->speak($event->{to}->[0]));
+#  return 0 unless (ASM::Util->speak($event->{to}->[0]));
   foreach my $command ( @{$::commands->{command}} )
   {
+    unless (ASM::Util->speak($event->{to}->[0])) {
+      next unless (defined($command->{nohush}) && ($command->{nohush} eq "nohush"));
+    }
     if (defined($command->{flag})) {
       next unless defined($::users->{person}->{$nick});
       next unless defined($::users->{person}->{$nick}->{flags});

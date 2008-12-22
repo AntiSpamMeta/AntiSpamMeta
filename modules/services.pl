@@ -14,11 +14,11 @@ sub doServices {
   if ($event->{from} eq 'NickServ!NickServ@services.')
   {
     print "NickServ: $event->{args}->[0]\n";
-    if ( $event->{args}->[0] eq 'This nickname is owned by someone else' )
+    if ( $event->{args}->[0] eq 'This nickname is registered' )
     {
       $conn->privmsg( 'NickServ', "identify $::settings->{pass}" );
     }
-    elsif ( $event->{args}->[0] eq 'Password accepted - you are now recognized' )
+    elsif ( $event->{args}->[0] =~ /^You are now identified/ )
     {
       $conn->join($_) foreach ( @{$::settings->{autojoins}} );
     }

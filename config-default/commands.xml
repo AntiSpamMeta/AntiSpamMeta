@@ -41,7 +41,7 @@
     $conn->privmsg($event->{to}->[0], "Hiya $nick");
   ]]>
   </command>
-  <command cmd="^;user flags (\S+)(?: (\S+))?$" flag="d">
+  <command cmd="^;user flags (\S+) ?(?: (\S+))?$" flag="d">
   <![CDATA[
     my $nick = lc $1;
     my $flags = $2;
@@ -89,7 +89,7 @@
   <command cmd="^;target (\S+) (\S+) ?(\S*)$" flag="a">
   <![CDATA[
     my $chan = $1;
-    my $nick = $2;
+    my $nick = lc $2;
     my $level= $3;
     my $link = ASM::Util->getLink(lc $chan);
     if ( lc $link ne lc $chan ) {
@@ -253,7 +253,7 @@
     $conn->privmsg($event->{to}->[0], $x . " exempted");
   ]]>
   </command>
-  <command cmd="^\!ops ?(#\S+)? ?(.*)">
+  <command cmd="^\!ops ?(#\S+)? ?(.*)" nohush="nohush">
   <![CDATA[
     my $tgt = $event->{to}->[0];
     $tgt = $1 if (defined($1));
