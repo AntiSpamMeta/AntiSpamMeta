@@ -327,7 +327,7 @@
     <event id="blacklist" action="none" class="strbl" reason="sending message containing blacklisted content" risk="low" time="0" type="public">blah</event>
     <event id="ctcp-dcc" action="ban" class="re" reason="ctcp-dcc" risk="high" time="0" type="cdcc">.*</event>
     <event id="ctcp-ping" action="none" class="re" reason="channel-wide CTCP PING" risk="medium" time="0" type="cping">.*</event>
-    <event id="ctcp-version" action="none" class="re" reason="channel-wide CTCP VERSION" risk="medium" time="0" type="cping">.*</event>
+    <event id="ctcp-version" action="none" class="re" reason="channel-wide CTCP VERSION" risk="medium" time="0" type="cversion">.*</event>
     <event id="dcc" action="ban" class="re" override="dcc-medium" reason="using the DC.C SE.ND exploit" risk="high" time="0" type="public">^DCC (SEND|S?CHAT) |\bDCC (SEND|S?CHAT) &quot;?[A-Za-z0-9]+&quot;? \d+ \d+ \d+</event>
     <event id="dcc-medium" action="ban" class="re" reason="using the DC.C SE.ND exploit" risk="medium" time="0" type="public">DCC SEND </event>
     <event id="dcc-part" action="ban" class="re" reason="using the DC.C SE.ND exploit in a part message" risk="high" time="0" type="part">DCC SEND </event>
