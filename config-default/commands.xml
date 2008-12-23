@@ -153,6 +153,11 @@
     my $nick = $2;
     my $level= $3;
     if ($level eq '') { $level = 'low'; }
+    $level = lc $level;
+    if ($level !~ /^(disable|debug|low|medium|high|opalert)$/) {
+      $conn->privmsg($event->{to}->[0], "Error: I don't recognize $level as a valid level.");
+      return;
+    }
     my $link = ASM::Util->getLink(lc $chan);
     if ( lc $link ne lc $chan ) {
       $conn->privmsg($event->{to}->[0], "Error: $chan is linked to $link - use $link instead.");

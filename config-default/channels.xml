@@ -3,8 +3,16 @@
     <hilights></hilights>
   </channel>
   <channel id="##asb-nexus" op="when">
-    <hilights></hilights>
+    <hilights>
+    </hilights>
     <msgs></msgs>
+  </channel>
+  <channel id="##asb-test" op="no">
+    <hilights></hilights>
+    <msgs>
+      <debug>##asb-test</debug>
+      <disable>##asb-nexus</disable>
+    </msgs>
   </channel>
   <channel id="##asb-testing" op="when" silence="yes">
     <hilights>
@@ -76,8 +84,9 @@
     <msgs></msgs>
   </channel>
   <channel id="##windows" op="no">
-    <hilights none="ST47">
+    <hilights>
       <disable>ST47</disable>
+      <disable>Thehelpfulone</disable>
       <info>njan</info>
       <low>numist</low>
       <low>quux</low>
@@ -147,6 +156,7 @@
       <high>DLange</high>
       <high>RichiH</high>
     </hilights>
+    <msgs></msgs>
   </channel>
   <channel id="#mediawiki" op="no" silence="yes">
     <hilights>
@@ -172,6 +182,7 @@
       <debug>Martinp23</debug>
       <debug>Warpath</debug>
       <debug>Rjd0060</debug>
+      <debug>AfterDeath</debug>
       <low>Majorly</low>
       <low>Fabexplosive</low>
     </hilights>
@@ -189,25 +200,20 @@
       <debug>#wikimedia-ops</debug>
     </msgs>
   </channel>
-  <channel id="#wikimedia-commons-social" op="no" silence="yes">
-    <hilights>
-      <low>Lcarsdata</low>
-    </hilights>
-    <msgs>
-      <debug>#wikimedia-ops</debug>
-    </msgs>
-  </channel>
   <channel id="#wikimedia-ops" op="no">
     <hilights>
       <debug>Cbrown1023</debug>
     </hilights>
     <msgs>
-      <debug>##wikimedia-ops</debug>
+      <debug>#wikimedia-ops</debug>
+      <low>#wikimedia-ops</low>
     </msgs>
   </channel>
   <channel id="#wikimedia-tech" op="no" silence="yes">
     <hilights></hilights>
-    <msgs></msgs>
+    <msgs>
+      <low>#wikimedia-ops</low>
+    </msgs>
   </channel>
   <channel id="#wikipedia" op="no" silence="yes">
     <hilights>
