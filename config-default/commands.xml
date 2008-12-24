@@ -241,6 +241,15 @@
   <command cmd="^;rehash$" flag="a">
   <![CDATA[
     ASM::XML->readXML();
+    my @strbl = io('string_blacklist.txt')->getlines;
+    chomp @strbl;
+    @::string_blacklist = @strbl;
+    my @eline=io('exempt.txt')->getlines;
+    chomp @eline;
+    %::eline = ();
+    foreach my $item (@eline) {
+	$::eline{lc $item} = 1;
+    }
     $conn->privmsg($event->{to}->[0], 'config files were re-read');
   ]]>
   </command>
@@ -270,16 +279,6 @@
     $msg = $2 if defined($2);
     my $hilite=ASM::Util->commaAndify(ASM::Util->getAlert($tgt, 'opalert', 'hilights'));
     $conn->privmsg($_, "[\x02$tgt\x02] - $event->{nick} wants op attention ($msg) $hilite") foreach ASM::Util->getAlert($tgt, 'opalert', 'msgs');
-  ]]>
-  </command>
-  <command cmd="^;re(load|hash) exempts" flag="a">
-  <![CDATA[
-    @eline=io('exempt.txt')->getlines;
-    chomp @eline;
-    %::eline = ();
-    foreach my $item (@eline) {
-	$::eline{lc $item} = 1;
-    }
   ]]>
   </command>
   <command cmd="^;blacklist (.*)" flag="o">
