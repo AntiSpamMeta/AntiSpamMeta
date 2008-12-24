@@ -1,32 +1,16 @@
 <channels>
-  <channel id="##Thehelpfulone" op="no" />
+  <channel id="##Thehelpfulone" op="no">
+    <hilights>
+      <disable>thehelpfulone</disable>
+      <low>PeterSymonds</low>
+    </hilights>
+  </channel>
   <channel id="##asb-meta" link="##asb-testing">
     <hilights></hilights>
   </channel>
   <channel id="##asb-nexus" op="when">
     <hilights></hilights>
     <msgs></msgs>
-  </channel>
-  <channel id="##asb-test" op="no">
-    <hilights></hilights>
-    <msgs>
-      <debug>##asb-test</debug>
-      <disable>##asb-nexus</disable>
-    </msgs>
-  </channel>
-  <channel id="##asb-testing" op="when" silence="yes">
-    <hilights>
-      <disable>ST47</disable>
-      <disable>alindeman</disable>
-      <disable>seanw</disable>
-      <low>a</low>
-      <low>b</low>
-      <low>c</low>
-      <low>d</low>
-    </hilights>
-    <msgs>
-      <debug>##asb-testing</debug>
-    </msgs>
   </channel>
   <channel id="##c++" op="no">
     <hilights>
@@ -78,9 +62,6 @@
       <debug>##thehelpfulone</debug>
       <disable>##asb-nexus</disable>
     </msgs>
-  </channel>
-  <channel id="##tomaw" op="no">
-    <hilights></hilights>
   </channel>
   <channel id="##wikimedia-ops" op="no">
     <hilights></hilights>
@@ -155,6 +136,7 @@
   </channel>
   <channel id="#lisp" op="no">
     <hilights>
+      <disable>Thehelpfulone</disable>
       <high>tomaw</high>
       <high>DLange</high>
       <high>RichiH</high>
@@ -298,6 +280,7 @@
       <debug>Thehelpfulone</debug>
       <debug>NotASpy</debug>
       <debug>|X|</debug>
+      <debug>PeterSymonds</debug>
     </hilights>
     <msgs>
       <debug>#wikimedia-ops</debug>
