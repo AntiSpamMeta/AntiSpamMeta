@@ -1,10 +1,10 @@
 <channels>
+  <channel id="##Thehelpfulone" op="no" />
   <channel id="##asb-meta" link="##asb-testing">
     <hilights></hilights>
   </channel>
   <channel id="##asb-nexus" op="when">
-    <hilights>
-    </hilights>
+    <hilights></hilights>
     <msgs></msgs>
   </channel>
   <channel id="##asb-test" op="no">
@@ -71,7 +71,9 @@
     </msgs>
   </channel>
   <channel id="##thehelpfulone" op="no">
-    <hilights></hilights>
+    <hilights>
+      <debug>thehelpfulone</debug>
+    </hilights>
     <msgs>
       <debug>##thehelpfulone</debug>
       <disable>##asb-nexus</disable>
@@ -81,6 +83,7 @@
     <hilights></hilights>
   </channel>
   <channel id="##wikimedia-ops" op="no">
+    <hilights></hilights>
     <msgs></msgs>
   </channel>
   <channel id="##windows" op="no">
@@ -161,6 +164,7 @@
   <channel id="#mediawiki" op="no" silence="yes">
     <hilights>
       <debug>flyingparchment</debug>
+      <debug>WaRpAtH</debug>
       <disable>seanw</disable>
       <disable>ST47</disable>
     </hilights>
@@ -206,7 +210,6 @@
     </hilights>
     <msgs>
       <debug>#wikimedia-ops</debug>
-      <low>#wikimedia-ops</low>
     </msgs>
   </channel>
   <channel id="#wikimedia-tech" op="no" silence="yes">

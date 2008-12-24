@@ -31,7 +31,7 @@
     $conn->privmsg($event->{to}->[0], "$result results found.");
   ]]>
   </command>
-  <command cmd="^;user add (\S+) ?(\S*)$" flag="d">
+  <command cmd="^;user add (\S+) ?(\S*)$" flag="a">
   <![CDATA[
     my $nick = lc $1;
     my $host = $2;
@@ -41,10 +41,14 @@
     $conn->privmsg($event->{to}->[0], "Hiya $nick");
   ]]>
   </command>
-  <command cmd="^;user flags (\S+) ?(?: (\S+))?$" flag="d">
+  <command cmd="^;user flags (\S+) ?(?: (\S+))?$" flag="a">
   <![CDATA[
     my $nick = lc $1;
     my $flags = $2;
+    if ($flags =~ /d/) {
+      $conn->privmsg($event->{to}->[0], "The d flag may not be assigned over IRC. Edit the configuration manually.");
+      return;
+    }
     if ((!defined($flags)) || ($flags eq '')) {
       if (defined($::users->{person}->{$nick}->{flags})) {
         $conn->privmsg($event->{to}->[0], "Flags for $nick: $::users->{person}->{$nick}->{flags}");
@@ -59,7 +63,7 @@
     }
   ]]>
   </command>
-  <command cmd="^;user del (\S+)$" flag="d">
+  <command cmd="^;user del (\S+)$" flag="a">
   <![CDATA[
     my $nick = lc $1;
     delete($::users->{person}->{$nick});
