@@ -10,12 +10,14 @@
   <person id="gdonato" flags="oth" host="wikimedia/GDonato" />
   <person id="jonathand" flags="oath" host="freenode/staff/jonathand" />
   <person id="martinp23" flags="oath" host="freenode/staff/wikimedia.martinp23" />
+  <person id="petersymonds" flags="th" host="wikipedia/PeterSymonds" />
   <person id="pricechild" flags="oath" host="freenode/staff/ubuntu.member.pricechild" />
   <person id="richih" flags="oath" host="freenode/staff/richih" />
   <person id="seanw" flags="oath" host="freenode/staff-emeritus/wikimedia.sean-whitton" />
   <person id="st47" flags="oath" host="wikipedia/st47" />
   <person id="thehelpfulone" flags="oath" host="wikimedia/Thehelpfulone" />
   <person id="tho|away" flags="oath" host="wikimedia/Thehelpfulone" />
+  <person id="tho|busy" flags="hoat" host="wikimedia/Thehelpfulone" />
   <person id="tomaw" flags="oathd" host="freenode/staff/tomaw" />
   <person id="troubled" flags="oath" host="unaffiliated/troubled" />
   <person id="vorian" flags="oath" host="freenode/staff/vorian" />
