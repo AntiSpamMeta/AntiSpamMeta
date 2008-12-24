@@ -41,7 +41,17 @@
     $conn->privmsg($event->{to}->[0], "Hiya $nick");
   ]]>
   </command>
-  <command cmd="^;user flags (\S+) ?(?: (\S+))?$" flag="a">
+  <command cmd="^;user flags (\S+) ?$">
+  <![CDATA[
+    my $nick = lc $1;
+    if (defined($::users->{person}->{$nick}->{flags})) {
+      $conn->privmsg($event->{to}->[0], "Flags for $nick: $::users->{person}->{$nick}->{flags}");
+    } else {
+      $conn->privmsg($event->{to}->[0], "$nick has no flags");
+    }
+  ]]>
+  </command>
+  <command cmd="^;user flags (\S+) (\S+)$" flag="a">
   <![CDATA[
     my $nick = lc $1;
     my $flags = $2;
@@ -49,18 +59,9 @@
       $conn->privmsg($event->{to}->[0], "The d flag may not be assigned over IRC. Edit the configuration manually.");
       return;
     }
-    if ((!defined($flags)) || ($flags eq '')) {
-      if (defined($::users->{person}->{$nick}->{flags})) {
-        $conn->privmsg($event->{to}->[0], "Flags for $nick: $::users->{person}->{$nick}->{flags}");
-      } else {
-        $conn->privmsg($event->{to}->[0], "$nick has no flags");
-      }
-#      delete($::users->{person}->{$nick}->{flags});
-    } else {
-      $::users->{person}->{$nick}->{flags} = $flags;
-      ASM::XML->writeUsers();
-      $conn->privmsg($event->{to}->[0], "Flags for $nick set to $flags");
-    }
+    $::users->{person}->{$nick}->{flags} = $flags;
+    ASM::XML->writeUsers();
+    $conn->privmsg($event->{to}->[0], "Flags for $nick set to $flags");
   ]]>
   </command>
   <command cmd="^;user del (\S+)$" flag="a">
