@@ -87,6 +87,7 @@
     </hilights>
     <msgs></msgs>
   </channel>
+  <channel id="#ST47" op="no" />
   <channel id="#apache" op="no">
     <hilights>
       <low>pctony</low>
@@ -106,7 +107,6 @@
       <debug>Martinp23</debug>
       <debug>SeJo</debug>
       <debug>pctony</debug>
-      <disable>ST47</disable>
       <info>njan</info>
       <info>AndrewB</info>
       <low>denny</low>
@@ -154,6 +154,17 @@
       <debug>#wikimedia-ops</debug>
     </msgs>
   </channel>
+  <channel id="#st47">
+    <hilights>
+      <debug>Randomuser</debug>
+      <high>Randomuser</high>
+      <low>Randomuser</low>
+    </hilights>
+    <msgs>
+      <debug>#st47</debug>
+      <low>#st47</low>
+    </msgs>
+  </channel>
   <channel id="#ubuntu" op="no" silence="yes">
     <hilights>
       <disable>ST47</disable>
@@ -194,6 +205,7 @@
       <debug>#wikimedia-ops</debug>
     </msgs>
   </channel>
+  <channel id="#wikimedia-overflow" />
   <channel id="#wikimedia-tech" op="no" silence="yes">
     <hilights></hilights>
     <msgs>
@@ -203,37 +215,36 @@
   <channel id="#wikipedia" op="no" silence="yes">
     <hilights>
       <debug>cbrown1023</debug>
-      <debug>bumm13_</debug>
-      <debug>Cyrius</debug>
-      <debug>Cyrius</debug>
-      <debug>DanielB</debug>
-      <debug>Dmcdevit</debug>
       <debug>TheLetterE</debug>
-      <debug>Fabexplosive</debug>
-      <debug>FastLizard4</debug>
       <debug>Golbez</debug>
-      <debug>James_F</debug>
-      <debug>JohnReaves</debug>
-      <debug>Krimpet</debug>
-      <debug>Lucifer_Cat</debug>
-      <debug>Luna-San</debug>
-      <debug>Uberpenguin</debug>
       <debug>Mbimmler</debug>
-      <debug>Mike42</debug>
-      <debug>Mike_H</debug>
-      <debug>nixeagle</debug>
       <debug>Prodego</debug>
-      <debug>quanticle</debug>
-      <debug>Ceiling_Cat</debug>
       <debug>Rjd0060</debug>
-      <debug>seanw</debug>
-      <debug>skenmy</debug>
       <debug>Snowolf</debug>
-      <debug>ST47</debug>
-      <debug>tawker</debug>
       <debug>Thehelpfulone</debug>
       <debug>werdan7</debug>
       <debug>wimt</debug>
+      <low>bumm13_</low>
+      <low>Cyrius</low>
+      <low>DanielB</low>
+      <low>Dmcdevit</low>
+      <low>Fabexplosive</low>
+      <low>FastLizard4</low>
+      <low>James_F</low>
+      <low>JohnReaves</low>
+      <low>Krimpet</low>
+      <low>Lucifer_Cat</low>
+      <low>Luna-San</low>
+      <low>Uberpenguin</low>
+      <low>Mike42</low>
+      <low>Mike_H</low>
+      <low>nixeagle</low>
+      <low>quanticle</low>
+      <low>Ceiling_Cat</low>
+      <low>seanw</low>
+      <low>skenmy</low>
+      <low>ST47</low>
+      <low>tawker</low>
     </hilights>
     <msgs>
       <debug>#wikimedia-ops</debug>
@@ -249,38 +260,38 @@
   </channel>
   <channel id="#wikipedia-en" op="no" silence="yes">
     <hilights>
-      <debug>agkwiki</debug>
       <debug>animum</debug>
-      <debug>bumm13</debug>
-      <debug>Cbrown1023</debug>
-      <debug>Cobi</debug>
-      <debug>DanielB</debug>
-      <debug>Dmcdevit</debug>
-      <debug>TheLetterE</debug>
-      <debug>Golbez</debug>
-      <debug>James_F</debug>
-      <debug>JohnReaves</debug>
-      <debug>KFP</debug>
       <debug>Kmccoy</debug>
-      <debug>Krimpet</debug>
-      <debug>Luna-Santin</debug>
-      <debug>Mike42</debug>
-      <debug>Rudha-an</debug>
-      <debug>nixeagle</debug>
       <debug>Prodego</debug>
-      <debug>Not_the_NSA</debug>
       <debug>Rjd0060</debug>
-      <debug>seanw</debug>
-      <debug>smoddy</debug>
       <debug>Snowolf</debug>
-      <debug>Tawker</debug>
       <debug>Werdan7</debug>
       <debug>wimt</debug>
-      <debug>Ryanpostlethwait</debug>
       <debug>Thehelpfulone</debug>
-      <debug>NotASpy</debug>
-      <debug>|X|</debug>
       <debug>PeterSymonds</debug>
+      <high>Rudha-an</high>
+      <low>agkwiki</low>
+      <low>bumm13</low>
+      <low>Cobi</low>
+      <low>Cbrown1023</low>
+      <low>DanielB</low>
+      <low>Dmcdevit</low>
+      <low>TheLetterE</low>
+      <low>Golbez</low>
+      <low>James_F</low>
+      <low>JohnReaves</low>
+      <low>KFP</low>
+      <low>Krimpet</low>
+      <low>Luna-Santin</low>
+      <low>Mike42</low>
+      <low>nixeagle</low>
+      <low>Not_the_NSA</low>
+      <low>seanw</low>
+      <low>smoddy</low>
+      <low>Tawker</low>
+      <low>Ryanpostlethwait</low>
+      <low>NotASpy</low>
+      <low>|X|</low>
     </hilights>
     <msgs>
       <debug>#wikimedia-ops</debug>
@@ -348,6 +359,7 @@
       <debug>pctony</debug>
       <debug>SeJo</debug>
       <debug>Thehelpfulone</debug>
+      <debug>ST47</debug>
       <medium>dave2</medium>
       <medium>RichiH</medium>
       <medium>troubled</medium>
