@@ -37,6 +37,7 @@ sub inspect {
 #    %aonx = (%monx, %conx);
     foreach $id (keys %aonx) {
       next unless ( grep { $event->{type} eq $_ } split(/[,:; ]+/, $aonx{$id}{type}) );
+      next if ($aonx{$id}{class} eq 'dnsbl') && ($event->{host} =~ /(fastwebnet\.it|fastres\.net)$/); #this is a bad hack
       $dct{$id} = $aonx{$id} if $::classes->check($aonx{$id}{class}, $aonx{$id}, $id, $event, $chan, $rev);
     }
   }
