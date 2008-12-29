@@ -9,7 +9,10 @@
   <person id="gary" flags="oath" host="freenode/staff/colchester-lug.gary" />
   <person id="gdonato" flags="oth" host="wikimedia/GDonato" />
   <person id="jonathand" flags="oath" host="freenode/staff/jonathand" />
+  <person id="mark_ryan" flags="oht" host="wikipedia/Mark" />
   <person id="martinp23" flags="oath" host="freenode/staff/wikimedia.martinp23" />
+  <person id="njan" flags="oath" host="freenode/staff/njan" />
+  <person id="not_the_nsa" flags="t" host="wikipedia/R" />
   <person id="petersymonds" flags="th" host="wikipedia/PeterSymonds" />
   <person id="pricechild" flags="oath" host="freenode/staff/ubuntu.member.pricechild" />
   <person id="richih" flags="oath" host="freenode/staff/richih" />
@@ -17,10 +20,11 @@
   <person id="st47" flags="oath" host="wikipedia/st47" />
   <person id="thehelpfulone" flags="oath" host="wikimedia/Thehelpfulone" />
   <person id="tho|away" flags="oath" host="wikimedia/Thehelpfulone" />
-  <person id="tho|busy" flags="hoat" host="wikimedia/Thehelpfulone" />
+  <person id="tho|busy" flags="oath" host="wikimedia/Thehelpfulone" />
   <person id="tomaw" flags="oathd" host="freenode/staff/tomaw" />
   <person id="troubled" flags="oath" host="unaffiliated/troubled" />
   <person id="vorian" flags="oath" host="freenode/staff/vorian" />
+  <person id="warpath" />
   <person id="werdan7" flags="oath" host="freenode/staff/wikimedia.werdan7" />
   <person id="wildpikachu" flags="oath" host="about/linux/staff/wildpikachu" />
   <person id="wimt" flags="oath" host="freenode/staff/wikipedia.wimt" />
