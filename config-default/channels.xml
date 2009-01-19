@@ -1,7 +1,6 @@
 <channels>
   <channel id="##Thehelpfulone" op="no">
     <hilights>
-      <disable>thehelpfulone</disable>
       <low>PeterSymonds</low>
     </hilights>
   </channel>
@@ -12,13 +11,13 @@
     <hilights></hilights>
     <msgs></msgs>
   </channel>
-  <channel id="##c++" op="no">
+  <channel id="##c++" op="no" silence="yes">
     <hilights>
       <debug>tomaw</debug>
     </hilights>
     <msgs></msgs>
   </channel>
-  <channel id="##linux" op="no">
+  <channel id="##linux" op="no" silence="yes">
     <hilights>
       <disable>ST47</disable>
       <low>nalioth</low>
@@ -54,6 +53,10 @@
       <opalert>##linux-ops</opalert>
     </msgs>
   </channel>
+  <channel id="##petersymonds" op="no">
+    <hilights></hilights>
+    <msgs></msgs>
+  </channel>
   <channel id="##thehelpfulone" op="no">
     <hilights>
       <debug>thehelpfulone</debug>
@@ -67,7 +70,7 @@
     <hilights></hilights>
     <msgs></msgs>
   </channel>
-  <channel id="##windows" op="no">
+  <channel id="##windows" op="no" silence="yes">
     <hilights>
       <disable>ST47</disable>
       <disable>Thehelpfulone</disable>
@@ -87,17 +90,20 @@
     </hilights>
     <msgs></msgs>
   </channel>
-  <channel id="#ST47" op="no" />
-  <channel id="#apache" op="no">
+  <channel id="#ST47" op="no">
+    <hilights></hilights>
+  </channel>
+  <channel id="#apache" op="no" silence="yes">
     <hilights>
       <low>pctony</low>
     </hilights>
+    <msgs></msgs>
   </channel>
-  <channel id="#debian" op="no">
+  <channel id="#debian" op="no" silence="yes">
     <hilights></hilights>
     <msgs></msgs>
   </channel>
-  <channel id="#defocus" link="#freenode">
+  <channel id="#defocus" link="#freenode" silence="yes">
     <hilights></hilights>
   </channel>
   <channel id="#freenode" op="no" silence="yes">
@@ -127,14 +133,19 @@
     <hilights></hilights>
     <msgs></msgs>
   </channel>
+  <channel id="#freenode-newyears" link="#freenode">
+    <hilights>
+      <debug>Thehelpfulone</debug>
+    </hilights>
+  </channel>
   <channel id="#gentoo" op="no" silence="yes">
     <hilights>
-      <high>NeddySeagoon</high>
+      <debug>NeddySeagoon</debug>
       <medium>tomaw</medium>
     </hilights>
     <msgs></msgs>
   </channel>
-  <channel id="#lisp" op="no">
+  <channel id="#lisp" op="no" silence="yes">
     <hilights>
       <disable>Thehelpfulone</disable>
       <high>tomaw</high>
@@ -180,6 +191,7 @@
       <debug>Warpath</debug>
       <debug>Rjd0060</debug>
       <debug>AfterDeath</debug>
+      <debug>theoneandonly</debug>
       <low>Majorly</low>
       <low>Fabexplosive</low>
     </hilights>
@@ -192,6 +204,7 @@
       <debug>White_cat</debug>
       <debug>Majorly</debug>
       <debug>Rjd0060</debug>
+      <debug>theoneandonly</debug>
     </hilights>
     <msgs>
       <debug>#wikimedia-ops</debug>
@@ -200,14 +213,30 @@
   <channel id="#wikimedia-ops" op="no">
     <hilights>
       <debug>Cbrown1023</debug>
+      <debug>Thehelpfulone</debug>
     </hilights>
     <msgs>
       <debug>#wikimedia-ops</debug>
     </msgs>
   </channel>
-  <channel id="#wikimedia-overflow" />
+  <channel id="#wikimedia-ops-internal">
+    <hilights>
+      <debug>Thehelpfulone</debug>
+    </hilights>
+  </channel>
+  <channel id="#wikimedia-overflow">
+    <hilights>
+      <debug>theoneandonly</debug>
+      <debug>Thehelpfulone</debug>
+    </hilights>
+    <msgs>
+      <debug>#wikimedia-ops</debug>
+    </msgs>
+  </channel>
   <channel id="#wikimedia-tech" op="no" silence="yes">
-    <hilights></hilights>
+    <hilights>
+      <debug>theoneandonly</debug>
+    </hilights>
     <msgs>
       <low>#wikimedia-ops</low>
     </msgs>
@@ -215,7 +244,6 @@
   <channel id="#wikipedia" op="no" silence="yes">
     <hilights>
       <debug>cbrown1023</debug>
-      <debug>TheLetterE</debug>
       <debug>Golbez</debug>
       <debug>Mbimmler</debug>
       <debug>Prodego</debug>
@@ -224,6 +252,7 @@
       <debug>Thehelpfulone</debug>
       <debug>werdan7</debug>
       <debug>wimt</debug>
+      <debug>theoneandonly</debug>
       <low>bumm13_</low>
       <low>Cyrius</low>
       <low>DanielB</low>
@@ -269,6 +298,8 @@
       <debug>wimt</debug>
       <debug>Thehelpfulone</debug>
       <debug>PeterSymonds</debug>
+      <debug>theoneandonly</debug>
+      <debug>Not_the_NSA</debug>
       <high>Rudha-an</high>
       <low>agkwiki</low>
       <low>bumm13</low>
@@ -276,7 +307,6 @@
       <low>Cbrown1023</low>
       <low>DanielB</low>
       <low>Dmcdevit</low>
-      <low>TheLetterE</low>
       <low>Golbez</low>
       <low>James_F</low>
       <low>JohnReaves</low>
@@ -285,7 +315,6 @@
       <low>Luna-Santin</low>
       <low>Mike42</low>
       <low>nixeagle</low>
-      <low>Not_the_NSA</low>
       <low>seanw</low>
       <low>smoddy</low>
       <low>Tawker</low>
@@ -299,25 +328,40 @@
   </channel>
   <channel id="#wikipedia-en-help" op="no" silence="yes">
     <hilights>
-      <debug>TheLetterE</debug>
       <debug>werdan7</debug>
       <debug>GDonato</debug>
-      <debug>TheLetterE</debug>
       <debug>Cometstyles</debug>
       <debug>Thehelpfulone</debug>
+      <debug>theoneandonly</debug>
+      <debug>Mike42</debug>
+      <debug>bjelleklang</debug>
+      <debug>centrx</debug>
+      <debug>nixeagle</debug>
+      <debug>JohnReaves</debug>
+      <debug>After-Midnight</debug>
+      <debug>Srikeit</debug>
+      <debug>Deon555</debug>
+      <debug>Luna-San</debug>
+      <debug>FrancoGG</debug>
+      <debug>Cremepuff222</debug>
+      <debug>KFP</debug>
+      <debug>Golbez</debug>
+      <debug>stwalkerster</debug>
+      <debug>PeterSymonds</debug>
+      <debug>Hersfold</debug>
     </hilights>
     <msgs>
       <debug>#wikimedia-ops</debug>
     </msgs>
   </channel>
   <channel id="#wikipedia-social" op="no" silence="yes">
-    <hilights>
-      <debug>Golbez</debug>
-      <debug>TheLetterE</debug>
-    </hilights>
+    <hilights></hilights>
     <msgs>
       <low>#wikimedia-ops</low>
     </msgs>
+  </channel>
+  <channel id="antispammeta">
+    <hilights></hilights>
   </channel>
   <channel id="default" op="no">
     <event id="flood-15to45" action="none" class="floodqueue" reason="flooding 15 to 45" risk="low" time="0" type="public">15:45</event>
@@ -336,6 +380,7 @@
     <event id="dcc-part" action="ban" class="re" reason="using the DC.C SE.ND exploit in a part message" risk="high" time="0" type="part">DCC SEND </event>
     <event id="dcc-topic" action="ban" class="re" reason="setting a bad topic" risk="medium" time="0" type="topic">\bDCC SEND </event>
     <event id="ddos_countdown" action="none" class="re" reason="doing the ddos countdown thing" risk="medium" time="0" type="public">^... DDOS COUNTDOWN.*</event>
+    <event id="donatespam1" action="none" class="re" override="notice" reason="freenode.donations@gmail.com spammer" risk="high" time="0" type="public,notice">freenode.donations@gmail.com</event>
     <event id="dronebl" action="none" class="dnsbl" reason="host $evhost is in dnsbl.dronebl.org ( $mylastreason )" risk="info" time="0" type="join">dnsbl.dronebl.org</event>
     <event id="efnetbl" action="none" class="dnsbl" reason="host $evhost is in rbl.efnetrbl.org ( $mylastreason ) " risk="info" time="0" type="join">rbl.efnetrbl.org</event>
     <event id="genspam1" action="none" class="re" reason="generic spamming" risk="debug" time="0" type="public">([^ ]{4,} +)\1{5,}</event>
@@ -358,11 +403,11 @@
       <debug>ST47</debug>
       <debug>pctony</debug>
       <debug>SeJo</debug>
-      <debug>Thehelpfulone</debug>
       <debug>ST47</debug>
       <medium>dave2</medium>
       <medium>RichiH</medium>
       <medium>troubled</medium>
+      <medium>Thehelpfulone</medium>
     </hilights>
     <msgs>
       <debug>##asb-nexus</debug>
