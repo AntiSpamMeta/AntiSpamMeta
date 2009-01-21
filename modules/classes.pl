@@ -82,15 +82,13 @@ sub dnsbl
     my $strip;
     if (@dnsbl) {
       $strip = sprintf("%s.%s.%s.%s", @dnsbl);
-      print "found host (rev $rev) in $chk->{content} - $strip\n";
+      print "found host (rev $rev) in $chk->{content} - $strip\n" unless ($strip eq '216.234.246.150');
     }
     if ((@dnsbl) && (defined($::dnsbl->{query}->{$chk->{content}}->{response}->{$strip}))) {
       $::lastlookup=$::dnsbl->{query}->{$chk->{content}}->{response}->{$strip}->{content};
       print "chk->content: $chk->{content}\n";
       print "strip: $strip\n";
       print "result: " . $::dnsbl->{query}->{$chk->{content}}->{response}->{$strip}->{content} . "\n";
-      print "just part of that: ";
-      print Dumper( $::dnsbl->{query}->{$chk->{content}} );
       # lol really icky hax
       return 1;
     }
