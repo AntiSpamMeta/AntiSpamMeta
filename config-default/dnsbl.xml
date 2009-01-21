@@ -10,14 +10,15 @@
     <response id="127.0.0.1">Testing data</response>
     <response id="127.0.0.2">Sample</response>
     <response id="127.0.0.3">IRC Drone</response>
-    <response id="127.0.0.4">Tor</response>
     <response id="127.0.0.5">Bottler</response>
     <response id="127.0.0.6">Unknown spambot or drone</response>
     <response id="127.0.0.7">DDOS drone</response> 
     <response id="127.0.0.8">SOCKS proxy</response> 
     <response id="127.0.0.9">HTTP proxy</response> 
     <response id="127.0.0.10">ProxyChain</response> 
-    <response id="127.0.0.11">MediaDefender crap</response> 
+    <response id="127.0.0.13">Brute force attackers</response>
+    <response id="127.0.0.14">Open Wingate Proxy</response>
+    <response id="127.0.0.15">Compromised router / gateway</response>
     <response id="127.0.0.255">Unknown</response>
   </query>
 </dnsbl>
