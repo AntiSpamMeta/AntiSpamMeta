@@ -324,7 +324,7 @@ sub on_mode
         if (lc $ex[1] eq lc $::settings->{nick}) {
           $::oq->doQueue($conn, $chan);
           if ( $::channels->{channel}->{$chan}->{op} eq "when" ) {
-            $conn->schedule(600, sub { print "Deop timer called!\n"; $conn->privmsg('ChanServ', "op $chan -". $::settings->{nick})});
+            $conn->schedule(600, sub {$conn->mode($chan, "-o $::settings->{nick}");});
           }
         }
       }
