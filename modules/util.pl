@@ -90,11 +90,23 @@ sub speak
 {
   my ($module, $chan) = @_;
   $chan = lc $chan;
-  if ( defined(cs($module, $chan)->{silence}) && (cs($module, $chan)->{silence} eq "yes") ) {
-    return 0;
-  } else {
-    return 1;
+  if ( defined($::channels->{channel}->{$chan}->{silence}) ) {
+    if ($::channels->{channel}->{$chan}->{silence} eq "no") {
+      return 1;
+    }
+    elsif ($::channels->{channel}->{$chan}->{silence} eq "yes") {
+      return 0;
+    }
   }
+  if ( defined($::channels->{channel}->{default}->{silence}) ) {
+    if ( $::channels->{channel}->{default}->{silence} eq "no" ) {
+      return 1;
+    }
+    elsif ( $::channels->{channel}->{default}->{silence} eq "yes" ) {
+      return 0;
+    }
+  }
+  return 1;
 }
 
 #this item is a stub, dur
