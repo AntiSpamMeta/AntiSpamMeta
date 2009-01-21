@@ -156,6 +156,7 @@ sub on_public
 sub on_notice
 {
   my ($conn, $event) = @_;
+  return if ( $event->{to}->[0] eq '$*' );
   $::inspector->inspect( $conn, $event );
   $::log->logg( $event );
   $::db->logg( $event );
