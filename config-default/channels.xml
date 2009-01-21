@@ -201,8 +201,6 @@
   </channel>
   <channel id="#wikimedia-commons" op="no" silence="yes">
     <hilights>
-      <debug>White_cat</debug>
-      <debug>Majorly</debug>
       <debug>Rjd0060</debug>
       <debug>theoneandonly</debug>
     </hilights>
@@ -399,6 +397,7 @@
     <event id="redarmyoflol" action="ban" class="re" reason="parting with 'red army of lol'" risk="low" time="0" type="part">RED ARMY OF LOL</event>
     <event id="sms_spam" action="none" class="re" reason="spam link / virus" risk="low" time="0" type="public">\.com/sms.exe</event>
     <event id="wikifags2" action="none" class="re" reason="saying 'sure are a lot of wikifag'..." risk="low" time="0" type="public">(?i)^sure are a ?lot of .*fags? in here</event>
+    <event id="phishing1" action="none" class="re" reason="trying to steal passwords" risk="high" time="0" type="notice" override="notice">identify.*/msg .* identify &lt;password&gt;</event>
     <hilights>
       <debug>ST47</debug>
       <debug>pctony</debug>
