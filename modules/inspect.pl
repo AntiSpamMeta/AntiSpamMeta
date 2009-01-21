@@ -57,6 +57,7 @@ sub inspect {
       $txtz = "\x03" . $::RCOLOR{$::RISKS{$dct{$id}{risk}}} . "\u$dct{$id}{risk}\x03 risk threat [\x02$chan\x02]: ".
               "\x02$event->{nick}\x02 - ${nicereason}; ping ";
       $txtz = $txtz . ASM::Util->commaAndify(ASM::Util->getAlert(lc $chan, $dct{$id}{risk}, 'hilights')) if (ASM::Util->getAlert(lc $chan, $dct{$id}{risk}, 'hilights'));
+      $txtz = $txtz . ' !att-' . $chan . '-' . $dct{$id}{risk};
       if (ASM::Util->cs(lc $chan)->{op} ne 'no') {
         if ($event->{type} eq 'topic') { #restore old topic
           my $oldtopic = $::sc{lc $event->{to}->[0]}{topic}{text};
