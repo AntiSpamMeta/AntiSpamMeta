@@ -11,6 +11,7 @@
     <hilights></hilights>
     <msgs></msgs>
   </channel>
+  <channel id="##asb-test" op="no" />
   <channel id="##c++" op="no" silence="yes">
     <hilights>
       <debug>tomaw</debug>
@@ -99,6 +100,7 @@
     </hilights>
     <msgs></msgs>
   </channel>
+  <channel id="#baadf00d" />
   <channel id="#debian" op="no" silence="yes">
     <hilights></hilights>
     <msgs></msgs>
@@ -370,6 +372,7 @@
     <event id="advflood" action="ban" class="advsplitflood" reason="advanced distributed flooding" risk="debug" time="0" type="public,part,caction">5:3</event>
     <event id="autoremove" action="none" class="re" reason="on chanserv autoremove" risk="info" time="0" type="part">^requested by ChanServ</event>
     <event id="blacklist" action="none" class="strbl" reason="sending message containing blacklisted content" risk="low" time="0" type="public">blah</event>
+    <event id="crapflood1" action="none" class="re" reason="crapflooding (rule crapflood1)" risk="high" time="0" type="public">^([A-Za-z]{12} ){15,}</event>
     <event id="ctcp-dcc" action="ban" class="re" reason="ctcp-dcc" risk="high" time="0" type="cdcc">.*</event>
     <event id="ctcp-ping" action="none" class="re" reason="channel-wide CTCP PING" risk="medium" time="0" type="cping">.*</event>
     <event id="ctcp-version" action="none" class="re" reason="channel-wide CTCP VERSION" risk="medium" time="0" type="cversion">.*</event>
@@ -379,8 +382,8 @@
     <event id="dcc-topic" action="ban" class="re" reason="setting a bad topic" risk="medium" time="0" type="topic">\bDCC SEND </event>
     <event id="ddos_countdown" action="none" class="re" reason="doing the ddos countdown thing" risk="medium" time="0" type="public">^... DDOS COUNTDOWN.*</event>
     <event id="donatespam1" action="none" class="re" override="notice" reason="freenode.donations@gmail.com spammer" risk="high" time="0" type="public,notice">freenode.donations@gmail.com</event>
-    <event id="dronebl" action="none" class="dnsbl" reason="host $evhost is in dnsbl.dronebl.org ( $mylastreason )" risk="info" time="0" type="join">dnsbl.dronebl.org</event>
-    <event id="efnetbl" action="none" class="dnsbl" reason="host $evhost is in rbl.efnetrbl.org ( $mylastreason ) " risk="info" time="0" type="join">rbl.efnetrbl.org</event>
+    <event id="dronebl" action="none" class="dnsbl" reason="host $evhost is in dnsbl.dronebl.org ( $xresult )" risk="info" time="0" type="join">dnsbl.dronebl.org</event>
+    <event id="efnetbl" action="none" class="dnsbl" reason="host $evhost is in rbl.efnetrbl.org ( $xresult ) " risk="info" time="0" type="join">rbl.efnetrbl.org</event>
     <event id="genspam1" action="none" class="re" reason="generic spamming" risk="debug" time="0" type="public">([^ ]{4,} +)\1{5,}</event>
     <event id="goatse" action="ban" class="re" reason="posting goatse link" risk="low" time="0" type="public">goatse\.cz</event>
     <event id="joinflood" action="none" class="floodqueue" reason="join flood (5 joins in 20 seconds)" risk="medium" time="0" type="join">5:20</event>
@@ -394,10 +397,10 @@
     <event id="nickspam" action="ban" class="nickspam" reason="nickspamming" risk="high" time="0" type="public">150:20</event>
     <event id="notice" action="ban" class="re" reason="sending a notice to the channel" risk="medium" time="0" type="notice">.*</event>
     <event id="pennergame_spam" action="none" class="re" reason="Pennergame reflink spam $evcontent " risk="medium" time="0" type="public">http:\/\/www\.pennergame\.de\/change_please\/(\d+)\/</event>
+    <event id="phishing1" action="none" class="re" override="notice" reason="trying to steal passwords" risk="high" time="0" type="notice">identify.*/msg .* identify &lt;password&gt;</event>
     <event id="redarmyoflol" action="ban" class="re" reason="parting with 'red army of lol'" risk="low" time="0" type="part">RED ARMY OF LOL</event>
     <event id="sms_spam" action="none" class="re" reason="spam link / virus" risk="low" time="0" type="public">\.com/sms.exe</event>
     <event id="wikifags2" action="none" class="re" reason="saying 'sure are a lot of wikifag'..." risk="low" time="0" type="public">(?i)^sure are a ?lot of .*fags? in here</event>
-    <event id="phishing1" action="none" class="re" reason="trying to steal passwords" risk="high" time="0" type="notice" override="notice">identify.*/msg .* identify &lt;password&gt;</event>
     <hilights>
       <debug>ST47</debug>
       <debug>pctony</debug>

@@ -2,7 +2,7 @@ package ASM::Inspect;
 use warnings;
 use strict;
 
-#use Data::Dumper;
+use Data::Dumper;
 #use List::Util qw(first);
 use String::Interpolate qw(interpolate);
 
@@ -25,6 +25,7 @@ sub inspect {
   my @override = [];
   our $unmode='';
   my $nick = lc $event->{nick};
+  my $xresult;
   return if (defined($::eline{$nick}) || defined($::eline{lc $event->{user}}) || defined($::eline{lc $event->{host}}));
   $iaddr = gethostbyname($event->{host});
   $rev = join('.', reverse(unpack('C4', $iaddr))).'.' if (defined $iaddr);
@@ -38,7 +39,12 @@ sub inspect {
     foreach $id (keys %aonx) {
       next unless ( grep { $event->{type} eq $_ } split(/[,:; ]+/, $aonx{$id}{type}) );
       next if ($aonx{$id}{class} eq 'dnsbl') && ($event->{host} =~ /(fastwebnet\.it|fastres\.net)$/); #this is a bad hack
-      $dct{$id} = $aonx{$id} if $::classes->check($aonx{$id}{class}, $aonx{$id}, $id, $event, $chan, $rev);
+      $xresult = $::classes->check($aonx{$id}{class}, $aonx{$id}, $id, $event, $chan, $rev); # this is another bad hack done for dnsbl-related stuff
+      next if defined($xresult) == 0;
+      next if $xresult eq 0;
+      print Dumper( $xresult );
+      $dct{$id} = $aonx{$id};
+      $dct{$id}{xresult} = $xresult;
     }
   }
   foreach ( keys %dct ) {
@@ -52,6 +58,7 @@ sub inspect {
   my $evhost = $event->{host};
   foreach $chan (@{$event->{to}}) {
     foreach $id ( keys %dct ) {
+      $xresult = $dct{$id}{xresult};
       my $nicereason = interpolate($dct{$id}{reason});
       $::db->record($chan, $event->{nick}, $event->{user}, $event->{host}, $::sn{lc $event->{nick}}->{gecos}, $dct{$id}{risk}, $id, $nicereason);
       $txtz = "\x03" . $::RCOLOR{$::RISKS{$dct{$id}{risk}}} . "\u$dct{$id}{risk}\x03 risk threat [\x02$chan\x02]: ".

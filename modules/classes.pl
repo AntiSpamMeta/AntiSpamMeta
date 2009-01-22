@@ -90,7 +90,7 @@ sub dnsbl
       print "strip: $strip\n";
       print "result: " . $::dnsbl->{query}->{$chk->{content}}->{response}->{$strip}->{content} . "\n";
       # lol really icky hax
-      return 1;
+      return $::dnsbl->{query}->{$chk->{content}}->{response}->{$strip}->{content};
     }
   }
   return 0;
