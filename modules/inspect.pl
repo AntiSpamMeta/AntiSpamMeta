@@ -27,8 +27,15 @@ sub inspect {
   my $nick = lc $event->{nick};
   my $xresult;
   return if (defined($::eline{$nick}) || defined($::eline{lc $event->{user}}) || defined($::eline{lc $event->{host}}));
-  $iaddr = gethostbyname($event->{host});
-  $rev = join('.', reverse(unpack('C4', $iaddr))).'.' if (defined $iaddr);
+  if ( $event->{host} =~ /gateway\/web\/ajax\// ) {
+    if ( $event->{user} =~ /.=([0-9a-f][0-9a-f])([0-9a-f][0-9a-f])([0-9a-f][0-9a-f])([0-9a-f][0-9a-f])/ ) {
+      $rev = sprintf("%d.%d.%d.%d.", hex($4), hex($3), hex($2), hex($1));
+    }
+  }
+  else {
+    $iaddr = gethostbyname($event->{host});
+    $rev = join('.', reverse(unpack('C4', $iaddr))).'.' if (defined $iaddr);
+  }
 #  %monx = defined($::channels->{channel}->{master}->{event}) ? %{$::channels->{channel}->{master}->{event}} : ();
   ## NB: isn't there a better way to do this with grep, somehow?
   %aonx = %{$::channels->{channel}->{master}->{event}};
