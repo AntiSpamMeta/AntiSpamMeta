@@ -75,7 +75,9 @@ sub levenflood
 sub dnsbl
 {
   my ($chk, $id, $event, $chan, $rev) = @_;
-  return unless index($event->{host}, '/') == -1;
+#  return unless index($event->{host}, '/') == -1;
+#  hopefully getting rid of this won't cause shit to assplode
+#  but I'm getting rid of it so it can detect cgi:irc shit
   if (defined $rev) {
     my $iaddr = gethostbyname( "$rev$chk->{content}" );
     my @dnsbl = unpack( 'C4', $iaddr ) if defined $iaddr;
@@ -89,6 +91,7 @@ sub dnsbl
       print "chk->content: $chk->{content}\n";
       print "strip: $strip\n";
       print "result: " . $::dnsbl->{query}->{$chk->{content}}->{response}->{$strip}->{content} . "\n";
+      $::sn{lc $event->{nick}}->{dnsbl} = 1;
       # lol really icky hax
       return $::dnsbl->{query}->{$chk->{content}}->{response}->{$strip}->{content};
     }
@@ -250,6 +253,7 @@ sub gecos {
 
 sub nuhg {
   my ( $chk, $id, $event, $chan) = @_;
+  return 0 unless defined($::sn{lc $event->{nick}}->{gecos});
   my $match = $event->{from} . '!' . $::sn{lc $event->{nick}}->{gecos};
   return 1 if ($match =~ /$chk->{content}/);
   return 0;

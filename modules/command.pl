@@ -2,6 +2,7 @@ package ASM::Commander;
 use warnings;
 use strict;
 use IO::All;
+use POSIX qw(strftime);
 
 sub new
 {
@@ -41,7 +42,7 @@ sub command
       }
     }
     if ($cmd=~/$command->{cmd}/) {
-      print "$event->{from} told me: $cmd \n";
+      print strftime("%F %T  ", gmtime) . "$event->{from} told me: $cmd \n";
       eval $command->{content};
       warn $@ if $@;
       last;

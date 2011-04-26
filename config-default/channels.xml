@@ -3,6 +3,7 @@
     <hilights>
       <low>PeterSymonds</low>
     </hilights>
+    <msgs></msgs>
   </channel>
   <channel id="##asb-meta" link="##asb-testing">
     <hilights></hilights>
@@ -11,12 +12,18 @@
     <hilights></hilights>
     <msgs></msgs>
   </channel>
-  <channel id="##asb-test" op="no" />
   <channel id="##c++" op="no" silence="yes">
     <hilights>
       <debug>tomaw</debug>
     </hilights>
     <msgs></msgs>
+  </channel>
+  <channel id="##electronics" op="no" silence="yes">
+    <hilights></hilights>
+    <msgs></msgs>
+  </channel>
+  <channel id="##javascript" op="no">
+    <hilights></hilights>
   </channel>
   <channel id="##linux" op="no" silence="yes">
     <hilights>
@@ -27,6 +34,7 @@
       <low>Fieldy</low>
       <low>tomaw</low>
       <low>WildPikachu</low>
+      <low>Gary</low>
       <medium>PhilKC</medium>
       <medium>vorian</medium>
       <medium>DLange</medium>
@@ -36,10 +44,10 @@
       <medium>DLange</medium>
       <medium>linagee</medium>
       <opalert>rob</opalert>
+      <opalert>stew</opalert>
     </hilights>
     <msgs>
       <debug>##linux-ops</debug>
-      <low>WildPikachu</low>
     </msgs>
   </channel>
   <channel id="##linux-ops" op="no">
@@ -54,7 +62,18 @@
       <opalert>##linux-ops</opalert>
     </msgs>
   </channel>
+  <channel id="##mac" op="no">
+    <hilights></hilights>
+  </channel>
   <channel id="##petersymonds" op="no">
+    <hilights></hilights>
+    <msgs></msgs>
+  </channel>
+  <channel id="##physics" op="no">
+    <hilights></hilights>
+    <msgs></msgs>
+  </channel>
+  <channel id="##posix" op="no" silence="yes">
     <hilights></hilights>
     <msgs></msgs>
   </channel>
@@ -64,8 +83,12 @@
     </hilights>
     <msgs>
       <debug>##thehelpfulone</debug>
+      <debug>tho|away</debug>
       <disable>##asb-nexus</disable>
     </msgs>
+  </channel>
+  <channel id="##tomaw" op="no">
+    <hilights></hilights>
   </channel>
   <channel id="##wikimedia-ops" op="no">
     <hilights></hilights>
@@ -73,8 +96,11 @@
   </channel>
   <channel id="##windows" op="no" silence="yes">
     <hilights>
+      <debug>jpalmer</debug>
+      <debug>KB1JWQ</debug>
       <disable>ST47</disable>
       <disable>Thehelpfulone</disable>
+      <high>werdan7</high>
       <info>njan</info>
       <low>numist</low>
       <low>quux</low>
@@ -83,13 +109,18 @@
       <low>njan</low>
       <low>JonathanD</low>
       <low>Cpudan80</low>
-      <low>AndrewB</low>
       <low>pinpoint</low>
-      <low>theacolyte</low>
       <medium>tomaw</medium>
-      <medium>theacolyte</medium>
     </hilights>
     <msgs></msgs>
+  </channel>
+  <channel id="##windows-server">
+    <hilights>
+      <debug>jpalmer</debug>
+    </hilights>
+  </channel>
+  <channel id="#+" op="no">
+    <hilights></hilights>
   </channel>
   <channel id="#ST47" op="no">
     <hilights></hilights>
@@ -100,12 +131,24 @@
     </hilights>
     <msgs></msgs>
   </channel>
-  <channel id="#baadf00d" />
+  <channel id="#cpudan80" op="no">
+    <hilights></hilights>
+    <msgs></msgs>
+  </channel>
   <channel id="#debian" op="no" silence="yes">
     <hilights></hilights>
     <msgs></msgs>
   </channel>
   <channel id="#defocus" link="#freenode" silence="yes">
+    <hilights></hilights>
+  </channel>
+  <channel id="#django" op="no">
+    <hilights>
+      <debug>tomaw</debug>
+    </hilights>
+    <msgs></msgs>
+  </channel>
+  <channel id="#errantego" op="no">
     <hilights></hilights>
   </channel>
   <channel id="#freenode" op="no" silence="yes">
@@ -115,36 +158,49 @@
       <debug>Martinp23</debug>
       <debug>SeJo</debug>
       <debug>pctony</debug>
+      <debug>KB1JWQ</debug>
+      <debug>theacolyte-</debug>
+      <debug>nhandler</debug>
+      <high>mquin</high>
       <info>njan</info>
-      <info>AndrewB</info>
       <low>denny</low>
       <low>Gary</low>
       <low>JonathanD</low>
       <low>ZoFreX</low>
       <low>DLange</low>
-      <low>vorian</low>
       <low>PriceChild</low>
+      <low>werdan7</low>
       <medium>ompaul</medium>
-      <medium>PhilKC</medium>
+      <medium>mrmist</medium>
     </hilights>
-    <msgs>
-      <debug>#freenode-adb</debug>
-    </msgs>
-  </channel>
-  <channel id="#freenode-adb" op="no">
-    <hilights></hilights>
     <msgs></msgs>
   </channel>
-  <channel id="#freenode-newyears" link="#freenode">
-    <hilights>
-      <debug>Thehelpfulone</debug>
-    </hilights>
+  <channel id="#freenode-newyears" op="no" silence="yes">
+    <hilights></hilights>
   </channel>
   <channel id="#gentoo" op="no" silence="yes">
     <hilights>
       <debug>NeddySeagoon</debug>
+      <debug>a3li</debug>
+      <debug>marienz</debug>
+      <low>marienz</low>
       <medium>tomaw</medium>
     </hilights>
+    <msgs></msgs>
+  </channel>
+  <channel id="#hamradio" op="no">
+    <hilights></hilights>
+    <msgs></msgs>
+  </channel>
+  <channel id="#hamradio-ops" op="no">
+    <hilights></hilights>
+  </channel>
+  <channel id="#httpd">
+    <hilights></hilights>
+    <msgs></msgs>
+  </channel>
+  <channel id="#irssi" op="no">
+    <hilights></hilights>
     <msgs></msgs>
   </channel>
   <channel id="#lisp" op="no" silence="yes">
@@ -156,16 +212,36 @@
     </hilights>
     <msgs></msgs>
   </channel>
+  <channel id="#logbook" op="no">
+    <hilights></hilights>
+  </channel>
   <channel id="#mediawiki" op="no" silence="yes">
     <hilights>
       <debug>flyingparchment</debug>
-      <debug>WaRpAtH</debug>
+      <debug>roberthl</debug>
       <disable>seanw</disable>
-      <disable>ST47</disable>
+      <low>vvv</low>
     </hilights>
     <msgs>
       <debug>#wikimedia-ops</debug>
     </msgs>
+  </channel>
+  <channel id="#osdev" op="no">
+    <hilights>
+      <low>tomaw</low>
+    </hilights>
+    <msgs></msgs>
+  </channel>
+  <channel id="#reddit" op="no">
+    <hilights></hilights>
+    <msgs></msgs>
+  </channel>
+  <channel id="#rubyonrails" op="no">
+    <hilights></hilights>
+    <msgs></msgs>
+  </channel>
+  <channel id="#sparkfun" op="no">
+    <hilights></hilights>
   </channel>
   <channel id="#st47">
     <hilights>
@@ -180,20 +256,44 @@
   </channel>
   <channel id="#ubuntu" op="no" silence="yes">
     <hilights>
+      <debug>nhandler</debug>
       <disable>ST47</disable>
       <low>PriceChild</low>
       <medium>tomaw</medium>
     </hilights>
     <msgs></msgs>
   </channel>
+  <channel id="#ubuntu-unregged">
+    <hilights></hilights>
+    <msgs></msgs>
+  </channel>
+  <channel id="#uncyclopedia" op="no">
+    <hilights></hilights>
+    <msgs></msgs>
+  </channel>
+  <channel id="#wikia" op="no">
+    <hilights>
+      <medium>tomaw</medium>
+    </hilights>
+    <msgs></msgs>
+  </channel>
+  <channel id="#wikia-dev" op="no">
+    <hilights></hilights>
+  </channel>
+  <channel id="#wikileaks" op="no">
+    <hilights></hilights>
+    <msgs></msgs>
+  </channel>
   <channel id="#wikimedia" op="no" silence="yes">
     <hilights>
-      <debug>Mbimmler</debug>
       <debug>Martinp23</debug>
-      <debug>Warpath</debug>
       <debug>Rjd0060</debug>
       <debug>AfterDeath</debug>
       <debug>theoneandonly</debug>
+      <debug>PeterSymonds</debug>
+      <debug>vvv</debug>
+      <debug>Barras</debug>
+      <debug>AfterDeath</debug>
       <low>Majorly</low>
       <low>Fabexplosive</low>
     </hilights>
@@ -205,6 +305,10 @@
     <hilights>
       <debug>Rjd0060</debug>
       <debug>theoneandonly</debug>
+      <debug>killiondude</debug>
+      <low>PeterSymonds</low>
+      <low>Abigor</low>
+      <low>Kanonkas</low>
     </hilights>
     <msgs>
       <debug>#wikimedia-ops</debug>
@@ -214,6 +318,13 @@
     <hilights>
       <debug>Cbrown1023</debug>
       <debug>Thehelpfulone</debug>
+      <debug>Not_the_NSA</debug>
+      <debug>Rjd0060</debug>
+      <debug>Kanonkas</debug>
+      <debug>PeterSymonds</debug>
+      <debug>Barras</debug>
+      <debug>AfterDeath</debug>
+      <low>slakr</low>
     </hilights>
     <msgs>
       <debug>#wikimedia-ops</debug>
@@ -224,10 +335,19 @@
       <debug>Thehelpfulone</debug>
     </hilights>
   </channel>
+  <channel id="#wikimedia-otrs" op="no">
+    <hilights>
+      <debug>PeterSymonds</debug>
+    </hilights>
+    <msgs>
+      <debug>#wikimedia-ops</debug>
+    </msgs>
+  </channel>
   <channel id="#wikimedia-overflow">
     <hilights>
       <debug>theoneandonly</debug>
       <debug>Thehelpfulone</debug>
+      <debug>Rjd0060</debug>
     </hilights>
     <msgs>
       <debug>#wikimedia-ops</debug>
@@ -236,6 +356,7 @@
   <channel id="#wikimedia-tech" op="no" silence="yes">
     <hilights>
       <debug>theoneandonly</debug>
+      <low>Rjd0060</low>
     </hilights>
     <msgs>
       <low>#wikimedia-ops</low>
@@ -243,9 +364,7 @@
   </channel>
   <channel id="#wikipedia" op="no" silence="yes">
     <hilights>
-      <debug>cbrown1023</debug>
       <debug>Golbez</debug>
-      <debug>Mbimmler</debug>
       <debug>Prodego</debug>
       <debug>Rjd0060</debug>
       <debug>Snowolf</debug>
@@ -253,27 +372,36 @@
       <debug>werdan7</debug>
       <debug>wimt</debug>
       <debug>theoneandonly</debug>
+      <debug>Jake_Wartenberg</debug>
+      <debug>shimgray</debug>
+      <debug>kibble</debug>
+      <debug>PeterSymonds</debug>
+      <debug>Jamesofur</debug>
+      <debug>killiondude</debug>
+      <debug>SpitfireWP</debug>
+      <debug>jeremyb</debug>
+      <debug>Maximillion</debug>
+      <debug>stwalkerster</debug>
+      <debug>Barras</debug>
       <low>bumm13_</low>
       <low>Cyrius</low>
       <low>DanielB</low>
-      <low>Dmcdevit</low>
       <low>Fabexplosive</low>
       <low>FastLizard4</low>
       <low>James_F</low>
       <low>JohnReaves</low>
-      <low>Krimpet</low>
       <low>Lucifer_Cat</low>
       <low>Luna-San</low>
       <low>Uberpenguin</low>
       <low>Mike42</low>
       <low>Mike_H</low>
       <low>nixeagle</low>
-      <low>quanticle</low>
       <low>Ceiling_Cat</low>
       <low>seanw</low>
       <low>skenmy</low>
       <low>ST47</low>
       <low>tawker</low>
+      <low>kibble</low>
     </hilights>
     <msgs>
       <debug>#wikimedia-ops</debug>
@@ -289,38 +417,38 @@
   </channel>
   <channel id="#wikipedia-en" op="no" silence="yes">
     <hilights>
-      <debug>animum</debug>
-      <debug>Kmccoy</debug>
-      <debug>Prodego</debug>
       <debug>Rjd0060</debug>
-      <debug>Snowolf</debug>
       <debug>Werdan7</debug>
       <debug>wimt</debug>
       <debug>Thehelpfulone</debug>
       <debug>PeterSymonds</debug>
       <debug>theoneandonly</debug>
       <debug>Not_the_NSA</debug>
+      <debug>Prodego</debug>
+      <debug>Jake_Wartenberg</debug>
+      <debug>shimgray</debug>
+      <debug>stwalkerster</debug>
+      <debug>Jamesofur</debug>
+      <debug>SpitfireWP</debug>
+      <debug>Barras</debug>
+      <debug>jeremyb</debug>
+      <debug>Maximillion</debug>
       <high>Rudha-an</high>
-      <low>agkwiki</low>
-      <low>bumm13</low>
       <low>Cobi</low>
       <low>Cbrown1023</low>
       <low>DanielB</low>
-      <low>Dmcdevit</low>
       <low>Golbez</low>
-      <low>James_F</low>
       <low>JohnReaves</low>
-      <low>KFP</low>
-      <low>Krimpet</low>
       <low>Luna-Santin</low>
       <low>Mike42</low>
-      <low>nixeagle</low>
       <low>seanw</low>
       <low>smoddy</low>
       <low>Tawker</low>
-      <low>Ryanpostlethwait</low>
       <low>NotASpy</low>
       <low>|X|</low>
+      <low>agkwiki</low>
+      <low>KFP</low>
+      <low>Ryanposs</low>
     </hilights>
     <msgs>
       <debug>#wikimedia-ops</debug>
@@ -330,7 +458,6 @@
     <hilights>
       <debug>werdan7</debug>
       <debug>GDonato</debug>
-      <debug>Cometstyles</debug>
       <debug>Thehelpfulone</debug>
       <debug>theoneandonly</debug>
       <debug>Mike42</debug>
@@ -343,15 +470,26 @@
       <debug>Deon555</debug>
       <debug>Luna-San</debug>
       <debug>FrancoGG</debug>
-      <debug>Cremepuff222</debug>
-      <debug>KFP</debug>
       <debug>Golbez</debug>
       <debug>stwalkerster</debug>
       <debug>PeterSymonds</debug>
       <debug>Hersfold</debug>
+      <debug>killiondude</debug>
+      <low>KFP</low>
+      <low>chzz</low>
     </hilights>
     <msgs>
       <debug>#wikimedia-ops</debug>
+    </msgs>
+  </channel>
+  <channel id="#wikipedia-es" op="no">
+    <hilights>
+      <debug>Dferg</debug>
+      <debug>Rasco</debug>
+      <disable>Thehelpfulone</disable>
+    </hilights>
+    <msgs>
+      <debug>dferg</debug>
     </msgs>
   </channel>
   <channel id="#wikipedia-social" op="no" silence="yes">
@@ -362,6 +500,7 @@
   </channel>
   <channel id="antispammeta">
     <hilights></hilights>
+    <msgs></msgs>
   </channel>
   <channel id="default" op="no">
     <event id="flood-15to45" action="none" class="floodqueue" reason="flooding 15 to 45" risk="low" time="0" type="public">15:45</event>
@@ -369,50 +508,56 @@
     <msgs></msgs>
   </channel>
   <channel id="master">
-    <event id="advflood" action="ban" class="advsplitflood" reason="advanced distributed flooding" risk="debug" time="0" type="public,part,caction">5:3</event>
+    <event id="advflood" action="none" class="advsplitflood" reason="advanced distributed flooding" risk="debug" time="0" type="public,part,caction" xresult="1">5:3</event>
+    <event id="anontalk1" action="none" class="re" reason="anontalk.com spam" risk="medium" time="0" type="public" xresult="1">(?i)w(.?)w\1w\1?.\1?a\1n\1o\1n\1t\1a\1l\1k\1?.\1?c\1o\1m</event>
     <event id="autoremove" action="none" class="re" reason="on chanserv autoremove" risk="info" time="0" type="part">^requested by ChanServ</event>
-    <event id="blacklist" action="none" class="strbl" reason="sending message containing blacklisted content" risk="low" time="0" type="public">blah</event>
-    <event id="crapflood1" action="none" class="re" reason="crapflooding (rule crapflood1)" risk="high" time="0" type="public">^([A-Za-z]{12} ){15,}</event>
-    <event id="ctcp-dcc" action="ban" class="re" reason="ctcp-dcc" risk="high" time="0" type="cdcc">.*</event>
-    <event id="ctcp-ping" action="none" class="re" reason="channel-wide CTCP PING" risk="medium" time="0" type="cping">.*</event>
-    <event id="ctcp-version" action="none" class="re" reason="channel-wide CTCP VERSION" risk="medium" time="0" type="cversion">.*</event>
-    <event id="dcc" action="ban" class="re" override="dcc-medium" reason="using the DC.C SE.ND exploit" risk="high" time="0" type="public">^DCC (SEND|S?CHAT) |\bDCC (SEND|S?CHAT) &quot;?[A-Za-z0-9]+&quot;? \d+ \d+ \d+</event>
-    <event id="dcc-medium" action="ban" class="re" reason="using the DC.C SE.ND exploit" risk="medium" time="0" type="public">DCC SEND </event>
-    <event id="dcc-part" action="ban" class="re" reason="using the DC.C SE.ND exploit in a part message" risk="high" time="0" type="part">DCC SEND </event>
-    <event id="dcc-topic" action="ban" class="re" reason="setting a bad topic" risk="medium" time="0" type="topic">\bDCC SEND </event>
-    <event id="ddos_countdown" action="none" class="re" reason="doing the ddos countdown thing" risk="medium" time="0" type="public">^... DDOS COUNTDOWN.*</event>
-    <event id="donatespam1" action="none" class="re" override="notice" reason="freenode.donations@gmail.com spammer" risk="high" time="0" type="public,notice">freenode.donations@gmail.com</event>
-    <event id="dronebl" action="none" class="dnsbl" reason="host $evhost is in dnsbl.dronebl.org ( $xresult )" risk="info" time="0" type="join">dnsbl.dronebl.org</event>
-    <event id="efnetbl" action="none" class="dnsbl" reason="host $evhost is in rbl.efnetrbl.org ( $xresult ) " risk="info" time="0" type="join">rbl.efnetrbl.org</event>
-    <event id="genspam1" action="none" class="re" reason="generic spamming" risk="debug" time="0" type="public">([^ ]{4,} +)\1{5,}</event>
-    <event id="goatse" action="ban" class="re" reason="posting goatse link" risk="low" time="0" type="public">goatse\.cz</event>
-    <event id="joinflood" action="none" class="floodqueue" reason="join flood (5 joins in 20 seconds)" risk="medium" time="0" type="join">5:20</event>
-    <event id="keylogger" action="ban" class="re" override="keylogger-medium" reason="using the norton start-key-logger exploit" risk="high" time="0" type="public">^startkeylogger$|^stopkeylogger$</event>
-    <event id="keylogger-medium" action="ban" class="re" reason="using the norton start-key-logger exploit" risk="medium" time="0" type="public">\bstartkeylogger\b|\bstopkeylogger\b</event>
-    <event id="last_measure_regex" action="kban" class="re" reason="posting what appears to be a last measure link" risk="medium" time="0" type="public">http://\S+\.on\.nimp\.org</event>
-    <event id="levenflood" action="none" class="levenflood" override="flood-5to3" reason="levenshtein flood match" risk="debug" time="0" type="public">contentisuseless</event>
-    <event id="lilotroll" action="none" class="re" reason="possible lilo-related trolling (&quot; $evcontent &quot;)" risk="medium" time="0" type="public"> cafe.* lilo.* tell.* RV</event>
-    <event id="magical" action="none" class="ident" reason="typical w00t ident" risk="info" time="0" type="join">i=magical</event>
-    <event id="massflood" action="ban" class="splitflood" reason="distributed flooding" risk="high" time="0" type="public,part,caction">4:4</event>
-    <event id="nickspam" action="ban" class="nickspam" reason="nickspamming" risk="high" time="0" type="public">150:20</event>
-    <event id="notice" action="ban" class="re" reason="sending a notice to the channel" risk="medium" time="0" type="notice">.*</event>
-    <event id="pennergame_spam" action="none" class="re" reason="Pennergame reflink spam $evcontent " risk="medium" time="0" type="public">http:\/\/www\.pennergame\.de\/change_please\/(\d+)\/</event>
-    <event id="phishing1" action="none" class="re" override="notice" reason="trying to steal passwords" risk="high" time="0" type="notice">identify.*/msg .* identify &lt;password&gt;</event>
-    <event id="redarmyoflol" action="ban" class="re" reason="parting with 'red army of lol'" risk="low" time="0" type="part">RED ARMY OF LOL</event>
-    <event id="sms_spam" action="none" class="re" reason="spam link / virus" risk="low" time="0" type="public">\.com/sms.exe</event>
+    <event id="blacklist" action="none" class="strbl" reason="sending message containing blacklisted content" risk="low" time="0" type="public" xresult="1">blah</event>
+    <event id="cheeesespammar" action="none" class="nuhg" reason="matches a dcc-exploiter (02/23/09)" risk="medium" time="0" type="join" xresult="1">(?i).*!.=aaaah@.*!hehehe</event>
+    <event id="ctcp-dcc" action="none" class="re" reason="ctcp-dcc" risk="high" time="0" type="cdcc" xresult="1">.*</event>
+    <event id="ctcp-ping" action="none" class="re" reason="channel-wide CTCP PING" risk="medium" time="0" type="cping" xresult="1">.*</event>
+    <event id="ctcp-version" action="none" class="re" reason="channel-wide CTCP VERSION" risk="medium" time="0" type="cversion" xresult="1">.*</event>
+    <event id="dcc" action="none" class="re" override="dcc-medium" reason="using the DC.C SE.ND exploit" risk="high" time="0" type="public" xresult="1">^DCC (SEND|S?CHAT) |\bDCC (SEND|S?CHAT) &quot;?[A-Za-z0-9]+&quot;? \d+ \d+ \d+</event>
+    <event id="dcc-medium" action="none" class="re" reason="using the DC.C SE.ND exploit" risk="medium" time="0" type="public" xresult="1">DCC SEND </event>
+    <event id="dcc-part" action="none" class="re" reason="using the DC.C SE.ND exploit in a part message" risk="high" time="0" type="part">DCC SEND </event>
+    <event id="dcc-topic" action="none" class="re" reason="setting a bad topic" risk="medium" time="0" type="topic">\bDCC SEND </event>
+    <event id="dronebl" action="none" class="dnsbl" reason="host $evhost is in dnsbl.dronebl.org ( $xresult )" risk="info" time="0" type="join" xresult="Automatically determined botnet IPs (experimental)">dnsbl.dronebl.org</event>
+    <event id="efnetbl" action="none" class="dnsbl" reason="host $evhost is in rbl.efnetrbl.org ( $xresult )" risk="info" time="0" type="join" xresult="TOR exit server">rbl.efnetrbl.org</event>
+    <event id="genspam1" action="none" class="re" reason="generic spamming" risk="debug" time="0" type="public" xresult="1">([^ ]{4,} +)\1{5,}</event>
+    <event id="joinflood" action="none" class="floodqueue" reason="join flood (5 joins in 20 seconds)" risk="medium" time="0" type="join" xresult="1">5:20</event>
+    <event id="keylogger" action="none" class="re" override="keylogger-medium" reason="using the norton start-key-logger exploit" risk="high" time="0" type="public" xresult="1">^startkeylogger$|^stopkeylogger$</event>
+    <event id="keylogger-medium" action="none" class="re" reason="using the norton start-key-logger exploit" risk="medium" time="0" type="public" xresult="1">\bstartkeylogger\b|\bstopkeylogger\b</event>
+    <event id="last_measure_regex" action="kban" class="re" reason="posting what appears to be a last measure link" risk="medium" time="0" type="public" xresult="1">http://\S+\.on\.nimp\.org</event>
+    <event id="levenflood" action="none" class="levenflood" override="flood-5to3" reason="levenshtein flood match" risk="debug" time="0" type="public" xresult="1">contentisuseless</event>
+    <event id="massflood" action="ban" class="splitflood" reason="distributed flooding" risk="high" time="0" type="public,part,caction" xresult="1">4:4</event>
+    <event id="nickspam" action="none" class="nickspam" reason="nickspamming" risk="high" time="0" type="public" xresult="1">60:10</event>
+    <event id="notice" action="none" class="re" reason="sending a notice to the channel" risk="medium" time="0" type="notice" xresult="1">.*</event>
+    <event id="phishing1" action="none" class="re" override="notice" reason="trying to steal passwords (v1)" risk="high" time="0" type="notice" xresult="1">identify.*/msg .* identify &lt;password&gt;</event>
+    <event id="phishing2" action="none" class="re" override="notice" reason="trying to steal passwords (v2)" risk="high" time="0" type="notice">^This nickname is registered</event>
+    <event id="proxybl" action="none" class="dnsbl" reason="host $evhost is in dnsbl.proxybl.org" risk="info" time="0" type="join" xresult="this does nothing I think">dnsbl.proxybl.org</event>
+    <event id="redarmyoflol" action="none" class="re" reason="parting with 'red army of lol'" risk="low" time="0" type="part">RED ARMY OF LOL</event>
+    <event id="sms_spam" action="none" class="re" reason="spam link / virus" risk="low" time="0" type="public" xresult="1">\.com/sms.exe</event>
     <event id="wikifags2" action="none" class="re" reason="saying 'sure are a lot of wikifag'..." risk="low" time="0" type="public">(?i)^sure are a ?lot of .*fags? in here</event>
     <hilights>
       <debug>ST47</debug>
       <debug>pctony</debug>
       <debug>SeJo</debug>
-      <debug>ST47</debug>
+      <debug>KB1JWQ</debug>
+      <debug>Rjd0060</debug>
+      <low>marienz</low>
+      <low>mrmist</low>
       <medium>dave2</medium>
       <medium>RichiH</medium>
-      <medium>troubled</medium>
       <medium>Thehelpfulone</medium>
+      <medium>mrmist</medium>
+      <medium>mrmist</medium>
     </hilights>
     <msgs>
       <debug>##asb-nexus</debug>
     </msgs>
+  </channel>
+  <channel id="werdan7">
+    <hilights>
+      <low>#freenode</low>
+    </hilights>
   </channel>
 </channels>

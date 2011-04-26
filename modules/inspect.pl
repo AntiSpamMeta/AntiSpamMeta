@@ -26,6 +26,7 @@ sub inspect {
   our $unmode='';
   my $nick = lc $event->{nick};
   my $xresult;
+  return if (index($nick, ".") != -1);
   return if (defined($::eline{$nick}) || defined($::eline{lc $event->{user}}) || defined($::eline{lc $event->{host}}));
   if ( $event->{host} =~ /gateway\/web\/ajax\// ) {
     if ( $event->{user} =~ /.=([0-9a-f][0-9a-f])([0-9a-f][0-9a-f])([0-9a-f][0-9a-f])([0-9a-f][0-9a-f])/ ) {

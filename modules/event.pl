@@ -5,6 +5,7 @@ use strict;
 use Data::Dumper;
 use Text::LevenshteinXS qw(distance);
 use IO::All;
+use POSIX qw(strftime);
 
 sub cs {
   my ($chan) = @_;
@@ -100,6 +101,7 @@ sub on_join {
   } else {
     $::sn{$nick} = {};
     $::sn{$nick}->{mship} = [ $chan ];
+    $::sn{$nick}->{dnsbl} = 0;
     if (defined($::needgeco{$nick})) {
       $::needgeco{$nick} = [ @{$::needgeco{$nick}}, $evcopy ];
       $::db->logg($event);
@@ -363,7 +365,7 @@ sub whois_identified {
     foreach my $item (@{$::idqueue{$who}}) {
       my ($cmd, $command, $event) = @{$item};
       if ( $cmd =~ /$command->{cmd}/ ){
-        print "$event->{from} told me $cmd \n";
+        print strftime("%F %T  ", gmtime) . "$event->{from} told me $cmd \n";
         eval $command->{content};
 	warn $@ if $@;
       }

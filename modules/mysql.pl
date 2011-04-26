@@ -134,7 +134,7 @@ sub query
   $host =~  s/\*/%/g;
   $host =~ s/_/\\_/g;
   $host =~  s/\?/_/g;
-  my $sth = $dbh->prepare("SELECT * from $self->{TABLE} WHERE channel = $channel and nick like $nick and user like $user and host like $host;");
+  my $sth = $dbh->prepare("SELECT * from $self->{TABLE} WHERE channel like $channel and nick like $nick and user like $user and host like $host;");
   $sth->execute;
   my $i = 0;
   while (my $ref = $sth->fetchrow_arrayref) {

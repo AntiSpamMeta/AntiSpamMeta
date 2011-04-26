@@ -11,6 +11,7 @@ sub new
 
 sub doServices {
   my ($self, $conn, $event) = @_;
+  my $i = 5;
   if ($event->{from} eq 'NickServ!NickServ@services.')
   {
     print "NickServ: $event->{args}->[0]\n";
@@ -20,7 +21,10 @@ sub doServices {
     }
     elsif ( $event->{args}->[0] =~ /^You are now identified/ )
     {
-      $conn->join($_) foreach ( @{$::settings->{autojoins}} );
+      foreach my $x ( @{$::settings->{autojoins}} ) {
+        $conn->schedule($i, sub { $conn->join($x); });
+        $i = $i + 6;
+      }
     }
     elsif ($event->{args}->[0] =~ /has been killed$/ )
     {
@@ -41,6 +45,10 @@ sub doServices {
     elsif ( $event->{args}->[0] =~ /^All.*bans matching.*have been cleared on(.*)/)
     {
       $conn->join($1);
+    }
+    elsif ( $event->{args}->[0] =~ /You are not authorized to perform this operation/ )
+    {
+      $::oq->clean();
     }
   }
 }

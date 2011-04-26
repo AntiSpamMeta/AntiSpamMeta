@@ -1,29 +1,35 @@
 <people>
-  <person id="afterdeath" flags="hodat" host="IDENTIFY" />
+  <person id="afterdeath" flags="hodat" host="freenode/weird-exception/network-troll/afterdeath" />
+  <person id="afterdeath_" flags="hodat" host="freenode/weird-exception/network-troll/afterdeath" />
   <person id="danielb" flags="h" host="wikimedia/Daniel" />
   <person id="dave2" flags="oath" host="freenode/staff/dave2" />
   <person id="denny" flags="ha" host="freenode/staff/denny" />
   <person id="dlange" flags="oath" host="freenode/staff/dlange" />
   <person id="dmcdevit" flags="oath" host="IDENTIFY" />
-  <person id="errantego" flags="t" host="unaffiliated/errantego" />
+  <person id="errantego" flags="doath" host="freenode/jester/errantego" />
   <person id="gary" flags="oath" host="freenode/staff/colchester-lug.gary" />
   <person id="gdonato" flags="oth" host="wikimedia/GDonato" />
   <person id="jonathand" flags="oath" host="freenode/staff/jonathand" />
+  <person id="kb1jwq" flags="ahot" host="freenode/staff/kb1jwq" />
+  <person id="kibble" flags="oth" host="wikimedia/Cbrown1023" />
+  <person id="marienz" flags="oath" host="freenode/staff/marienz" />
   <person id="mark_ryan" flags="oht" host="wikipedia/Mark" />
   <person id="martinp23" flags="oath" host="freenode/staff/wikimedia.martinp23" />
+  <person id="mquin" flags="hot" host="freenode/staff/mquin" />
+  <person id="nhandler" flags="oath" host="freenode/staff/ubuntu.member.nhandler" />
   <person id="njan" flags="oath" host="freenode/staff/njan" />
   <person id="not_the_nsa" flags="t" host="wikipedia/R" />
-  <person id="petersymonds" flags="th" host="wikipedia/PeterSymonds" />
+  <person id="petersymonds" flags="oath" host="wikimedia/petersymonds" />
   <person id="pricechild" flags="oath" host="freenode/staff/ubuntu.member.pricechild" />
   <person id="richih" flags="oath" host="freenode/staff/richih" />
+  <person id="rjd0060" flags="oth" host="wikimedia/rjd0060" />
   <person id="seanw" flags="oath" host="freenode/staff-emeritus/wikimedia.sean-whitton" />
-  <person id="st47" flags="oath" host="wikipedia/st47" />
+  <person id="st47" flags="oath" host="perlwikipedia/developer/wikipedia.st47" />
+  <person id="theacolyte" flags="t" host="about/windows/staff/theacolyte" />
   <person id="thehelpfulone" flags="oath" host="wikimedia/Thehelpfulone" />
   <person id="tho|away" flags="oath" host="wikimedia/Thehelpfulone" />
-  <person id="tho|busy" flags="oath" host="wikimedia/Thehelpfulone" />
   <person id="tomaw" flags="oathd" host="freenode/staff/tomaw" />
   <person id="troubled" flags="oath" host="unaffiliated/troubled" />
-  <person id="vorian" flags="oath" host="freenode/staff/vorian" />
   <person id="werdan7" flags="oath" host="freenode/staff/wikimedia.werdan7" />
   <person id="wildpikachu" flags="oath" host="about/linux/staff/wildpikachu" />
   <person id="wimt" flags="oath" host="freenode/staff/wikipedia.wimt" />
