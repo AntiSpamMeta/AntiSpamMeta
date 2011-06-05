@@ -276,6 +276,7 @@
   <channel id="#wikia" op="no">
     <hilights>
       <medium>tomaw</medium>
+      <opalert>AfterDeath</opalert>
     </hilights>
     <msgs></msgs>
   </channel>
