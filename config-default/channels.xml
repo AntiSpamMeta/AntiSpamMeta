@@ -161,6 +161,8 @@
       <debug>KB1JWQ</debug>
       <debug>theacolyte-</debug>
       <debug>nhandler</debug>
+      <debug>Plazma</debug>
+      <debug>Plazma-Rooolz</debug>
       <high>mquin</high>
       <info>njan</info>
       <low>denny</low>
@@ -383,6 +385,7 @@
       <debug>Maximillion</debug>
       <debug>stwalkerster</debug>
       <debug>Barras</debug>
+      <debug>DeltaQuad</debug>
       <low>bumm13_</low>
       <low>Cyrius</low>
       <low>DanielB</low>
@@ -402,6 +405,8 @@
       <low>ST47</low>
       <low>tawker</low>
       <low>kibble</low>
+      <low>slakr</low>
+      <low>slakr</low>
     </hilights>
     <msgs>
       <debug>#wikimedia-ops</debug>
@@ -433,6 +438,8 @@
       <debug>Barras</debug>
       <debug>jeremyb</debug>
       <debug>Maximillion</debug>
+      <debug>DeltaQuad</debug>
+      <debug>Theo10011</debug>
       <high>Rudha-an</high>
       <low>Cobi</low>
       <low>Cbrown1023</low>
@@ -449,6 +456,7 @@
       <low>agkwiki</low>
       <low>KFP</low>
       <low>Ryanposs</low>
+      <low>slakr</low>
     </hilights>
     <msgs>
       <debug>#wikimedia-ops</debug>
@@ -475,12 +483,20 @@
       <debug>PeterSymonds</debug>
       <debug>Hersfold</debug>
       <debug>killiondude</debug>
+      <debug>DeltaQuad</debug>
+      <debug>Logan_</debug>
+      <debug>Shirik</debug>
+      <debug>slakr</debug>
       <low>KFP</low>
       <low>chzz</low>
+      <low>Gfoley4</low>
     </hilights>
     <msgs>
       <debug>#wikimedia-ops</debug>
     </msgs>
+  </channel>
+  <channel id="#wikipedia-en-unblock">
+    <hilights></hilights>
   </channel>
   <channel id="#wikipedia-es" op="no">
     <hilights>
