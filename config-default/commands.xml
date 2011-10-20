@@ -4,13 +4,27 @@
     $conn->privmsg($event->{to}->[0], "source is at http://svn.linuxrulz.org/repos/antispammeta");
   ]]>
   </command>
-  <command cmd="^;sql (main|log) (.*)">
+  <command cmd="^;sql (main|log) (.*)" flag="d">
   <![CDATA[
     my $dbh = $::db->{DBH};
     if ($1 eq 'log') {
       $dbh = $::db->{DBH_LOG};
     }
     $::db->raw($conn, $event->{to}->[0], $dbh, $2);
+  ]]>
+  </command>
+  <command cmd="^;monitor (\S+) (yes|no)$" flag="a">
+  <![CDATA[
+    my $chan = lc $1;
+    my $switch = lc $2;
+    my $link = ASM::Util->getLink(lc $chan);
+    if ( lc $link ne lc $chan ) {
+      $conn->privmsg($event->{to}->[0], "Error: $chan is linked to $link - use $link instead.");
+      return;
+    }
+    $::channels->{channel}->{$chan}->{monitor} = $switch;
+    ASM::XML->writeChannels();
+    $conn->privmsg($event->{to}->[0], "Monitor flag for $chan set to $switch");
   ]]>
   </command>
   <command cmd="^;help$">
