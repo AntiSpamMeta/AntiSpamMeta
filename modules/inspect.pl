@@ -37,13 +37,11 @@ sub inspect {
     $iaddr = gethostbyname($event->{host});
     $rev = join('.', reverse(unpack('C4', $iaddr))).'.' if (defined $iaddr);
   }
-#  %monx = defined($::channels->{channel}->{master}->{event}) ? %{$::channels->{channel}->{master}->{event}} : ();
   ## NB: isn't there a better way to do this with grep, somehow?
   %aonx = %{$::channels->{channel}->{master}->{event}};
   foreach $chan ( @{$event->{to}} ) {
     next unless $chan =~ /^#/;
-#    %conx = defined($::channels->{channel}->{lc $chan}->{event}) ? %{$::channels->{channel}->{lc $chan}->{event}} : ();
-#    %aonx = (%monx, %conx);
+    next if ((defined($::channels->{channel}->{$chan}->{monitor})) and ($::channels->{channel}->{$chan}->{monitor} eq "no"));
     foreach $id (keys %aonx) {
       next unless ( grep { $event->{type} eq $_ } split(/[,:; ]+/, $aonx{$id}{type}) );
       next if ($aonx{$id}{class} eq 'dnsbl') && ($event->{host} =~ /(fastwebnet\.it|fastres\.net)$/); #this is a bad hack
