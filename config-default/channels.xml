@@ -493,6 +493,7 @@
     <msgs></msgs>
   </channel>
   <channel id="master">
+    <event id="suckmynick" action="none" class="re" reason="using a potentially offensive nick" risk="low" time="0" type="join">(suck.*dick)</event>
     <event id="advflood" action="none" class="advsplitflood" reason="advanced distributed flooding" risk="debug" time="0" type="public,part,caction" xresult="1">5:3</event>
     <event id="anontalk1" action="none" class="re" reason="anontalk.com spam" risk="medium" time="0" type="public" xresult="1">(?i)w(.?)w\1w\1?.\1?a\1n\1o\1n\1t\1a\1l\1k\1?.\1?c\1o\1m</event>
     <event id="autoremove" action="none" class="re" reason="on chanserv autoremove" risk="info" time="0" type="part">^requested by ChanServ</event>
