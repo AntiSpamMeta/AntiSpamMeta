@@ -1,6 +1,10 @@
 <channels>
-  <channel id="##apple" op="no" />
-  <channel id="##asb-debug" monitor="no" op="no" />
+  <channel id="##apple" op="no">
+    <hilights></hilights>
+  </channel>
+  <channel id="##asb-debug" monitor="no" op="no">
+    <hilights></hilights>
+  </channel>
   <channel id="##asb-meta" link="##asb-testing">
     <hilights></hilights>
   </channel>
@@ -83,6 +87,12 @@
       <disable>##asb-nexus</disable>
     </msgs>
   </channel>
+  <channel id="##wikia">
+    <hilights>
+      <debug>charitwo</debug>
+    </hilights>
+    <msgs></msgs>
+  </channel>
   <channel id="##wikimedia-ops" op="no">
     <hilights></hilights>
     <msgs></msgs>
@@ -106,7 +116,12 @@
     </hilights>
     <msgs></msgs>
   </channel>
-  <channel id="#Reddit" />
+  <channel id="#Reddit">
+    <hilights></hilights>
+  </channel>
+  <channel id="#RubyOnRails">
+    <hilights></hilights>
+  </channel>
   <channel id="#debian" op="no" silence="yes">
     <hilights></hilights>
     <msgs>
@@ -123,6 +138,7 @@
     <msgs></msgs>
   </channel>
   <channel id="#fedora">
+    <hilights></hilights>
     <msgs>
       <info>#ubuntu-ops-monitor</info>
     </msgs>
@@ -148,6 +164,7 @@
       <low>DLange</low>
       <low>PriceChild</low>
       <low>werdan7</low>
+      <low>dax</low>
       <medium>ompaul</medium>
       <medium>mrmist</medium>
     </hilights>
@@ -168,7 +185,9 @@
       <info>#ubuntu-ops-monitor</info>
     </msgs>
   </channel>
-  <channel id="#hamradio" link="##hamradio" op="no" silence="yes" />
+  <channel id="#hamradio" link="##hamradio" op="no" silence="yes">
+    <hilights></hilights>
+  </channel>
   <channel id="#hamradio-ops" op="no">
     <hilights></hilights>
   </channel>
@@ -244,6 +263,7 @@
     </msgs>
   </channel>
   <channel id="#ubuntu-ops">
+    <hilights></hilights>
     <msgs></msgs>
   </channel>
   <channel id="#ubuntu-ops-monitor" monitor="no" op="no">
@@ -265,6 +285,12 @@
     </hilights>
     <msgs></msgs>
   </channel>
+  <channel id="#wikia-dev">
+    <hilights></hilights>
+  </channel>
+  <channel id="#wikileaks">
+    <hilights></hilights>
+  </channel>
   <channel id="#wikimedia" op="no" silence="yes">
     <hilights>
       <debug>Martinp23</debug>
@@ -273,6 +299,9 @@
       <debug>vvv</debug>
       <debug>Barras</debug>
       <debug>AfterDeath</debug>
+      <debug>DeltaQuad</debug>
+      <debug>Snowolf</debug>
+      <debug>Thehelpfulone</debug>
       <low>Majorly</low>
       <low>Fabexplosive</low>
     </hilights>
@@ -363,6 +392,7 @@
       <debug>Gfoley4</debug>
       <debug>Logan_</debug>
       <debug>Theo10011</debug>
+      <debug>Snowolf</debug>
       <low>bumm13_</low>
       <low>Cyrius</low>
       <low>DanielB</low>
@@ -417,6 +447,7 @@
       <debug>Theo10011</debug>
       <debug>Gfoley4</debug>
       <debug>Logan_</debug>
+      <debug>Snowolf</debug>
       <high>Rudha-an</high>
       <low>Cobi</low>
       <low>Cbrown1023</low>
@@ -469,6 +500,8 @@
       <debug>JoeGazz84</debug>
       <debug>Steven_Zhang</debug>
       <debug>SteveMobile</debug>
+      <debug>TBloemink</debug>
+      <debug>Snowolf</debug>
       <low>KFP</low>
       <low>chzz</low>
       <low>Gfoley4</low>
@@ -493,7 +526,6 @@
     <msgs></msgs>
   </channel>
   <channel id="master">
-    <event id="suckmynick" action="none" class="re" reason="using a potentially offensive nick" risk="low" time="0" type="join">(suck.*dick)</event>
     <event id="advflood" action="none" class="advsplitflood" reason="advanced distributed flooding" risk="debug" time="0" type="public,part,caction" xresult="1">5:3</event>
     <event id="anontalk1" action="none" class="re" reason="anontalk.com spam" risk="medium" time="0" type="public" xresult="1">(?i)w(.?)w\1w\1?.\1?a\1n\1o\1n\1t\1a\1l\1k\1?.\1?c\1o\1m</event>
     <event id="autoremove" action="none" class="re" reason="on chanserv autoremove" risk="info" time="0" type="part">^requested by ChanServ</event>
@@ -508,7 +540,7 @@
     <event id="dcc-topic" action="none" class="re" reason="setting a bad topic" risk="medium" time="0" type="topic">\bDCC SEND </event>
     <event id="debugme" action="none" class="re" reason="sending a string designed to trigger a debug test alert, disregard this" risk="debug" time="0" type="public">debugantispambotdebug</event>
     <event id="dronebl" action="none" class="dnsbl" reason="host $evhost is in dnsbl.dronebl.org ( $xresult )" risk="info" time="0" type="join" xresult="Automatically determined botnet IPs (experimental)">dnsbl.dronebl.org</event>
-    <event id="efnetbl" action="none" class="dnsbl" reason="host $evhost is in rbl.efnetrbl.org ( $xresult )" risk="info" time="0" type="join" xresult="TOR exit server">rbl.efnetrbl.org</event>
+    <event id="efnetbl" action="none" class="dnsbl" reason="host $evhost is in rbl.efnetrbl.org ( $xresult )" risk="info" time="0" type="join" xresult="Drones / Flooding">rbl.efnetrbl.org</event>
     <event id="genspam1" action="none" class="re" reason="generic spamming" risk="debug" time="0" type="public" xresult="1">([^ ]{4,} +)\1{5,}</event>
     <event id="joinflood" action="none" class="floodqueue" reason="join flood (5 joins in 20 seconds)" risk="medium" time="0" type="join" xresult="1">5:20</event>
     <event id="keylogger" action="none" class="re" override="keylogger-medium" reason="using the norton start-key-logger exploit" risk="high" time="0" type="public" xresult="1">^startkeylogger$|^stopkeylogger$</event>
@@ -523,6 +555,7 @@
     <event id="proxybl" action="none" class="dnsbl" reason="host $evhost is in dnsbl.proxybl.org" risk="info" time="0" type="join" xresult="this does nothing I think">dnsbl.proxybl.org</event>
     <event id="redarmyoflol" action="none" class="re" reason="parting with 'red army of lol'" risk="low" time="0" type="part">RED ARMY OF LOL</event>
     <event id="sms_spam" action="none" class="re" reason="spam link / virus" risk="low" time="0" type="public" xresult="1">\.com/sms.exe</event>
+    <event id="suckmynick" action="none" class="re" reason="using a potentially offensive nick" risk="low" time="0" type="join">(suck.*dick)</event>
     <event id="wikifags2" action="none" class="re" reason="saying 'sure are a lot of wikifag'..." risk="low" time="0" type="public">(?i)^sure are a ?lot of .*fags? in here</event>
     <hilights>
       <debug>ST47</debug>

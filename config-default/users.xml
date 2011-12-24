@@ -25,6 +25,7 @@
   <person id="pricechild" flags="oath" host="freenode/staff/ubuntu.member.pricechild" />
   <person id="richih" flags="oath" host="freenode/staff/richih" />
   <person id="rjd0060" flags="oth" host="wikimedia/rjd0060" />
+  <person id="sauvin" flags="o" host="about/linux/staff/sauvin" />
   <person id="seanw" flags="oath" host="freenode/staff-emeritus/wikimedia.sean-whitton" />
   <person id="st47" flags="oath" host="perlwikipedia/developer/wikipedia.st47" />
   <person id="theacolyte" flags="t" host="about/windows/staff/theacolyte" />
@@ -35,4 +36,6 @@
   <person id="werdan7" flags="oath" host="freenode/staff/wikimedia.werdan7" />
   <person id="wildpikachu" flags="oath" host="about/linux/staff/wildpikachu" />
   <person id="wimt" flags="oath" host="freenode/staff/wikipedia.wimt" />
+  <person id="windowshasyou" flags="o" host="about/linux/staff/windowshasyou" />
+  <person id="zymurgy" flags="o" host="about/linux/staff/sauvin" />
 </people>
