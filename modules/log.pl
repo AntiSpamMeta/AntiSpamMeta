@@ -27,6 +27,7 @@ sub logg
   foreach my $chan ( @chans )
   {
     $chan = lc $chan;
+    next if ($chan eq '$$*');
     if (substr($chan, 0, 1) eq '@') {
       $chan = substr($chan, 1);
     }
