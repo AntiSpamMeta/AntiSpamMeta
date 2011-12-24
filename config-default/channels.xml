@@ -1,4 +1,7 @@
 <channels>
+  <channel id="##Thehelpfulone" op="no">
+    <hilights></hilights>
+  </channel>
   <channel id="##apple" op="no">
     <hilights></hilights>
   </channel>
@@ -294,7 +297,6 @@
   <channel id="#wikimedia" op="no" silence="yes">
     <hilights>
       <debug>Martinp23</debug>
-      <debug>theoneandonly</debug>
       <debug>PeterSymonds</debug>
       <debug>vvv</debug>
       <debug>Barras</debug>
@@ -302,8 +304,6 @@
       <debug>DeltaQuad</debug>
       <debug>Snowolf</debug>
       <debug>Thehelpfulone</debug>
-      <low>Majorly</low>
-      <low>Fabexplosive</low>
     </hilights>
     <msgs>
       <debug>#wikimedia-ops</debug>
@@ -311,10 +311,8 @@
   </channel>
   <channel id="#wikimedia-commons" op="no" silence="yes">
     <hilights>
-      <debug>theoneandonly</debug>
       <debug>killiondude</debug>
       <debug>matanya</debug>
-      <low>Abigor</low>
       <low>Kanonkas</low>
     </hilights>
     <msgs>
@@ -346,6 +344,9 @@
   <channel id="#wikimedia-otrs" op="no">
     <hilights>
       <debug>PeterSymonds</debug>
+      <debug>jeremyb</debug>
+      <debug>kibble</debug>
+      <debug>Keegan</debug>
     </hilights>
     <msgs>
       <debug>#wikimedia-ops</debug>
@@ -353,7 +354,6 @@
   </channel>
   <channel id="#wikimedia-overflow">
     <hilights>
-      <debug>theoneandonly</debug>
       <debug>Thehelpfulone</debug>
     </hilights>
     <msgs>
@@ -362,7 +362,6 @@
   </channel>
   <channel id="#wikimedia-tech" op="no" silence="yes">
     <hilights>
-      <debug>theoneandonly</debug>
     </hilights>
     <msgs>
       <low>#wikimedia-ops</low>
@@ -376,7 +375,6 @@
       <debug>Thehelpfulone</debug>
       <debug>werdan7</debug>
       <debug>wimt</debug>
-      <debug>theoneandonly</debug>
       <debug>Jake_Wartenberg</debug>
       <debug>shimgray</debug>
       <debug>kibble</debug>
@@ -396,23 +394,20 @@
       <low>bumm13_</low>
       <low>Cyrius</low>
       <low>DanielB</low>
-      <low>Fabexplosive</low>
       <low>FastLizard4</low>
       <low>James_F</low>
       <low>JohnReaves</low>
       <low>Lucifer_Cat</low>
       <low>Luna-San</low>
-      <low>Uberpenguin</low>
       <low>Mike42</low>
       <low>Mike_H</low>
-      <low>nixeagle</low>
-      <low>Ceiling_Cat</low>
       <low>skenmy</low>
       <low>ST47</low>
       <low>tawker</low>
       <low>slakr</low>
       <low>Courcelles</low>
       <medium>closedmouth</medium>
+      <medium>Fluffernutter</medium>
     </hilights>
     <msgs>
       <debug>#wikimedia-ops</debug>
@@ -432,7 +427,6 @@
       <debug>wimt</debug>
       <debug>Thehelpfulone</debug>
       <debug>PeterSymonds</debug>
-      <debug>theoneandonly</debug>
       <debug>Not_the_NSA</debug>
       <debug>Prodego</debug>
       <debug>Jake_Wartenberg</debug>
@@ -456,7 +450,6 @@
       <low>JohnReaves</low>
       <low>Luna-Santin</low>
       <low>Mike42</low>
-      <low>smoddy</low>
       <low>Tawker</low>
       <low>NotASpy</low>
       <low>|X|</low>
@@ -477,17 +470,13 @@
       <debug>werdan7</debug>
       <debug>GDonato</debug>
       <debug>Thehelpfulone</debug>
-      <debug>theoneandonly</debug>
       <debug>Mike42</debug>
       <debug>bjelleklang</debug>
-      <debug>centrx</debug>
-      <debug>nixeagle</debug>
       <debug>JohnReaves</debug>
       <debug>After-Midnight</debug>
       <debug>Srikeit</debug>
       <debug>Deon555</debug>
       <debug>Luna-San</debug>
-      <debug>FrancoGG</debug>
       <debug>Golbez</debug>
       <debug>stwalkerster</debug>
       <debug>PeterSymonds</debug>
