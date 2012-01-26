@@ -11,7 +11,7 @@ sub new
 
 sub doServices {
   my ($self, $conn, $event) = @_;
-  my $i = 5;
+  my $i = 1;
   if ($event->{from} eq 'NickServ!NickServ@services.')
   {
     print "NickServ: $event->{args}->[0]\n";
@@ -23,7 +23,7 @@ sub doServices {
     {
       foreach my $x ( @{$::settings->{autojoins}} ) {
         $conn->schedule($i, sub { $conn->join($x); });
-        $i = $i + 6;
+        $i = $i + 5;
       }
     }
     elsif ($event->{args}->[0] =~ /has been killed$/ )
