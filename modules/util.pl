@@ -17,6 +17,9 @@ my %oq;
   'opalert'=> 9001 #OVER NINE THOUSAND!!!
 );
 
+#leaves room for more levels if for some reason we end up needing more
+#theoretically, you should be able to change those numbers without any damage
+
 %::COLORS =
 (
   'white'   => '00',
@@ -53,9 +56,6 @@ sub new
   bless ($self);
   return $self;
 }
-
-#leaves room for more levels if for some reason we end up needing more
-#theoretically, you should be able to change those numbers without any damage
 
 sub maxlen {
   my ($a, $b) = @_;
@@ -202,6 +202,11 @@ sub seq {
   return 0 unless defined($n1);
   return 0 unless defined($n2);
   return ($n1 eq $n2);
+}
+
+sub dprint {
+  my ($module, $text) = @_;
+  print $text if $::debug;
 }
 
 return 1;
