@@ -2,9 +2,6 @@
   <channel id="##Thehelpfulone" op="no">
     <hilights></hilights>
   </channel>
-  <channel id="##apple" op="no">
-    <hilights></hilights>
-  </channel>
   <channel id="##asb-debug" monitor="no" op="no">
     <hilights></hilights>
   </channel>
@@ -67,10 +64,6 @@
     <msgs>
       <opalert>##linux-ops</opalert>
     </msgs>
-  </channel>
-  <channel id="##mac" op="no">
-    <hilights></hilights>
-    <msgs></msgs>
   </channel>
   <channel id="##physics" op="no">
     <hilights></hilights>
@@ -173,7 +166,7 @@
     </hilights>
     <msgs></msgs>
   </channel>
-  <channel id="#freenode-newyears" op="no" silence="yes">
+  <channel id="#freenode-newyears" link="#freenode" op="no" silence="yes">
     <hilights></hilights>
   </channel>
   <channel id="#gentoo" op="no" silence="yes">
@@ -277,10 +270,6 @@
     <hilights></hilights>
     <msgs></msgs>
   </channel>
-  <channel id="#uncyclopedia" op="no">
-    <hilights></hilights>
-    <msgs></msgs>
-  </channel>
   <channel id="#wikia" op="no">
     <hilights>
       <medium>tomaw</medium>
@@ -304,6 +293,8 @@
       <debug>DeltaQuad</debug>
       <debug>Snowolf</debug>
       <debug>Thehelpfulone</debug>
+      <debug>Tanvir</debug>
+      <debug>jeremyb</debug>
     </hilights>
     <msgs>
       <debug>#wikimedia-ops</debug>
@@ -313,6 +304,9 @@
     <hilights>
       <debug>killiondude</debug>
       <debug>matanya</debug>
+      <debug>Tanvir</debug>
+      <debug>log</debug>
+      <debug>Thehelpfulone</debug>
       <low>Kanonkas</low>
     </hilights>
     <msgs>
@@ -361,8 +355,7 @@
     </msgs>
   </channel>
   <channel id="#wikimedia-tech" op="no" silence="yes">
-    <hilights>
-    </hilights>
+    <hilights></hilights>
     <msgs>
       <low>#wikimedia-ops</low>
     </msgs>
@@ -391,6 +384,8 @@
       <debug>Logan_</debug>
       <debug>Theo10011</debug>
       <debug>Snowolf</debug>
+      <debug>Tanvir</debug>
+      <debug>TBloemink</debug>
       <low>bumm13_</low>
       <low>Cyrius</low>
       <low>DanielB</low>
@@ -442,6 +437,9 @@
       <debug>Gfoley4</debug>
       <debug>Logan_</debug>
       <debug>Snowolf</debug>
+      <debug>Steven_Zhang</debug>
+      <debug>Shirik</debug>
+      <debug>TBloemink</debug>
       <high>Rudha-an</high>
       <low>Cobi</low>
       <low>Cbrown1023</low>
@@ -491,6 +489,8 @@
       <debug>SteveMobile</debug>
       <debug>TBloemink</debug>
       <debug>Snowolf</debug>
+      <debug>Tanvir</debug>
+      <debug>TBloemink</debug>
       <low>KFP</low>
       <low>chzz</low>
       <low>Gfoley4</low>
@@ -529,7 +529,7 @@
     <event id="dcc-topic" action="none" class="re" reason="setting a bad topic" risk="medium" time="0" type="topic">\bDCC SEND </event>
     <event id="debugme" action="none" class="re" reason="sending a string designed to trigger a debug test alert, disregard this" risk="debug" time="0" type="public">debugantispambotdebug</event>
     <event id="dronebl" action="none" class="dnsbl" reason="host $evhost is in dnsbl.dronebl.org ( $xresult )" risk="info" time="0" type="join" xresult="Automatically determined botnet IPs (experimental)">dnsbl.dronebl.org</event>
-    <event id="efnetbl" action="none" class="dnsbl" reason="host $evhost is in rbl.efnetrbl.org ( $xresult )" risk="info" time="0" type="join" xresult="Drones / Flooding">rbl.efnetrbl.org</event>
+    <event id="efnetbl" action="none" class="dnsbl" reason="host $evhost is in rbl.efnetrbl.org ( $xresult )" risk="info" time="0" type="join" xresult="TOR exit server">rbl.efnetrbl.org</event>
     <event id="genspam1" action="none" class="re" reason="generic spamming" risk="debug" time="0" type="public" xresult="1">([^ ]{4,} +)\1{5,}</event>
     <event id="joinflood" action="none" class="floodqueue" reason="join flood (5 joins in 20 seconds)" risk="medium" time="0" type="join" xresult="1">5:20</event>
     <event id="keylogger" action="none" class="re" override="keylogger-medium" reason="using the norton start-key-logger exploit" risk="high" time="0" type="public" xresult="1">^startkeylogger$|^stopkeylogger$</event>
@@ -539,13 +539,16 @@
     <event id="massflood" action="ban" class="splitflood" reason="distributed flooding" risk="high" time="0" type="public,part,caction" xresult="1">4:4</event>
     <event id="nickspam" action="none" class="nickspam" reason="nickspamming" risk="high" time="0" type="public" xresult="1">60:10</event>
     <event id="notice" action="none" class="re" reason="sending a notice to the channel" risk="medium" time="0" type="notice" xresult="1">.*</event>
-    <event id="phishing1" action="none" class="re" override="notice" reason="trying to steal passwords (v1)" risk="high" time="0" type="notice" xresult="1">identify.*/msg .* identify &lt;password&gt;</event>
+    <event id="phishing1" action="none" class="re" override="notice" reason="trying to steal passwords (v1)" risk="high" time="0" type="notice">identify.*/msg .* identify &lt;password&gt;</event>
     <event id="phishing2" action="none" class="re" override="notice" reason="trying to steal passwords (v2)" risk="high" time="0" type="notice">^This nickname is registered</event>
-    <event id="proxybl" action="none" class="dnsbl" reason="host $evhost is in dnsbl.proxybl.org" risk="info" time="0" type="join" xresult="this does nothing I think">dnsbl.proxybl.org</event>
+    <event id="proxybl" action="none" class="dnsbl" reason="host $evhost is in dnsbl.proxybl.org" risk="info" time="0" type="join">dnsbl.proxybl.org</event>
     <event id="redarmyoflol" action="none" class="re" reason="parting with 'red army of lol'" risk="low" time="0" type="part">RED ARMY OF LOL</event>
     <event id="sms_spam" action="none" class="re" reason="spam link / virus" risk="low" time="0" type="public" xresult="1">\.com/sms.exe</event>
     <event id="suckmynick" action="none" class="re" reason="using a potentially offensive nick" risk="low" time="0" type="join">(suck.*dick)</event>
     <event id="wikifags2" action="none" class="re" reason="saying 'sure are a lot of wikifag'..." risk="low" time="0" type="public">(?i)^sure are a ?lot of .*fags? in here</event>
+    <event id="sorbsbl" action="none" class="dnsbl" reason="host $evhost is in dnsbl.sorbs.net ( $xresult )" risk="info" time="0" type="join">dnsbl.sorbs.net</event>
+    <event id="njabl" action="none" class="dnsbl" reason="host $evhost is in dnsbl.njabl.org ( $xresult )" risk="info" time="0" type="join">dnsbl.njabl.org</event>
+    <event id="ahbl" action="none" class="dnsbl" reason="host $evhost is in dnsbl.ahbl.org ( $xresult )" risk="info" time="0" type="join">dnsbl.ahbl.org</event>
     <hilights>
       <debug>ST47</debug>
       <debug>pctony</debug>
@@ -555,7 +558,6 @@
       <low>mrmist</low>
       <medium>dave2</medium>
       <medium>RichiH</medium>
-      <medium>Thehelpfulone</medium>
     </hilights>
     <msgs>
       <debug>##asb-nexus</debug>
