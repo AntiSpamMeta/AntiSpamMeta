@@ -4,7 +4,6 @@ use warnings;
 use strict;
 
 my %sf;
-my %oq;
 
 %::RISKS =
 (
@@ -112,31 +111,6 @@ sub speak
 #this item is a stub, dur
 sub hostip {
   return gethostbyname($_[0]);
-}
-
-# Send something that requires ops
-sub o_send {
-  my ( $conn, $send ) = @_;
-  my @splt = split(/ /, $send);
-  my $chan = lc $splt[1];
-  $oq{$chan} = [] unless defined($oq{$chan});
-  if ( cs($chan)->{op} ne 'no' ) {
-    print Dumper(lc $::settings->{nick}, $::sc{$chan}{users}{lc $::settings->{nick}});
-    print Dumper($send, $chan);
-    if ( $::sc{$chan}{users}{lc $::settings->{nick}}{op} eq 1) {
-      $conn->sl($send);
-    }
-    else {
-      push( @{$oq{$chan}},$send );
-      $conn->privmsg( 'chanserv', "op $chan" );
-    }
-  }
-}
-
-sub doQueue {
-  my ( $conn, $chan ) = @_;
-  return unless defined $oq{$chan};
-  $conn->sl(shift(@{$oq{$chan}})) while (@{$oq{$chan}});
 }
 
 sub flood_add {

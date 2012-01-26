@@ -89,7 +89,6 @@ sub on_join {
     $::sc{$chan} = {};
     mkdir($::settings->{log}->{dir} . $chan);
     $conn->sl("who $chan");
-    $conn->privmsg('ChanServ', "op $chan" ) if (defined cs($chan)->{op}) && (cs($chan)->{op} eq 'yes');
 # I don't know what the hell this was for but I'm disabling it for now
 #    #TODO: make it settable via config. Hardcoded channames ftl.
 #    if ($chan eq '##linux') {

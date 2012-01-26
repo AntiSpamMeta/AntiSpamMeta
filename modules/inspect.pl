@@ -17,13 +17,11 @@ sub new
 
 sub inspect {
   our ($self, $conn, $event) = @_;
-  my (%conx, %monx);
   my (%aonx, %dct, $rev, $chan, $id);
   %aonx=(); %dct=(); $chan=""; $id="";
-  my (@dnsbl, @unpakt, @uniq, @cut);
+  my (@dnsbl, @uniq);
   my ($match, $txtz, $iaddr);
   my @override = [];
-  our $unmode='';
   my $nick = lc $event->{nick};
   my $xresult;
   return if (index($nick, ".") != -1);
@@ -46,8 +44,7 @@ sub inspect {
       next unless ( grep { $event->{type} eq $_ } split(/[,:; ]+/, $aonx{$id}{type}) );
       next if ($aonx{$id}{class} eq 'dnsbl') && ($event->{host} =~ /(fastwebnet\.it|fastres\.net)$/); #this is a bad hack
       $xresult = $::classes->check($aonx{$id}{class}, $aonx{$id}, $id, $event, $chan, $rev); # this is another bad hack done for dnsbl-related stuff
-      next if defined($xresult) == 0;
-      next if $xresult eq 0;
+      next unless (defined($xresult)) && ($xresult ne 0);
       ASM::Util->dprint(Dumper( $xresult ));
       $dct{$id} = $aonx{$id};
       $dct{$id}{xresult} = $xresult;
@@ -59,7 +56,6 @@ sub inspect {
     }
   }
   delete $dct{$_} foreach @override;
-  my $mylastreason = $::lastreason;
   my $evcontent = $event->{args}->[0];
   my $evhost = $event->{host};
   foreach $chan (@{$event->{to}}) {

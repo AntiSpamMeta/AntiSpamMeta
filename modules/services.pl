@@ -38,17 +38,9 @@ sub doServices {
   elsif ($event->{from} eq 'ChanServ!ChanServ@services.')
   {
     print "ChanServ: $event->{args}->[0] \n";
-    if ($event->{args}->[0] =~ /You are already opped on \[.(.*).\]/)
-    {
-      $::oq->doQueue($conn, $1);
-    }
-    elsif ( $event->{args}->[0] =~ /^All.*bans matching.*have been cleared on(.*)/)
+    if ( $event->{args}->[0] =~ /^All.*bans matching.*have been cleared on(.*)/)
     {
       $conn->join($1);
-    }
-    elsif ( $event->{args}->[0] =~ /You are not authorized to perform this operation/ )
-    {
-      $::oq->clean();
     }
   }
 }
