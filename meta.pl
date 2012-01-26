@@ -20,7 +20,7 @@ $::pass = '';
 @::joinrate=(); #I really need to stop doing this shit
 
 BEGIN {
-my @modules = qw/Util Xml Inspect Event Services Log Command Classes Actions Mysql OperQueue/;
+my @modules = qw/Util Xml Inspect Event Services Log Command Classes Mysql/;
 require 'modules/' . lc $_ . '.pl' foreach @modules;
 }
 
@@ -52,11 +52,9 @@ sub init {
   $conn->debug($debug);
   $::inspector = ASM::Inspect->new();
   $::services = ASM::Services->new();
-  $::oq = ASM::OperQueue->new();
   $::commander = ASM::Commander->new();
   $::event = ASM::Event->new($conn, $::inspector);
   $::classes = ASM::Classes->new();
-  $::actions = ASM::Actions->new();
   my @eline=io('exempt.txt')->getlines;
   chomp @eline;
   foreach my $item (@eline) {

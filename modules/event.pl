@@ -335,12 +335,6 @@ sub on_mode
       my @ex = @{$line};
       if ( $ex[0] eq '+o' ) {
         $::sc{$chan}{users}{lc $ex[1]}{op}=1;
-        if (lc $ex[1] eq lc $::settings->{nick}) {
-          $::oq->doQueue($conn, $chan);
-          if ( $::channels->{channel}->{$chan}->{op} eq "when" ) {
-            $conn->schedule(600, sub {$conn->mode($chan, "-o $::settings->{nick}");});
-          }
-        }
       }
       elsif ( $ex[0] eq '-o' ) {
         $::sc{$chan}{users}{lc $ex[1]}{op}=0;

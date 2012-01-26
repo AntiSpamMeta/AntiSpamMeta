@@ -71,19 +71,6 @@ sub inspect {
               "\x02$event->{nick}\x02 - ${nicereason}; ping ";
       $txtz = $txtz . ASM::Util->commaAndify(ASM::Util->getAlert(lc $chan, $dct{$id}{risk}, 'hilights')) if (ASM::Util->getAlert(lc $chan, $dct{$id}{risk}, 'hilights'));
       $txtz = $txtz . ' !att-' . $chan . '-' . $dct{$id}{risk};
-      if (ASM::Util->cs(lc $chan)->{op} ne 'no') {
-        if ($event->{type} eq 'topic') { #restore old topic
-          my $oldtopic = $::sc{lc $event->{to}->[0]}{topic}{text};
-          $::oq->o_send( $conn, "topic $chan :$oldtopic");
-          $::oq->o_send( $conn, "mode $chan +t");
-        }
-#        eval '$unmode = Actions::' . $dct{$id}{action} . '($conn, $event, $chan);';
-        $unmode = $::actions->do($dct{$id}{action}, $conn, $event, $chan);
-        my $lconn=$conn; my $lunmode = $unmode;
-        if ((int($dct{$id}{time}) ne 0) && ($unmode ne '')) {
-           $conn->schedule(int($dct{$id}{time}), sub { $::oq->o_send($lconn,$lunmode); });
-        }
-      }
       unless (defined($::ignored{$chan}) && ($::ignored{$chan} >= $::RISKS{$dct{$id}{risk}})) {
         my @tgts = ASM::Util->getAlert($chan, $dct{$id}{risk}, 'msgs');
         foreach my $tgt (@tgts) { #unfortunately wikipedia has way too many ops, and it breaks things
