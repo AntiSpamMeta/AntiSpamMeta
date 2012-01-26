@@ -74,16 +74,28 @@ sub on_join {
   my $evcopy = \%evcopyx;
   my $nick = lc $event->{nick};
   my $chan = lc $event->{to}->[0];
+  my $rate;
+  push( @::joinrate, time );
+  while ( time >= $::joinrate[0] + 1 ) {
+      last if ( $#{ @::joinrate } == 0 );
+      shift( @::joinrate );
+    }
+  $rate = $#{ @::joinrate}+1;
+  print "on_join rate = $rate\n" if $::debug;
+  if ( $rate == 20 ) {
+    $conn->privmsg('##asb-nexus', "AfterDeath: I think I'm seeing a netjoin!");
+  }
   if ( lc $conn->{_nick} eq lc $nick)  {
     $::sc{$chan} = {};
     mkdir($::settings->{log}->{dir} . $chan);
     $conn->sl("who $chan");
     $conn->privmsg('ChanServ', "op $chan" ) if (defined cs($chan)->{op}) && (cs($chan)->{op} eq 'yes');
-    #TODO: make it settable via config. Hardcoded channames ftl.
-    if ($chan eq '##linux') {
-      $conn->schedule(300, \&do_chancount, $chan, 300);
-      #TODO: mark this as a channel we're watching so we don't schedule this multiple times
-    }
+# I don't know what the hell this was for but I'm disabling it for now
+#    #TODO: make it settable via config. Hardcoded channames ftl.
+#    if ($chan eq '##linux') {
+#      $conn->schedule(300, \&do_chancount, $chan, 300);
+#      #TODO: mark this as a channel we're watching so we don't schedule this multiple times
+#    }
   }
   $::sc{$chan}{users}{$nick} = {};
   $::sc{$chan}{users}{$nick}{hostmask} = $event->{userhost};
@@ -432,6 +444,7 @@ sub on_whoreply
 sub on_bannedfromchan {
   my ($conn, $event) = @_;
   $conn->privmsg('ChanServ', "unban $event->{args}->[1]");
+  print "I'm banned from " . $event->{args}->[1] . "... attempting to unban myself\n";
 }
 
 sub on_byechan {

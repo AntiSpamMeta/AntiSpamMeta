@@ -17,6 +17,7 @@ use Getopt::Long;
 %::eline=();
 $::pass = '';
 @::string_blacklist=();
+@::joinrate=(); #I really need to stop doing this shit
 
 BEGIN {
 my @modules = qw/Util Xml Inspect Event Services Log Command Classes Actions Mysql OperQueue/;
