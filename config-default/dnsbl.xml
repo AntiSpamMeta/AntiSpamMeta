@@ -19,10 +19,22 @@
 <!--    <response id="127.0.0.13">Brute force attackers</response> -->
     <response id="127.0.0.14">Open Wingate Proxy</response>
     <response id="127.0.0.15">Compromised router / gateway</response>
-    <response id="127.0.0.17">Automatically determined botnet IPs (experimental)</response>
+<!--    <response id="127.0.0.17">Automatically determined botnet IPs (experimental)</response> -->
     <response id="127.0.0.255">Unknown</response>
   </query>
   <query id="dnsbl.proxybl.org">
     <response id="127.0.0.2">Open Proxy</response>
+  </query>
+  <query id="dnsbl.sorbs.net">
+    <response id="127.0.0.2">HTTP Proxy</response>
+    <response id="127.0.0.3">SOCKS Proxy</response>
+    <response id="127.0.0.4">Misc. proxy</response>
+  </query>
+  <query id="dnsbl.njabl.org">
+    <response id="127.0.0.9">Open proxy</response>
+  </query>
+  <query id="dnsbl.ahbl.org">
+    <response id="127.0.0.3">Open proxy cat 1</response>
+    <response id="127.0.0.19">Open proxy cat 2</response>
   </query>
 </dnsbl>
