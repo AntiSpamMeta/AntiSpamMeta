@@ -28,8 +28,8 @@ sub inspect {
   my $xresult;
   return if (index($nick, ".") != -1);
   return if (defined($::eline{$nick}) || defined($::eline{lc $event->{user}}) || defined($::eline{lc $event->{host}}));
-  if ( $event->{host} =~ /gateway\/web\/ajax\// ) {
-    if ( $event->{user} =~ /.=([0-9a-f][0-9a-f])([0-9a-f][0-9a-f])([0-9a-f][0-9a-f])([0-9a-f][0-9a-f])/ ) {
+  if ( $event->{host} =~ /gateway\/web\// ) {
+    if ( $event->{user} =~ /([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})/ ) {
       $rev = sprintf("%d.%d.%d.%d.", hex($4), hex($3), hex($2), hex($1));
     }
   }
@@ -48,7 +48,7 @@ sub inspect {
       $xresult = $::classes->check($aonx{$id}{class}, $aonx{$id}, $id, $event, $chan, $rev); # this is another bad hack done for dnsbl-related stuff
       next if defined($xresult) == 0;
       next if $xresult eq 0;
-      print Dumper( $xresult );
+      ASM::Util->dprint(Dumper( $xresult ));
       $dct{$id} = $aonx{$id};
       $dct{$id}{xresult} = $xresult;
     }
@@ -86,8 +86,14 @@ sub inspect {
       }
       unless (defined($::ignored{$chan}) && ($::ignored{$chan} >= $::RISKS{$dct{$id}{risk}})) {
         my @tgts = ASM::Util->getAlert($chan, $dct{$id}{risk}, 'msgs');
-        foreach my $tgt (@tgts) {
-          $conn->privmsg($tgt, $txtz);
+        foreach my $tgt (@tgts) { #unfortunately wikipedia has way too many ops, and it breaks things
+          if (length($txtz) <= 380) {
+            $conn->privmsg($tgt, $txtz);
+          } else {
+            my $splitpart = rindex($txtz, " ", 380);
+            $conn->privmsg($tgt, substr($txtz, 0, $splitpart));
+            $conn->privmsg($tgt, substr($txtz, $splitpart));
+          }
         }
         $::ignored{$chan} = $::RISKS{$dct{$id}{risk}};
         $conn->schedule(45, sub { delete($::ignored{$chan})});
