@@ -8,9 +8,7 @@ use IO::All;
 $::xs1 = XML::Simple->new( KeyAttr => ['id'], Cache => [ qw/storable memcopy/ ]);
 
 sub readXML {
-  my ( $p ) = $::cset; #@_;
-  $p = 'default' if $p eq '';
-  $p = "config-$p";
+  my ( $p ) = $::cset;
   my @fchan = ( 'event', keys %::RISKS );
   $::settings = $::xs1->XMLin( "$p/settings.xml", ForceArray => ['host'], 'GroupTags' => { altnicks => 'altnick', server => 'host', autojoins => 'autojoin' });
   $::channels = $::xs1->XMLin( "$p/channels.xml", ForceArray => \@fchan );
@@ -21,9 +19,7 @@ sub readXML {
 }
 
 sub writeXML {
-  my ( $p ) = $::cset; #@_;
-  $p = 'default' if $p eq '';
-  $p = "config-$p";
+  my ( $p ) = $::cset;
   $::xs1->XMLout($::settings, RootName => 'settings', KeyAttr => ['id'],
                GroupTags => { altnicks => 'altnick', server => 'host', autojoins => 'autojoin' },
                ValueAttr => { debug => 'content',     nick => 'content',    port => 'content',
@@ -35,24 +31,15 @@ sub writeXML {
 }
 
 sub writeChannels {
-  my ( $p ) = $::cset; #@_;
-  $p = 'default' if $p eq '';
-  $p = "config-$p";
-  $::xs1->XMLout($::channels, RootName => 'channels', KeyAttr => ['id']) > io("$p/channels.xml");
+  $::xs1->XMLout($::channels, RootName => 'channels', KeyAttr => ['id']) > io("$::cset/channels.xml");
 }
 
 sub writeUsers {
-  my ( $p ) = $::cset; #@_;
-  $p = 'default' if $p eq '';
-  $p = "config-$p";
-  $::xs1->XMLout($::users,    RootName => 'people',   KeyAttr => ['id']) > io("$p/users.xml");
+  $::xs1->XMLout($::users,    RootName => 'people',   KeyAttr => ['id']) > io("$::cset/users.xml");
 }
 
 sub writeSettings {
-  my ( $p ) = $::cset; #@_;
-  $p = 'default' if $p eq '';
-  $p = "config-$p";
-  $::xs1->XMLout($::settings, RootName => 'settings', GroupTags => { altnicks => 'altnick', server => 'host', autojoins => 'autojoin' }, NoAttr => 1) > io("$p/settings.xml");
+  $::xs1->XMLout($::settings, RootName => 'settings', GroupTags => { altnicks => 'altnick', server => 'host', autojoins => 'autojoin' }, NoAttr => 1) > io("$::cset/settings.xml");
 }
 
 return 1;

@@ -17,7 +17,9 @@ use Getopt::Long;
 %::eline=();
 $::pass = '';
 @::string_blacklist=();
-@::joinrate=(); #I really need to stop doing this shit
+$::netsplit = 0;
+$::debug = 0;
+$::cset = '';
 
 BEGIN {
 my @modules = qw/Util Xml Inspect Event Services Log Command Classes Mysql/;
@@ -26,21 +28,23 @@ require 'modules/' . lc $_ . '.pl' foreach @modules;
 
 sub init {
   my ( $conn, $host );
-  my $debug = 0;
   my $irc = new Net::IRC;
-  $::cset = '';
-  GetOptions( 'debug|d!'   => \$debug,
+  GetOptions( 'debug|d!'   => \$::debug,
               'pass|p:s'   => \$::pass,
               'config|c:s' => \$::cset
             );
-  $::debug = $debug;
+  if ($::cset eq '') {
+    $::cset = 'config-default';
+  } else {
+    $::cset = "config-$::cset";
+  }
   ASM::XML->readXML();
   mkdir($::settings->{log}->{dir});
   $::log = ASM::Log->new($::settings->{log});
   $::pass = $::settings->{pass} if $::pass eq '';
   $host = ${$::settings->{server}}[rand @{$::settings->{server}}];
   print "Connecting to $host\n";
-  $irc->debug($debug);
+  $irc->debug($::debug);
   $::db = ASM::DB->new($::mysql->{db}, $::mysql->{host}, $::mysql->{port}, $::mysql->{user}, $::mysql->{pass}, $::mysql->{table}, $::mysql->{dblog});
   $conn = $irc->newconn( Server => $host,
                          Port => $::settings->{port} || '6667',
@@ -49,7 +53,7 @@ sub init {
                          Username => $::settings->{username},
                          Password => $::settings->{pass},
 			 Pacing => 1 );
-  $conn->debug($debug);
+  $conn->debug($::debug);
   $::inspector = ASM::Inspect->new();
   $::services = ASM::Services->new();
   $::commander = ASM::Commander->new();

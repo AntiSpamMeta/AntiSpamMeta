@@ -59,13 +59,22 @@ sub new
   $conn->add_handler('318', \&whois_end);
   $conn->add_handler('311', \&whois_user);
   $conn->add_handler('352', \&on_whoreply);
+  $conn->add_handler('354', \&on_whoxreply);
+  $conn->add_handler('account', \&on_account);
   bless($self);
   return $self;
 }
-  
+
+sub on_account
+{
+  my ($conn, $event) = @_;
+  $::sn{lc $event->{nick}}{account} = lc $event->{args}->[0];
+}
+
 sub on_connect {
   my ($conn, $event) = @_; # need to check for no services
   $conn->privmsg( 'NickServ', "ghost $::settings->{nick} $::settings->{pass}" ) if lc $event->{args}->[0] ne lc $::settings->{nick};
+  $conn->sl('CAP REQ :extended-join multi-prefix account-notify'); #god help you if you try to use this bot off freenode
 }
 
 sub on_join {
@@ -75,20 +84,12 @@ sub on_join {
   my $nick = lc $event->{nick};
   my $chan = lc $event->{to}->[0];
   my $rate;
-  push( @::joinrate, time );
-  while ( time >= $::joinrate[0] + 1 ) {
-      last if ( $#{ @::joinrate } == 0 );
-      shift( @::joinrate );
-    }
-  $rate = $#{ @::joinrate}+1;
-  print "on_join rate = $rate\n" if $::debug;
-  if ( $rate == 20 ) {
-    $conn->privmsg('##asb-nexus', "AfterDeath: I think I'm seeing a netjoin!");
-  }
+  print Dumper($event) if $::debug;
   if ( lc $conn->{_nick} eq lc $nick)  {
     $::sc{$chan} = {};
     mkdir($::settings->{log}->{dir} . $chan);
-    $conn->sl("who $chan");
+#    $conn->sl("who $chan");
+    $conn->sl('who ' . $chan . ' %tcfnuhra,314');
 # I don't know what the hell this was for but I'm disabling it for now
 #    #TODO: make it settable via config. Hardcoded channames ftl.
 #    if ($chan eq '##linux') {
@@ -107,20 +108,31 @@ sub on_join {
     }
     @mship = (@mship, $chan);
     $::sn{$nick}->{mship} = \@mship;
-    $::inspector->inspect( $conn, $event );
-    $::db->logg($event);
   } else {
     $::sn{$nick} = {};
     $::sn{$nick}->{mship} = [ $chan ];
     $::sn{$nick}->{dnsbl} = 0;
-    if (defined($::needgeco{$nick})) {
-      $::needgeco{$nick} = [ @{$::needgeco{$nick}}, $evcopy ];
-      $::db->logg($event);
-    } else {
-      $::needgeco{$nick} = [ $evcopy ];
-      $conn->sl("whois $nick");
-    }
+    $::sn{$nick}->{netsplit} = 0;
+    $::sn{$nick}->{gecos} = $event->{args}->[1];
+    $::sn{$nick}->{user} = $event->{user};
+    $::sn{$nick}->{host} = $event->{host};
+    $::sn{$nick}->{account} = lc $event->{args}->[0];
+#  if (defined( $::needgeco{$lnick} )) {
+#    foreach my $event (@{$::needgeco{$lnick}}) {
+#      $::inspector->inspect($conn, $event);
+#      $::db->logg( $event );
+#    }
+#    delete $::needgeco{$lnick};
+#    if (defined($::needgeco{$nick})) {
+#      $::needgeco{$nick} = [ @{$::needgeco{$nick}}, $evcopy ];
+#      $::db->logg($event);
+#    } else {
+#      $::needgeco{$nick} = [ $evcopy ];
+#      $conn->sl("whois $nick");
+#    }
   }   
+  $::inspector->inspect( $conn, $event ) unless $::netsplit;
+  $::db->logg($event);
   $::log->logg( $event );
 }
 	
@@ -193,14 +205,20 @@ sub on_quit
   }
   $event->{to} = \@channels;
   $::db->logg( $event );
-  delete($::sn{lc $event->{nick}});
-  $::inspector->inspect( $conn, $event );
+  if (($::netsplit == 0) && ($event->{args}->[0] eq "*.net *.split")) { #special, netsplit situation
+    $conn->privmsg("##asb-nexus", "Entering netsplit mode - JOIN and QUIT inspection will be disabled for 60 minutes");
+    $::netsplit = 1;
+    $conn->schedule(60*60, sub { $::netsplit = 0; });
+  }
+  $::inspector->inspect( $conn, $event ) unless $::netsplit;
   $::log->logg( $event );
+  delete($::sn{lc $event->{nick}});
 }
 
 sub blah
 {
   my ($self, $event) = @_;
+  print Dumper($event) if $::debug;
   $::inspector->inspect($self, $event);
 }
 
@@ -403,12 +421,41 @@ sub whois_user {
   }
 }
 
+sub on_whoxreply
+{
+  my ($conn, $event) = @_;
+  return unless $event->{args}->[1] eq '314';
+  my ($tgt, $magic, $chan, $user, $host, $nick, $flags, $account, $gecos) = @{$event->{args}};
+  my ($voice, $op) = (0, 0);
+  print Dumper($event) if $::debug;
+  $op = 1 if ( $flags =~ /\@/ );
+  $voice = 1 if ($flags =~ /\+/);
+  $nick = lc $nick; $chan = lc $chan;
+  $::sn{$nick} = {} unless defined $::sn{lc $nick};
+  my @mship=();
+  if (defined($::sn{$nick}->{mship})) {
+    @mship = @{$::sn{$nick}->{mship}};
+  }
+  @mship = grep { lc $_ ne $chan } @mship;
+  @mship = (@mship, $chan);
+  $::sn{$nick}->{mship} = \@mship;
+  $::sn{$nick}->{gecos} = $gecos;
+  $::sn{$nick}->{user} = $user;
+  $::sn{$nick}->{host} = $host;
+  $::sn{$nick}->{account} = lc $account;
+  $::sc{$chan}{users}{$nick} = {};
+  $::sc{$chan}{users}{$nick}{op} = $op;
+  $::sc{$chan}{users}{$nick}{voice} = $voice;
+
+}
+
 sub on_whoreply
 {
   my ($conn, $event) = @_;
   my ($tgt, $chan, $user, $host, $server, $nick, $flags, $hops_and_gecos) = @{$event->{args}};
   my ($voice, $op) = (0, 0);
   my ($hops, $gecos);
+  print Dumper($event) if $::debug;
   $op = 1 if ( $flags =~ /\@/ );
   $voice = 1 if ($flags =~ /\+/);
   if ($hops_and_gecos =~ /^(\d+) (.*)$/) {

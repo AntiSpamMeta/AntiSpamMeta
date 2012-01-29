@@ -1,32 +1,31 @@
 <people>
-  <person id="afterdeath" flags="hodat" host="freenode/weird-exception/network-troll/afterdeath" />
-  <person id="afterdeath_" flags="hodat" host="freenode/weird-exception/network-troll/afterdeath" />
-  <person id="dave2" flags="oath" host="freenode/staff/dave2" />
-  <person id="denny" flags="ha" host="freenode/staff/denny" />
-  <person id="dlange" flags="oath" host="about/linux/staff/dlange" />
-  <person id="dmcdevit" flags="oath" host="IDENTIFY" />
-  <person id="dungodung" flags="oath" host="wikimedia/dungodung" />
-  <person id="errantego" flags="doath" host="freenode/jester/errantego" />
-  <person id="gary" flags="oath" host="freenode/staff/colchester-lug.gary" />
-  <person id="jonathand" flags="oath" host="freenode/staff/jonathand" />
-  <person id="kibble" flags="oath" host="wikimedia/Cbrown1023" />
-  <person id="m0trn_th1" flags="th" host="pdpc/supporter/professional/th1" />
-  <person id="marienz" flags="oath" host="freenode/staff/marienz" />
-  <person id="martinp23" flags="oath" host="freenode/staff/wikimedia.martinp23" />
-  <person id="mquin" flags="hota" host="freenode/staff/mquin" />
-  <person id="nhandler" flags="oath" host="freenode/staff/ubuntu.member.nhandler" />
-  <person id="njan" flags="oath" host="freenode/staff/njan" />
-  <person id="petersymonds" flags="oath" host="wikimedia/petersymonds" />
-  <person id="pricechild" flags="oath" host="freenode/staff/ubuntu.member.pricechild" />
-  <person id="richih" flags="oath" host="freenode/staff/richih" />
-  <person id="sauvin" flags="oath" host="about/linux/staff/sauvin" />
-  <person id="seanw" flags="oath" host="freenode/staff-emeritus/wikimedia.sean-whitton" />
-  <person id="snowolf" flags="oath" host="wikimedia/Snowolf" />
-  <person id="thehelpfulone" flags="oath" host="wikimedia/Thehelpfulone" />
-  <person id="tomaw" flags="oathd" host="freenode/staff/tomaw" />
-  <person id="troubled" flags="oath" host="unaffiliated/troubled" />
-  <person id="werdan7" flags="oath" host="freenode/staff/wikimedia.werdan7" />
-  <person id="wildpikachu" flags="oath" host="about/linux/staff/wildpikachu" />
-  <person id="windowshasyou" flags="o" host="about/linux/staff/windowshasyou" />
-  <person id="zymurgy" flags="o" host="about/linux/staff/sauvin" />
+  <person id="afterdeath" flags="hodat" />
+  <person id="cbrown1023" flags="oath" />
+  <person id="charitwo" flags="oath" />
+  <person id="dave2" flags="oath" />
+  <person id="denny" flags="ha" />
+  <person id="dlange" flags="oathd" />
+  <person id="dmcdevit" flags="oath" />
+  <person id="dungodung" flags="oath" />
+  <person id="errantego" flags="doath" />
+  <person id="gary" flags="oath" />
+  <person id="jonathand" flags="oath" />
+  <person id="marienz" flags="oath" />
+  <person id="martinp23" flags="oath" />
+  <person id="mquin" flags="hota" />
+  <person id="nhandler" flags="oath" />
+  <person id="njan" flags="oath" />
+  <person id="petersymonds" flags="oath" />
+  <person id="pricechild" flags="oath" />
+  <person id="richih" flags="oath" />
+  <person id="sauvin" flags="oath" />
+  <person id="seanw" flags="oath" />
+  <person id="snowolf" flags="oath" />
+  <person id="th1" flags="th" />
+  <person id="thehelpfulone" flags="oath" />
+  <person id="tomaw" flags="oathd" />
+  <person id="troubled" flags="oath" />
+  <person id="werdan7" flags="oath" />
+  <person id="wildpikachu" flags="oath" />
+  <person id="windowshasyou" flags="oath" />
 </people>

@@ -46,17 +46,25 @@
     $conn->privmsg($event->{to}->[0], "$result results found.");
   ]]>
   </command>
-  <command cmd="^;user add (\S+) ?(\S*)$" flag="a">
+  <command cmd="^;userx add (\S+) (\S+)$" flag="a">
   <![CDATA[
-    my $nick = lc $1;
-    my $host = $2;
-    if ($host eq '') { $host = 'IDENTIFY'; }
-    $::users->{person}->{$nick} = { 'host' => $host };
+    my $acct = lc $1;
+    my $flags = $2;
+    if ($flags =~ /d/) {
+      $conn->privmsg($event->{to}->[0], "The d flag may not be assigned over IRC. Edit the configuration manually.");
+      return;
+    }
+    $::users->{person}->{$acct} = { 'flags' => $flags };
     ASM::XML->writeUsers();
-    $conn->privmsg($event->{to}->[0], "Hiya $nick");
+    $conn->privmsg($event->{to}->[0], "Flags for NickServ account $acct set to $flags");
   ]]>
   </command>
-  <command cmd="^;user flags (\S+) ?$">
+  <command cmd="^;user add (\S+) ?(\S*)$" flag="a">
+  <![CDATA[
+    $conn->privmsg($event->{to}->[0], "This command has been deprecated");
+  ]]>
+  </command>
+  <command cmd="^;userx? flags (\S+) ?$">
   <![CDATA[
     my $nick = lc $1;
     if (defined($::users->{person}->{$nick}->{flags})) {
@@ -66,7 +74,7 @@
     }
   ]]>
   </command>
-  <command cmd="^;user flags (\S+) (\S+)$" flag="a">
+  <command cmd="^;userx? flags (\S+) (\S+)$" flag="a">
   <![CDATA[
     my $nick = lc $1;
     my $flags = $2;
@@ -79,31 +87,12 @@
     $conn->privmsg($event->{to}->[0], "Flags for $nick set to $flags");
   ]]>
   </command>
-  <command cmd="^;user del (\S+)$" flag="a">
+  <command cmd="^;userx? del (\S+)$" flag="a">
   <![CDATA[
     my $nick = lc $1;
     delete($::users->{person}->{$nick});
     ASM::XML->writeUsers();
     $conn->privmsg($event->{to}->[0], "Byebye $nick");
-  ]]>
-  </command>
-<!--  <command cmd="^;user flags show (\S+)$" flag="a">
-  <![CDATA[
-    my $nick = lc $1;
-    if (defined($::users->{person}->{$nick}->{flags})) {
-      $conn->privmsg($event->{to}->[0], "Flags for $nick: $::users->{person}->{$nick}->{flags}");
-    } else {
-      $conn->privmsg($event->{to}->[0], "$nick has no flags");
-    }
-  ]]>
-  </command> -->
-  <command cmd="^;autoban (\S+)$" flag="a">
-  <![CDATA[
-    my $chan = $1;
-    my $set = $::channels->{channel}->{$chan}->{op};
-    if ($set eq "no") { $set = "when"; } else { $set = "no"; }
-    $::channels->{channel}->{$chan}->{op} = $set;
-    $conn->privmsg($event->{to}->[0], "Operator action for $chan set to \"$set\".");
   ]]>
   </command>
   <command cmd="^;target (\S+) (\S+) ?(\S*)$" flag="a">

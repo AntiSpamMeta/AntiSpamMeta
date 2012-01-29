@@ -20,26 +20,17 @@ sub command
   my $cmd = $args;
   my $d1;
   my $nick = lc $event->{nick};
+  my $acct = lc $::sn{$nick}->{account};
 #  return 0 unless (ASM::Util->speak($event->{to}->[0]));
   foreach my $command ( @{$::commands->{command}} )
   {
     unless (ASM::Util->speak($event->{to}->[0])) {
       next unless (defined($command->{nohush}) && ($command->{nohush} eq "nohush"));
     }
-    if (defined($command->{flag})) {
-      next unless defined($::users->{person}->{$nick});
-      next unless defined($::users->{person}->{$nick}->{flags});
-      next unless (grep {$_ eq $command->{flag}} split('', $::users->{person}->{$nick}->{flags}));
-      if ($::users->{person}->{$nick}->{host} ne 'IDENTIFY') {
-        next unless (lc $::users->{person}->{$nick}->{host} eq lc $event->{host});
-      }
-      else {
-        if ( $cmd =~ /$command->{cmd}/ ){
-          push (@{$::idqueue{$nick}}, [$cmd, $command, $event]);
-          $conn->sl("whois $nick $nick");
-          last;
-        }
-      }
+    if (defined($command->{flag})) { #If the command is restricted,
+      next unless defined($::users->{person}->{$acct}); #make sure the requester has an account
+      next unless defined($::users->{person}->{$acct}->{flags}); #make sure the requester has flags defined
+      next unless (grep {$_ eq $command->{flag}} split('', $::users->{person}->{$acct}->{flags})); #make sure the requester has the needed flags
     }
     if ($cmd=~/$command->{cmd}/) {
       print strftime("%F %T  ", gmtime) . "$event->{from} told me: $cmd \n";
