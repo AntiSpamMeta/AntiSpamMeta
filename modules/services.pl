@@ -32,7 +32,7 @@ sub doServices {
     }
     elsif ($event->{args}->[0] =~ /Password Incorrect/ )
     {
-      $conn->join($_) foreach ( @{$::settings->{autojoins}} );
+      die("NickServ password invalid.")
     }
   }
   elsif ($event->{from} eq 'ChanServ!ChanServ@services.')
@@ -43,10 +43,6 @@ sub doServices {
       $conn->join($1);
     }
   }
-}
-
-sub Services::killsub {
-  undef &doServices;
 }
 
 return 1;
