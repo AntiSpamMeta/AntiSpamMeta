@@ -25,9 +25,10 @@
   <channel id="##hamradio" silence="yes">
     <hilights></hilights>
     <msgs>
-      <debug>#hamradio-ops</debug>
+      <debug>##hamradio-ops</debug>
     </msgs>
   </channel>
+  <channel id="##hamradio-ops" op="no" />
   <channel id="##javascript">
     <hilights></hilights>
   </channel>
@@ -181,12 +182,6 @@
       <info>#ubuntu-ops-monitor</info>
     </msgs>
   </channel>
-  <channel id="#hamradio" link="##hamradio" silence="yes">
-    <hilights></hilights>
-  </channel>
-  <channel id="#hamradio-ops">
-    <hilights></hilights>
-  </channel>
   <channel id="#httpd">
     <hilights></hilights>
     <msgs></msgs>
@@ -324,6 +319,7 @@
       <debug>AfterDeath</debug>
       <debug>Logan_</debug>
       <debug>jeremyb</debug>
+      <debug>AfterDeath</debug>
       <low>slakr</low>
     </hilights>
     <msgs>
@@ -332,6 +328,7 @@
   </channel>
   <channel id="#wikimedia-ops-internal">
     <hilights>
+      <debug>AfterDeath</debug>
       <debug>Thehelpfulone</debug>
     </hilights>
   </channel>
@@ -349,11 +346,13 @@
   <channel id="#wikimedia-overflow">
     <hilights>
       <debug>Thehelpfulone</debug>
+      <debug>AfterDeath</debug>
     </hilights>
     <msgs>
       <debug>#wikimedia-ops</debug>
     </msgs>
   </channel>
+  <channel id="#wikimedia-stewards" op="no" />
   <channel id="#wikimedia-tech" silence="yes">
     <hilights></hilights>
     <msgs>
@@ -365,6 +364,7 @@
       <debug>Golbez</debug>
       <debug>Prodego</debug>
       <debug>Snowolf</debug>
+      <debug>AfterDeath</debug>
       <debug>Thehelpfulone</debug>
       <debug>werdan7</debug>
       <debug>wimt</debug>
@@ -425,6 +425,7 @@
       <debug>Not_the_NSA</debug>
       <debug>Prodego</debug>
       <debug>Jake_Wartenberg</debug>
+      <debug>AfterDeath</debug>
       <debug>shimgray</debug>
       <debug>stwalkerster</debug>
       <debug>Jamesofur</debug>
@@ -515,6 +516,7 @@
   </channel>
   <channel id="master">
     <event id="advflood" class="advsplitflood" reason="advanced distributed flooding" risk="debug" type="public,part,caction">5:3</event>
+    <event id="ahbl" class="dnsbl" reason="host $evhost is in dnsbl.ahbl.org ( $xresult )" risk="info" type="join" xresult="Open proxy cat 1">dnsbl.ahbl.org</event>
     <event id="anontalk1" class="re" reason="anontalk.com spam" risk="medium" type="public">(?i)w(.?)w\1w\1?.\1?a\1n\1o\1n\1t\1a\1l\1k\1?.\1?c\1o\1m</event>
     <event id="autoremove" class="re" reason="on chanserv autoremove" risk="info" type="part">^requested by ChanServ</event>
     <event id="blacklist" class="strbl" reason="sending message containing blacklisted content" risk="low" type="public">blah</event>
@@ -527,7 +529,7 @@
     <event id="dcc-topic" class="re" reason="setting a bad topic" risk="medium" type="topic">\bDCC SEND </event>
     <event id="debugme" class="re" reason="sending a string designed to trigger a debug test alert, disregard this" risk="debug" type="public">debugantispambotdebug</event>
     <event id="dronebl" class="dnsbl" reason="host $evhost is in dnsbl.dronebl.org ( $xresult )" risk="info" type="join">dnsbl.dronebl.org</event>
-    <event id="efnetbl" class="dnsbl" reason="host $evhost is in rbl.efnetrbl.org ( $xresult )" risk="info" type="join">rbl.efnetrbl.org</event>
+    <event id="efnetbl" class="dnsbl" reason="host $evhost is in rbl.efnetrbl.org ( $xresult )" risk="info" type="join" xresult="TOR exit server">rbl.efnetrbl.org</event>
     <event id="genspam1" class="re" reason="generic spamming" risk="debug" type="public">([^ ]{4,} +)\1{5,}</event>
     <event id="joinflood" class="floodqueue" reason="join flood (5 joins in 20 seconds)" risk="medium" type="join">5:20</event>
     <event id="keylogger" class="re" override="keylogger-medium" reason="using the norton start-key-logger exploit" risk="high" type="public">^startkeylogger$|^stopkeylogger$</event>
@@ -536,17 +538,16 @@
     <event id="levenflood" class="levenflood" override="flood-5to3" reason="levenshtein flood match" risk="debug" type="public">contentisuseless</event>
     <event id="massflood" class="splitflood" reason="distributed flooding" risk="high" type="public,part,caction">4:4</event>
     <event id="nickspam" class="nickspam" reason="nickspamming" risk="high" type="public">60:10</event>
+    <event id="njabl" class="dnsbl" reason="host $evhost is in dnsbl.njabl.org ( $xresult )" risk="info" type="join">dnsbl.njabl.org</event>
     <event id="notice" class="re" reason="sending a notice to the channel" risk="medium" type="notice">.*</event>
     <event id="phishing1" class="re" override="notice" reason="trying to steal passwords (v1)" risk="high" type="notice">identify.*/msg .* identify &lt;password&gt;</event>
     <event id="phishing2" class="re" override="notice" reason="trying to steal passwords (v2)" risk="high" type="notice">^This nickname is registered</event>
     <event id="proxybl" class="dnsbl" reason="host $evhost is in dnsbl.proxybl.org" risk="info" type="join">dnsbl.proxybl.org</event>
     <event id="redarmyoflol" class="re" reason="parting with 'red army of lol'" risk="low" type="part">RED ARMY OF LOL</event>
     <event id="sms_spam" class="re" reason="spam link / virus" risk="low" type="public">\.com/sms.exe</event>
+    <event id="sorbsbl" class="dnsbl" reason="host $evhost is in dnsbl.sorbs.net ( $xresult )" risk="info" type="join">dnsbl.sorbs.net</event>
     <event id="suckmynick" class="re" reason="using a potentially offensive nick" risk="low" type="join">(suck.*dick)</event>
     <event id="wikifags2" class="re" reason="saying 'sure are a lot of wikifag'..." risk="low" type="public">(?i)^sure are a ?lot of .*fags? in here</event>
-    <event id="sorbsbl" class="dnsbl" reason="host $evhost is in dnsbl.sorbs.net ( $xresult )" risk="info" type="join">dnsbl.sorbs.net</event>
-    <event id="njabl" class="dnsbl" reason="host $evhost is in dnsbl.njabl.org ( $xresult )" risk="info" type="join">dnsbl.njabl.org</event>
-    <event id="ahbl" class="dnsbl" reason="host $evhost is in dnsbl.ahbl.org ( $xresult )" risk="info" type="join">dnsbl.ahbl.org</event>
     <hilights>
       <debug>ST47</debug>
       <debug>pctony</debug>
