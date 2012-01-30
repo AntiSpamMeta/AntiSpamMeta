@@ -55,10 +55,6 @@ sub new
   $conn->add_handler('cuserinfo', \&on_ctcp);
   $conn->add_handler('cclientinfo', \&on_ctcp);
   $conn->add_handler('cfinger', \&on_ctcp);
-  $conn->add_handler('320', \&whois_identified);
-  $conn->add_handler('318', \&whois_end);
-  $conn->add_handler('311', \&whois_user);
-  $conn->add_handler('352', \&on_whoreply);
   $conn->add_handler('354', \&on_whoxreply);
   $conn->add_handler('account', \&on_account);
   bless($self);
@@ -79,8 +75,6 @@ sub on_connect {
 
 sub on_join {
   my ($conn, $event) = @_;
-  my %evcopyx = %{$event};
-  my $evcopy = \%evcopyx;
   my $nick = lc $event->{nick};
   my $chan = lc $event->{to}->[0];
   my $rate;
@@ -88,14 +82,7 @@ sub on_join {
   if ( lc $conn->{_nick} eq lc $nick)  {
     $::sc{$chan} = {};
     mkdir($::settings->{log}->{dir} . $chan);
-#    $conn->sl("who $chan");
     $conn->sl('who ' . $chan . ' %tcfnuhra,314');
-# I don't know what the hell this was for but I'm disabling it for now
-#    #TODO: make it settable via config. Hardcoded channames ftl.
-#    if ($chan eq '##linux') {
-#      $conn->schedule(300, \&do_chancount, $chan, 300);
-#      #TODO: mark this as a channel we're watching so we don't schedule this multiple times
-#    }
   }
   $::sc{$chan}{users}{$nick} = {};
   $::sc{$chan}{users}{$nick}{hostmask} = $event->{userhost};
@@ -117,19 +104,6 @@ sub on_join {
     $::sn{$nick}->{user} = $event->{user};
     $::sn{$nick}->{host} = $event->{host};
     $::sn{$nick}->{account} = lc $event->{args}->[0];
-#  if (defined( $::needgeco{$lnick} )) {
-#    foreach my $event (@{$::needgeco{$lnick}}) {
-#      $::inspector->inspect($conn, $event);
-#      $::db->logg( $event );
-#    }
-#    delete $::needgeco{$lnick};
-#    if (defined($::needgeco{$nick})) {
-#      $::needgeco{$nick} = [ @{$::needgeco{$nick}}, $evcopy ];
-#      $::db->logg($event);
-#    } else {
-#      $::needgeco{$nick} = [ $evcopy ];
-#      $conn->sl("whois $nick");
-#    }
   }   
   $::inspector->inspect( $conn, $event ) unless $::netsplit;
   $::db->logg($event);
@@ -167,6 +141,8 @@ sub on_msg
 {
   my ($conn, $event) = @_;
   $::commander->command($conn, $event);
+  print strftime("%F %T  ", gmtime) . "(msg) " . $event->{from} . " - " . $event->{args}->[0] . "\n";
+  $conn->privmsg('##asb-nexus', $event->{from} . ' told me: ' . $event->{args}->[0]);
 }
 
 sub on_public
@@ -208,7 +184,7 @@ sub on_quit
   if (($::netsplit == 0) && ($event->{args}->[0] eq "*.net *.split")) { #special, netsplit situation
     $conn->privmsg("##asb-nexus", "Entering netsplit mode - JOIN and QUIT inspection will be disabled for 60 minutes");
     $::netsplit = 1;
-    $conn->schedule(60*60, sub { $::netsplit = 0; });
+    $conn->schedule(60*60, sub { $::netsplit = 0; $conn->privmsg('##asb-nexus', 'Returning to regular operation'); });
   }
   $::inspector->inspect( $conn, $event ) unless $::netsplit;
   $::log->logg( $event );
@@ -381,46 +357,6 @@ sub on_ctcp_source
   }
 }
 
-sub whois_identified {
-  my ($conn, $event2) = @_;
-  my $who = lc $event2->{args}->[1];
-  if ( (defined( $::idqueue{$who} )) && ( @{$::idqueue{$who}} ) ) {
-    foreach my $item (@{$::idqueue{$who}}) {
-      my ($cmd, $command, $event) = @{$item};
-      if ( $cmd =~ /$command->{cmd}/ ){
-        print strftime("%F %T  ", gmtime) . "$event->{from} told me $cmd \n";
-        eval $command->{content};
-	warn $@ if $@;
-      }
-    }
-    $::idqueue{$who} = [];
-  }
-}
-
-sub whois_end {
-  my ($conn, $event) = @_;
-  my $who = lc $event->{args}->[1];
-  $::idqueue{$who} = [];
-}
-
-sub whois_user {
-  my ($conn, $event2) = @_;
-  my $lnick = lc $event2->{args}->[1];
-  unless (defined($::sn{$lnick})) {
-    $::sn{$lnick} = {};
-  }
-  $::sn{$lnick}->{gecos} = $event2->{args}->[5];
-  $::sn{$lnick}->{user} = $event2->{args}->[2];
-  $::sn{$lnick}->{host} = $event2->{args}->[3];
-  if (defined( $::needgeco{$lnick} )) {
-    foreach my $event (@{$::needgeco{$lnick}}) {
-      $::inspector->inspect($conn, $event);
-      $::db->logg( $event );
-    }
-    delete $::needgeco{$lnick};
-  }
-}
-
 sub on_whoxreply
 {
   my ($conn, $event) = @_;
@@ -446,39 +382,6 @@ sub on_whoxreply
   $::sc{$chan}{users}{$nick} = {};
   $::sc{$chan}{users}{$nick}{op} = $op;
   $::sc{$chan}{users}{$nick}{voice} = $voice;
-
-}
-
-sub on_whoreply
-{
-  my ($conn, $event) = @_;
-  my ($tgt, $chan, $user, $host, $server, $nick, $flags, $hops_and_gecos) = @{$event->{args}};
-  my ($voice, $op) = (0, 0);
-  my ($hops, $gecos);
-  print Dumper($event) if $::debug;
-  $op = 1 if ( $flags =~ /\@/ );
-  $voice = 1 if ($flags =~ /\+/);
-  if ($hops_and_gecos =~ /^(\d+) (.*)$/) {
-    $hops = $1;
-    $gecos = $2;
-  } else {
-    $hops = "0";
-    $gecos = "";
-  }
-  $::sn{lc $nick} = {} unless defined $::sn{lc $nick};
-  my @mship=();
-  if (defined($::sn{lc $nick}->{mship})) {
-    @mship = @{$::sn{lc $nick}->{mship}};
-  }
-  @mship = grep { lc $_ ne lc $chan } @mship;
-  @mship = (@mship, $chan);
-  $::sn{lc $nick}->{mship} = \@mship;
-  $::sn{lc $nick}->{gecos} = $gecos;
-  $::sn{lc $nick}->{user} = $user;
-  $::sn{lc $nick}->{host} = $host;
-  $::sc{lc $chan}{users}{lc $nick} = {};
-  $::sc{lc $chan}{users}{lc $nick}{op} = $op;
-  $::sc{lc $chan}{users}{lc $nick}{voice} = $voice;
 }
 
 sub on_bannedfromchan {
@@ -490,14 +393,6 @@ sub on_bannedfromchan {
 sub on_byechan {
   my ($chan) = @_;
   #TODO do del event stuff
-}
-
-sub do_chancount {
-  my ($conn, $chan, $repeat) = @_;
-  my @users = keys(%{$::sc{$chan}{users}});
-  my $count = @users;
-  system('/home/icxcnika/AntiSpamMeta/chancount.pl ' . $chan . sprintf(' %d', $count));
-  $conn->schedule($repeat, \&do_chancount, $chan, $repeat);
 }
 
 return 1;

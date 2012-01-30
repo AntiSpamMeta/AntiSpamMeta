@@ -1,7 +1,4 @@
 <channels>
-  <channel id="##Thehelpfulone">
-    <hilights></hilights>
-  </channel>
   <channel id="##asb-debug" monitor="no">
     <hilights></hilights>
   </channel>
@@ -29,27 +26,18 @@
     </msgs>
   </channel>
   <channel id="##hamradio-ops" op="no" />
-  <channel id="##javascript">
-    <hilights></hilights>
-  </channel>
   <channel id="##linux" silence="yes">
     <hilights>
       <disable>ST47</disable>
-      <low>nalioth</low>
       <low>denny</low>
       <low>numist</low>
-      <low>Fieldy</low>
       <low>tomaw</low>
       <low>WildPikachu</low>
       <low>Gary</low>
-      <medium>PhilKC</medium>
       <medium>vorian</medium>
       <medium>DLange</medium>
       <medium>pinPoint</medium>
       <medium>njan</medium>
-      <medium>linagee</medium>
-      <opalert>rob</opalert>
-      <opalert>stew</opalert>
     </hilights>
     <msgs>
       <debug>##linux-ops</debug>
@@ -74,24 +62,10 @@
     <hilights></hilights>
     <msgs></msgs>
   </channel>
-  <channel id="##thehelpfulone">
-    <hilights>
-      <debug>thehelpfulone</debug>
-    </hilights>
-    <msgs>
-      <debug>##thehelpfulone</debug>
-      <debug>tho|away</debug>
-      <disable>##asb-nexus</disable>
-    </msgs>
-  </channel>
   <channel id="##wikia">
     <hilights>
       <debug>charitwo</debug>
     </hilights>
-    <msgs></msgs>
-  </channel>
-  <channel id="##wikimedia-ops">
-    <hilights></hilights>
     <msgs></msgs>
   </channel>
   <channel id="##windows" silence="yes">
@@ -199,9 +173,6 @@
     </hilights>
     <msgs></msgs>
   </channel>
-  <channel id="#logbook">
-    <hilights></hilights>
-  </channel>
   <channel id="#mediawiki" silence="yes">
     <hilights>
       <debug>flyingparchment</debug>
@@ -227,20 +198,6 @@
     <hilights></hilights>
     <msgs></msgs>
   </channel>
-  <channel id="#sparkfun">
-    <hilights></hilights>
-  </channel>
-  <channel id="#st47">
-    <hilights>
-      <debug>Randomuser</debug>
-      <high>Randomuser</high>
-      <low>Randomuser</low>
-    </hilights>
-    <msgs>
-      <debug>#st47</debug>
-      <low>#st47</low>
-    </msgs>
-  </channel>
   <channel id="#ubuntu" silence="yes">
     <hilights>
       <debug>nhandler</debug>
@@ -253,23 +210,8 @@
       <info>#ubuntu-ops-monitor</info>
     </msgs>
   </channel>
-  <channel id="#ubuntu-ops">
-    <hilights></hilights>
-    <msgs></msgs>
-  </channel>
   <channel id="#ubuntu-ops-monitor" monitor="no">
     <hilights></hilights>
-    <msgs></msgs>
-  </channel>
-  <channel id="#ubuntu-unregged">
-    <hilights></hilights>
-    <msgs></msgs>
-  </channel>
-  <channel id="#wikia">
-    <hilights>
-      <medium>tomaw</medium>
-      <opalert>AfterDeath</opalert>
-    </hilights>
     <msgs></msgs>
   </channel>
   <channel id="#wikia-dev">
@@ -326,12 +268,6 @@
       <debug>#wikimedia-ops</debug>
     </msgs>
   </channel>
-  <channel id="#wikimedia-ops-internal">
-    <hilights>
-      <debug>AfterDeath</debug>
-      <debug>Thehelpfulone</debug>
-    </hilights>
-  </channel>
   <channel id="#wikimedia-otrs">
     <hilights>
       <debug>PeterSymonds</debug>
@@ -352,7 +288,7 @@
       <debug>#wikimedia-ops</debug>
     </msgs>
   </channel>
-  <channel id="#wikimedia-stewards" op="no" />
+  <channel id="#wikimedia-stewards" />
   <channel id="#wikimedia-tech" silence="yes">
     <hilights></hilights>
     <msgs>
@@ -506,20 +442,12 @@
       <low>#wikimedia-ops</low>
     </msgs>
   </channel>
-  <channel id="antispammeta">
-    <hilights></hilights>
-    <msgs></msgs>
-  </channel>
-  <channel id="default">
-    <hilights></hilights>
-    <msgs></msgs>
-  </channel>
   <channel id="master">
     <event id="advflood" class="advsplitflood" reason="advanced distributed flooding" risk="debug" type="public,part,caction">5:3</event>
     <event id="ahbl" class="dnsbl" reason="host $evhost is in dnsbl.ahbl.org ( $xresult )" risk="info" type="join" xresult="Open proxy cat 1">dnsbl.ahbl.org</event>
     <event id="anontalk1" class="re" reason="anontalk.com spam" risk="medium" type="public">(?i)w(.?)w\1w\1?.\1?a\1n\1o\1n\1t\1a\1l\1k\1?.\1?c\1o\1m</event>
     <event id="autoremove" class="re" reason="on chanserv autoremove" risk="info" type="part">^requested by ChanServ</event>
-    <event id="blacklist" class="strbl" reason="sending message containing blacklisted content" risk="low" type="public">blah</event>
+    <event id="blacklist" class="strbl" reason="sending message containing blacklisted content" risk="low" type="public,part,quit,caction">blah</event>
     <event id="ctcp-dcc" class="re" reason="ctcp-dcc" risk="high" type="cdcc">.*</event>
     <event id="ctcp-ping" class="re" reason="channel-wide CTCP PING" risk="medium" type="cping">.*</event>
     <event id="ctcp-version" class="re" reason="channel-wide CTCP VERSION" risk="medium" type="cversion">.*</event>
@@ -548,6 +476,7 @@
     <event id="sorbsbl" class="dnsbl" reason="host $evhost is in dnsbl.sorbs.net ( $xresult )" risk="info" type="join">dnsbl.sorbs.net</event>
     <event id="suckmynick" class="re" reason="using a potentially offensive nick" risk="low" type="join">(suck.*dick)</event>
     <event id="wikifags2" class="re" reason="saying 'sure are a lot of wikifag'..." risk="low" type="public">(?i)^sure are a ?lot of .*fags? in here</event>
+    <event id="gnaaquit" class="re" reason="quitting with a GNAA message" risk="medium" type="quit">(?i)\bgnaa\b</event>
     <hilights>
       <debug>ST47</debug>
       <debug>pctony</debug>
