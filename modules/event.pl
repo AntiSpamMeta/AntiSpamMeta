@@ -57,8 +57,18 @@ sub new
   $conn->add_handler('cfinger', \&on_ctcp);
   $conn->add_handler('354', \&on_whoxreply);
   $conn->add_handler('account', \&on_account);
+  $conn->add_handler('ping', \&on_ping);
   bless($self);
   return $self;
+}
+
+sub on_ping
+{
+  my ($conn, $event) = @_;
+  $conn->sl("PONG " . $event->{args}->[0]);
+  return unless $::debugx{pingpong};
+  print strftime("%F %T  ", gmtime) . "Ping? Pong!\n";
+  print Dumper($event);
 }
 
 sub on_account
@@ -78,7 +88,6 @@ sub on_join {
   my $nick = lc $event->{nick};
   my $chan = lc $event->{to}->[0];
   my $rate;
-  print Dumper($event) if $::debug;
   if ( lc $conn->{_nick} eq lc $nick)  {
     $::sc{$chan} = {};
     mkdir($::settings->{log}->{dir} . $chan);
@@ -363,7 +372,6 @@ sub on_whoxreply
   return unless $event->{args}->[1] eq '314';
   my ($tgt, $magic, $chan, $user, $host, $nick, $flags, $account, $gecos) = @{$event->{args}};
   my ($voice, $op) = (0, 0);
-  print Dumper($event) if $::debug;
   $op = 1 if ( $flags =~ /\@/ );
   $voice = 1 if ($flags =~ /\+/);
   $nick = lc $nick; $chan = lc $chan;

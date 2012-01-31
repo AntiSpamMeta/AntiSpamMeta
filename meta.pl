@@ -20,6 +20,10 @@ $::pass = '';
 $::netsplit = 0;
 $::debug = 0;
 $::cset = '';
+%::debugx = (
+  "dnsbl" => 0,
+  "pingpong" => 0
+);
 
 BEGIN {
 my @modules = qw/Util Xml Inspect Event Services Log Command Classes Mysql/;

@@ -79,6 +79,7 @@ sub dnsbl
 #  hopefully getting rid of this won't cause shit to assplode
 #  but I'm getting rid of it so it can detect cgi:irc shit
   if (defined $rev) {
+    print "Querying $rev$chk->{content}\n" if $::debugx{dnsbl};
     my $iaddr = gethostbyname( "$rev$chk->{content}" );
     my @dnsbl = unpack( 'C4', $iaddr ) if defined $iaddr;
     my $strip;
@@ -164,7 +165,7 @@ sub splitflood {
     $cfc = 0;
     process_cf();
   }
-  if ( $#{@{$cf{$id}{$chan}{$text}}}+1 == int($cut[0]) ) {
+  if ( scalar @{$cf{$id}{$chan}{$text}} == int($cut[0]) ) {
     $bs{$id}{$text} = time;
     return 1;
   }
@@ -195,7 +196,7 @@ sub advsplitflood {
     $cfc = 0;
     process_cf();
   }
-  if ( $#{@{$cf{$id}{$chan}{$text}}}+1 == int($cut[0]) ) {
+  if ( scalar @{$cf{$id}{$chan}{$text}} == int($cut[0]) ) {
     $bs{$id}{$text} = time;
     return 1;
   }
@@ -279,7 +280,8 @@ sub flood_add
       $sfc = 0;
       flood_process();
     }
-    return $#{ @{$sf{$id}{$chan}{$host}}}+1;
+#    return $#{ @{$sf{$id}{$chan}{$host}}}+1;
+    return scalar @{$sf{$id}{$chan}{$host}};
 }
 
 sub flood_process
