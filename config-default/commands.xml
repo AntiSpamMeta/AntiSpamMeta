@@ -1,4 +1,9 @@
 <commands>
+  <command cmd="^;mship (\S+)$" flag="c">
+  <![CDATA[
+    $conn->privmsg($event->{to}->[0], $1 . " is on: " . ASM::Util->commaAndify(@{$::sn{lc $1}->{mship}}));
+  ]]>
+  </command>
   <command cmd="^;source$">
   <![CDATA[
     $conn->privmsg($event->{to}->[0], "source is at http://svn.linuxrulz.org/repos/antispammeta");
