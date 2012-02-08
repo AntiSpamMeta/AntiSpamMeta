@@ -1,5 +1,5 @@
 <people>
-  <person id="afterdeath" flags="hodat" />
+  <person id="afterdeath" flags="hocdat" />
   <person id="cbrown1023" flags="oath" />
   <person id="charitwo" flags="oath" />
   <person id="dave2" flags="oath" />
@@ -15,6 +15,7 @@
   <person id="mquin" flags="hota" />
   <person id="nhandler" flags="oath" />
   <person id="njan" flags="oath" />
+  <person id="paradox" flags="h" />
   <person id="petersymonds" flags="oath" />
   <person id="pricechild" flags="oath" />
   <person id="richih" flags="oath" />

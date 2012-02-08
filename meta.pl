@@ -24,6 +24,8 @@ $::cset = '';
   "dnsbl" => 0,
   "pingpong" => 0
 );
+%::dsock = ();
+%::spy = ();
 
 BEGIN {
 my @modules = qw/Util Xml Inspect Event Services Log Command Classes Mysql/;

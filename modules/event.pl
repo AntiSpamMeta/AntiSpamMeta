@@ -21,6 +21,12 @@ sub maxlen {
   return $lb;
 }
 
+sub alarmdeath
+{
+  die "SIG ALARM!!!\n";
+}
+$SIG{ALRM} = \&alarmdeath;
+
 sub new
 {
   my $module = shift;
@@ -58,14 +64,44 @@ sub new
   $conn->add_handler('354', \&on_whoxreply);
   $conn->add_handler('account', \&on_account);
   $conn->add_handler('ping', \&on_ping);
+  $conn->add_handler('banlist', \&on_banlist);
+  $conn->add_handler('dcc_open', \&dcc_open);
+  $conn->add_handler('chat', \&on_dchat);
   bless($self);
   return $self;
+}
+
+sub on_dchat
+{
+  my ($conn, $event) = @_;
+  print Dumper($event);
+  if ((lc $event->{nick} eq 'afterdeath') && ($event->{args}->[0] ne '')) {
+    my $msg = $event->{args}->[0];
+    if ($msg =~ /^SPY (.*)/) {
+      my $chan = $1;
+      $::spy{lc $chan} = $event->{to}[0];
+    } elsif ($msg =~ /^STOPSPY (.*)/) {
+      delete $::spy{lc $1};
+    } elsif ($msg =~ /^RETRIEVE (\S+)/) {
+      my $chan = lc $1;
+      my $out = $event->{to}[0];
+      my @time = ($::settings->{log}->{zone} eq 'local') ? localtime : gmtime;
+      print $out "Retriving " . "$::settings->{log}->{dir}${chan}/${chan}" . strftime($::settings->{log}->{filefmt}, @time) . "\n";
+      open(FHX, "$::settings->{log}->{dir}${chan}/${chan}" . strftime($::settings->{log}->{filefmt}, @time));
+      while (<FHX>) {
+        print $out $_;
+      }
+      close FHX;
+    }
+    #lols we gots a chat message! :D
+  }
 }
 
 sub on_ping
 {
   my ($conn, $event) = @_;
   $conn->sl("PONG " . $event->{args}->[0]);
+  alarm 200;
   return unless $::debugx{pingpong};
   print strftime("%F %T  ", gmtime) . "Ping? Pong!\n";
   print Dumper($event);
@@ -88,6 +124,7 @@ sub on_join {
   my $nick = lc $event->{nick};
   my $chan = lc $event->{to}->[0];
   my $rate;
+  alarm 200;
   if ( lc $conn->{_nick} eq lc $nick)  {
     $::sc{$chan} = {};
     mkdir($::settings->{log}->{dir} . $chan);
@@ -107,13 +144,13 @@ sub on_join {
   } else {
     $::sn{$nick} = {};
     $::sn{$nick}->{mship} = [ $chan ];
-    $::sn{$nick}->{dnsbl} = 0;
-    $::sn{$nick}->{netsplit} = 0;
-    $::sn{$nick}->{gecos} = $event->{args}->[1];
-    $::sn{$nick}->{user} = $event->{user};
-    $::sn{$nick}->{host} = $event->{host};
-    $::sn{$nick}->{account} = lc $event->{args}->[0];
-  }   
+  }
+  $::sn{$nick}->{dnsbl} = 0;
+  $::sn{$nick}->{netsplit} = 0;
+  $::sn{$nick}->{gecos} = $event->{args}->[1];
+  $::sn{$nick}->{user} = $event->{user};
+  $::sn{$nick}->{host} = $event->{host};
+  $::sn{$nick}->{account} = lc $event->{args}->[0];
   $::inspector->inspect( $conn, $event ) unless $::netsplit;
   $::db->logg($event);
   $::log->logg( $event );
@@ -157,6 +194,7 @@ sub on_msg
 sub on_public
 {
   my ($conn, $event) = @_;
+  alarm 200;
   $::inspector->inspect( $conn, $event );
   $::log->logg( $event );
   $::db->logg( $event );
@@ -355,7 +393,26 @@ sub on_mode
 sub on_ctcp
 {
   my ($conn, $event) = @_;
-  $::inspector->inspect($conn, $event);
+  my $acct = lc $::sn{lc $event->{nick}}->{account};
+  if (($event->{type} eq 'cdcc') &&
+      (defined($::users->{person}->{$acct})) &&
+      (defined($::users->{person}->{$acct}->{flags})) &&
+      (grep {$_ eq 'c'} split('', $::users->{person}->{$acct}->{flags}))) {
+    print Dumper($event);
+    my @spit = split(/ /, $event->{args}->[0]);
+    if (($spit[0] eq 'CHAT') && ($spit[1] eq 'CHAT')) {
+      $::chat = Net::IRC::DCC::CHAT->new($conn, 0, lc $event->{nick}, $spit[2], $spit[3]);
+    }
+  } else {
+    $::inspector->inspect($conn, $event);
+  }
+}
+
+sub dcc_open
+{
+  my ($conn, $event) = @_;
+#  print Dumper($event);
+  $::dsock{lc $event->{nick}} = $event->{args}->[1];
 }
 
 sub on_ctcp_source
@@ -390,6 +447,11 @@ sub on_whoxreply
   $::sc{$chan}{users}{$nick} = {};
   $::sc{$chan}{users}{$nick}{op} = $op;
   $::sc{$chan}{users}{$nick}{voice} = $voice;
+}
+
+sub on_banlist
+{
+  my ($conn, $event) = @_;
 }
 
 sub on_bannedfromchan {

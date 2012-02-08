@@ -43,11 +43,20 @@ sub logg
     $_ =    "-$event->{nick}- $event->{args}->[0]"                      if $event->{type} eq 'notice';
     $_ = "*** $event->{nick} sets mode: " . join(" ",@{$event->{args}}) if $event->{type} eq 'mode';
     $_ = "*** $event->{nick} changes topic to \"$event->{args}->[0]\""  if $event->{type} eq 'topic';
+    my $nostamp = $_;
     $_ = strftime($cfg->{timefmt}, @time) . $_ . "\n";
     my $line = $_;
     open(FH, $path) or die "Can't open $path: $!";
     print FH $line;
     close(FH);
+    if (defined($::spy{$chan})) {
+      my $spy = $::spy{$chan};
+      print $spy $chan .": " . $nostamp . "\n";
+    }
+    if (defined($::spy{lc $event->{nick}})) {
+      my $spy = $::spy{lc $event->{nick}};
+      print $spy $chan .": " . $nostamp . "\n";
+    }
 #    $_ >> io($path);
   }
 }
