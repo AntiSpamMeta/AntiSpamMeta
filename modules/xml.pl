@@ -19,19 +19,18 @@ sub readXML {
 }
 
 sub writeXML {
-  my ( $p ) = $::cset;
   $::xs1->XMLout($::settings, RootName => 'settings', KeyAttr => ['id'],
                GroupTags => { altnicks => 'altnick', server => 'host', autojoins => 'autojoin' },
                ValueAttr => { debug => 'content',     nick => 'content',    port => 'content',
                            realname => 'content', username => 'content',     dir => 'content',
-                               zone => 'content',  filefmt => 'content', timefmt => 'content'}) > io("$p/settings.xml");
-  $::xs1->XMLout($::channels, RootName => 'channels', KeyAttr => ['id']) > io("$p/channels.xml");
-  $::xs1->XMLout($::users,    RootName => 'people',   KeyAttr => ['id']) > io("$p/users.xml");
-  $::xs1->XMLout($::commands, RootName => 'commands', KeyAttr => ['id']) > io("$p/commands.xml");
+                               zone => 'content',  filefmt => 'content', timefmt => 'content'}) > io("$::cset/settings.xml");
+  $::xs1->XMLout($::channels, RootName => 'channels', KeyAttr => ['id'], NumericEscape => 2) > io("$::cset/channels.xml");
+  $::xs1->XMLout($::users,    RootName => 'people',   KeyAttr => ['id']) > io("$::cset/users.xml");
+  $::xs1->XMLout($::commands, RootName => 'commands', KeyAttr => ['id']) > io("$::cset/commands.xml");
 }
 
 sub writeChannels {
-  $::xs1->XMLout($::channels, RootName => 'channels', KeyAttr => ['id']) > io("$::cset/channels.xml");
+  $::xs1->XMLout($::channels, RootName => 'channels', KeyAttr => ['id'], NumericEscape => 2) > io("$::cset/channels.xml");
 }
 
 sub writeUsers {
