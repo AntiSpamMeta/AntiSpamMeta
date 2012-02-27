@@ -166,9 +166,9 @@
     my $chan = $1;
     my $nick = $2;
     my $level= $3;
-    if ($level eq '') { $level = 'low'; }
+    if ($level eq '') { $level = 'info'; }
     $level = lc $level;
-    if ($level !~ /^(disable|debug|low|medium|high|opalert)$/) {
+    if ($level !~ /^(disable|debug|info|low|medium|high|opalert)$/) {
       $conn->privmsg($event->{to}->[0], "Error: I don't recognize $level as a valid level.");
       return;
     }
