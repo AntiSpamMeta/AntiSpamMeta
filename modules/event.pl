@@ -67,15 +67,27 @@ sub new
   $conn->add_handler('banlist', \&on_banlist);
   $conn->add_handler('dcc_open', \&dcc_open);
   $conn->add_handler('chat', \&on_dchat);
+  $conn->add_handler('pong', \&on_pong);
   bless($self);
   return $self;
+}
+
+sub on_pong
+{
+  my ($conn, $event) = @_;
+  alarm 60;
+  $conn->schedule( 30, sub { $conn->sl("PING :" . time); } );
+  return unless $::debugx{pingpong};
+  print strftime("%F %T  ", gmtime) . "Ping? Pong!\n";
+  print Dumper($event);
 }
 
 sub on_dchat
 {
   my ($conn, $event) = @_;
   print Dumper($event);
-  if ((lc $event->{nick} eq 'afterdeath') && ($event->{args}->[0] ne '')) {
+  if ( #(lc $event->{nick} eq 'afterdeath') && 
+      ($event->{args}->[0] ne '')) {
     my $msg = $event->{args}->[0];
     if ($msg =~ /^SPY (.*)/) {
       my $chan = $1;
@@ -128,7 +140,7 @@ sub on_join {
   if ( lc $conn->{_nick} eq lc $nick)  {
     $::sc{$chan} = {};
     mkdir($::settings->{log}->{dir} . $chan);
-    $conn->sl('who ' . $chan . ' %tcfnuhra,314');
+    $conn->sl('who ' . $chan . ' %tcnuhra,314');
   }
   $::sc{$chan}{users}{$nick} = {};
   $::sc{$chan}{users}{$nick}{hostmask} = $event->{userhost};
@@ -427,26 +439,19 @@ sub on_whoxreply
 {
   my ($conn, $event) = @_;
   return unless $event->{args}->[1] eq '314';
-  my ($tgt, $magic, $chan, $user, $host, $nick, $flags, $account, $gecos) = @{$event->{args}};
-  my ($voice, $op) = (0, 0);
-  $op = 1 if ( $flags =~ /\@/ );
-  $voice = 1 if ($flags =~ /\+/);
+  my ($tgt, $magic, $chan, $user, $host, $nick, $account, $gecos) = @{$event->{args}};
   $nick = lc $nick; $chan = lc $chan;
-  $::sn{$nick} = {} unless defined $::sn{lc $nick};
-  my @mship=();
-  if (defined($::sn{$nick}->{mship})) {
-    @mship = @{$::sn{$nick}->{mship}};
+  if (!defined $::sn{lc $nick}) {
+    $::sn{$nick} = {};
+    $::sn{$nick}->{mship} = [$chan];
+  } else {
+    $::sn{$nick}->{mship} = [grep { lc $_ ne $chan } @{$::sn{$nick}->{mship}}];
+    push @{$::sn{$nick}->{mship}}, $chan;
   }
-  @mship = grep { lc $_ ne $chan } @mship;
-  @mship = (@mship, $chan);
-  $::sn{$nick}->{mship} = \@mship;
   $::sn{$nick}->{gecos} = $gecos;
   $::sn{$nick}->{user} = $user;
   $::sn{$nick}->{host} = $host;
   $::sn{$nick}->{account} = lc $account;
-  $::sc{$chan}{users}{$nick} = {};
-  $::sc{$chan}{users}{$nick}{op} = $op;
-  $::sc{$chan}{users}{$nick}{voice} = $voice;
 }
 
 sub on_banlist
