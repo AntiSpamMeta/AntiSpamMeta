@@ -67,20 +67,24 @@ sub inspect {
               "\x02$event->{nick}\x02 - ${nicereason}; ping ";
       $txtz = $txtz . ASM::Util->commaAndify(ASM::Util->getAlert(lc $chan, $dct{$id}{risk}, 'hilights')) if (ASM::Util->getAlert(lc $chan, $dct{$id}{risk}, 'hilights'));
       $txtz = $txtz . ' !att-' . $chan . '-' . $dct{$id}{risk};
+      if ($id eq 'last_measure_regex') { #TODO: Note that this is another example of things that shouldn't be hardcoded, but are.
+
+      }
       unless (defined($::ignored{$chan}) && ($::ignored{$chan} >= $::RISKS{$dct{$id}{risk}})) {
         my @tgts = ASM::Util->getAlert($chan, $dct{$id}{risk}, 'msgs');
-        foreach my $tgt (@tgts) { #unfortunately wikipedia has way too many ops, and it breaks things
+#        foreach my $tgt (@tgts) { #unfortunately wikipedia has way too many ops, and it breaks things
           if (length($txtz) <= 380) {
-            $conn->privmsg($tgt, $txtz);
+            $conn->privmsg(\@tgts, $txtz);
           } else {
             my $splitpart = rindex($txtz, " ", 380);
-            $conn->privmsg($tgt, substr($txtz, 0, $splitpart));
-            $conn->privmsg($tgt, substr($txtz, $splitpart));
+            $conn->privmsg(\@tgts, substr($txtz, 0, $splitpart));
+            $conn->privmsg(\@tgts, substr($txtz, $splitpart));
           }
-        }
+#        }
         $::ignored{$chan} = $::RISKS{$dct{$id}{risk}};
         $conn->schedule(45, sub { delete($::ignored{$chan})});
       }
+      delete $dct{$id}{xresult};
     }
   }
 }
