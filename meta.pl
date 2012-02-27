@@ -1,12 +1,10 @@
 #!/usr/bin/perl -w
 
 use lib '/home/icxcnika/AntiSpamMeta';
-#use Devel::Profiler
-#  package_filter => sub {
-#			my $pkg = shift;
-#			return 0 if $pkg =~ /^XML::Simple/;
-#			return 1;
-#		    };
+
+#use Devel::Profiler package_filter => sub { return 0 if $_[0] =~ /^XML::Simple/; return 1; };
+
+
 use warnings;
 use strict;
 use Net::IRC;
@@ -36,8 +34,8 @@ sub init {
   my ( $conn, $host );
   my $irc = new Net::IRC;
   GetOptions( 'debug|d!'   => \$::debug,
-              'pass|p:s'   => \$::pass,
-              'config|c:s' => \$::cset
+              'pass|p=s'   => \$::pass,
+              'config|c=s' => \$::cset
             );
   if ($::cset eq '') {
     $::cset = 'config-default';
