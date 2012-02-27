@@ -21,9 +21,11 @@ sub doServices {
     }
     elsif ( $event->{args}->[0] =~ /^You are now identified/ )
     {
-      foreach my $x ( @{$::settings->{autojoins}} ) {
-        $conn->schedule($i, sub { $conn->join($x); });
-        $i = $i + 5;
+      my @autojoins = @{$::settings->{autojoins}};
+      while (@autojoins) {
+        my $joinstr = join (',', shift @autojoins, shift @autojoins, shift @autojoins, shift @autojoins, shift @autojoins);
+        $conn->schedule($i, sub { $conn->join($joinstr); });
+        $i += 5;
       }
     }
     elsif ($event->{args}->[0] =~ /has been killed$/ )
