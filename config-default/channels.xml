@@ -12,7 +12,7 @@
     <hilights></hilights>
     <msgs></msgs>
   </channel>
-  <channel id="##asb-testing" op="no">
+  <channel id="##asb-testing">
     <hilights></hilights>
     <msgs></msgs>
   </channel>
@@ -26,7 +26,7 @@
     <hilights></hilights>
     <msgs></msgs>
   </channel>
-  <channel id="##english" op="no" silence="yes">
+  <channel id="##english" silence="yes">
     <hilights></hilights>
     <msgs></msgs>
   </channel>
@@ -36,8 +36,9 @@
       <debug>##hamradio-ops</debug>
     </msgs>
   </channel>
-  <channel id="##hamradio-ops" op="no">
+  <channel id="##hamradio-ops">
     <hilights></hilights>
+    <msgs></msgs>
   </channel>
   <channel id="##linux" silence="yes">
     <hilights>
@@ -77,8 +78,7 @@
   </channel>
   <channel id="##wikia">
     <hilights>
-      <debug>charitwo</debug>
-      <debug>charitwo</debug>
+      <info>vegadark</info>
     </hilights>
     <msgs></msgs>
   </channel>
@@ -106,6 +106,14 @@
   </channel>
   <channel id="#RubyOnRails">
     <hilights></hilights>
+  </channel>
+  <channel id="#antispammeta">
+    <hilights></hilights>
+    <msgs></msgs>
+  </channel>
+  <channel id="#cisco">
+    <hilights></hilights>
+    <msgs></msgs>
   </channel>
   <channel id="#debian" silence="yes">
     <hilights></hilights>
@@ -141,6 +149,7 @@
       <debug>Plazma</debug>
       <debug>Plazma-Rooolz</debug>
       <high>mquin</high>
+      <high>ttuttle</high>
       <info>njan</info>
       <low>denny</low>
       <low>Gary</low>
@@ -171,7 +180,7 @@
       <info>#ubuntu-ops-monitor</info>
     </msgs>
   </channel>
-  <channel id="#haskell" op="no" silence="yes">
+  <channel id="#haskell" silence="yes">
     <hilights></hilights>
     <msgs></msgs>
   </channel>
@@ -196,24 +205,28 @@
     <hilights>
       <debug>flyingparchment</debug>
       <debug>roberthl</debug>
+      <debug>Snowolf</debug>
       <disable>seanw</disable>
+      <info>charitwo</info>
       <low>vvv</low>
     </hilights>
     <msgs>
       <debug>#wikimedia-ops</debug>
     </msgs>
   </channel>
-  <channel id="#noisebridge" op="no" />
+  <channel id="#noisebridge">
+    <hilights></hilights>
+  </channel>
   <channel id="#osdev">
     <hilights>
       <low>tomaw</low>
     </hilights>
     <msgs></msgs>
   </channel>
-  <channel id="#persian" op="no">
+  <channel id="#persian">
     <hilights></hilights>
   </channel>
-  <channel id="#persians" op="no">
+  <channel id="#persians">
     <hilights></hilights>
   </channel>
   <channel id="#reddit">
@@ -230,13 +243,13 @@
       <debug>#reddit-priv</debug>
     </msgs>
   </channel>
-  <channel id="#reddit-downtime" op="no">
+  <channel id="#reddit-downtime">
     <hilights></hilights>
     <msgs>
       <debug>#reddit-priv</debug>
     </msgs>
   </channel>
-  <channel id="#reddit-priv" op="no">
+  <channel id="#reddit-priv">
     <hilights></hilights>
     <msgs></msgs>
   </channel>
@@ -256,19 +269,23 @@
       <info>#ubuntu-ops-monitor</info>
     </msgs>
   </channel>
-  <channel id="#ubuntu-fr" op="no">
+  <channel id="#ubuntu-fr">
     <hilights></hilights>
     <msgs>
       <info>#ubuntu-fr-ops-log</info>
     </msgs>
   </channel>
-  <channel id="#ubuntu-fr-ops-log" op="no">
+  <channel id="#ubuntu-fr-ops-log">
     <hilights></hilights>
   </channel>
-  <channel id="#ubuntu-fr-ops-logs" op="no">
+  <channel id="#ubuntu-fr-ops-logs">
     <hilights></hilights>
   </channel>
   <channel id="#ubuntu-ops-monitor" monitor="no">
+    <hilights></hilights>
+    <msgs></msgs>
+  </channel>
+  <channel id="#uncyclopedia">
     <hilights></hilights>
     <msgs></msgs>
   </channel>
@@ -296,8 +313,11 @@
       <debug>Thehelpfulone</debug>
       <debug>Tanvir</debug>
       <debug>jeremyb</debug>
+      <debug>Logan_</debug>
       <info>charitwo</info>
-      <info>log</info>
+      <info>Rjd0060</info>
+      <info>Fluffernutter</info>
+      <info>TBloemink</info>
     </hilights>
     <msgs>
       <debug>#wikimedia-ops</debug>
@@ -308,9 +328,9 @@
       <debug>killiondude</debug>
       <debug>matanya</debug>
       <debug>Tanvir</debug>
-      <debug>log</debug>
       <debug>Thehelpfulone</debug>
       <debug>Snowolf</debug>
+      <debug>Logan_</debug>
       <low>Kanonkas</low>
     </hilights>
     <msgs>
@@ -330,6 +350,7 @@
       <debug>jeremyb</debug>
       <debug>AfterDeath</debug>
       <info>charitwo</info>
+      <info>TBloemink</info>
       <low>slakr</low>
     </hilights>
     <msgs>
@@ -360,6 +381,17 @@
     <hilights>
       <debug>Barras</debug>
       <debug>PeterSymonds</debug>
+      <debug>Snowolf</debug>
+      <debug>Thehelpfulone</debug>
+      <info>Snowolf</info>
+      <info>Rjd0060</info>
+      <info>TBloemink</info>
+      <info>Savh</info>
+      <info>Fluffernutter</info>
+      <info>Pmlineditor</info>
+      <info>juancarlos</info>
+      <info>omtsh</info>
+      <info>MBisanz</info>
     </hilights>
     <msgs>
       <debug>#wikimedia-ops</debug>
@@ -369,6 +401,7 @@
     <hilights>
       <debug>Thehelpfulone</debug>
       <debug>Snowolf</debug>
+      <debug>Rjd0060</debug>
     </hilights>
     <msgs>
       <low>#wikimedia-ops</low>
@@ -401,6 +434,7 @@
       <debug>Snowolf</debug>
       <debug>Tanvir</debug>
       <debug>TBloemink</debug>
+      <debug>Rjd0060</debug>
       <low>bumm13_</low>
       <low>Cyrius</low>
       <low>DanielB</low>
@@ -433,21 +467,17 @@
   </channel>
   <channel id="#wikipedia-en" silence="yes">
     <hilights>
+      <debug>AfterDeath</debug>
       <debug>Werdan7</debug>
-      <debug>wimt</debug>
       <debug>Thehelpfulone</debug>
       <debug>PeterSymonds</debug>
-      <debug>Not_the_NSA</debug>
       <debug>Prodego</debug>
-      <debug>Jake_Wartenberg</debug>
-      <debug>AfterDeath</debug>
       <debug>shimgray</debug>
       <debug>stwalkerster</debug>
       <debug>Jamesofur</debug>
       <debug>SpitfireWP</debug>
       <debug>Barras</debug>
       <debug>jeremyb</debug>
-      <debug>Maximillion</debug>
       <debug>DeltaQuad</debug>
       <debug>Theo10011</debug>
       <debug>Gfoley4</debug>
@@ -456,20 +486,12 @@
       <debug>Steven_Zhang</debug>
       <debug>Shirik</debug>
       <debug>TBloemink</debug>
-      <high>Rudha-an</high>
+      <debug>foxj</debug>
+      <debug>Rjd0060</debug>
       <low>Cobi</low>
-      <low>Cbrown1023</low>
-      <low>DanielB</low>
       <low>Golbez</low>
-      <low>JohnReaves</low>
-      <low>Luna-Santin</low>
-      <low>Mike42</low>
-      <low>Tawker</low>
-      <low>NotASpy</low>
-      <low>|X|</low>
       <low>agkwiki</low>
       <low>KFP</low>
-      <low>Ryanposs</low>
       <low>slakr</low>
       <low>Courcelles</low>
       <medium>closedmouth</medium>
@@ -510,8 +532,8 @@
       <debug>Barras</debug>
       <debug>Barras</debug>
       <debug>Ocaasi</debug>
+      <info>mabdul</info>
       <low>KFP</low>
-      <low>chzz</low>
       <low>Gfoley4</low>
       <low>sonia</low>
     </hilights>
@@ -525,7 +547,16 @@
       <low>#wikimedia-ops</low>
     </msgs>
   </channel>
-  <channel id="default" />
+  <channel id="+#wikimedia-ops">
+    <hilights></hilights>
+  </channel>
+  <channel id="antispammeta">
+    <hilights></hilights>
+    <msgs></msgs>
+  </channel>
+  <channel id="default">
+    <hilights></hilights>
+  </channel>
   <channel id="master">
     <event id="advflood" class="advsplitflood" reason="advanced distributed flooding" risk="low" type="public,part,caction">5:3</event>
     <event id="ahbl" class="dnsbl" reason="host $evhost is in dnsbl.ahbl.org ( $xresult )" risk="info" type="join">dnsbl.ahbl.org</event>
@@ -536,14 +567,13 @@
     <event id="ctcp-ping" class="re" reason="channel-wide CTCP PING" risk="medium" type="cping">.*</event>
     <event id="ctcp-version" class="re" reason="channel-wide CTCP VERSION" risk="medium" type="cversion">.*</event>
     <event id="dcc" class="re" override="dcc-medium" reason="using the DC.C SE.ND exploit" risk="high" type="public">^DCC (SEND|S?CHAT) |\bDCC (SEND|S?CHAT) &quot;?[A-Za-z0-9]+&quot;? \d+ \d+ \d+</event>
-    <event id="dcc-medium" class="re" reason="using the DC.C SE.ND exploit" risk="medium" type="public">DCC SEND </event>
-    <event id="dcc-part" class="re" reason="using the DC.C SE.ND exploit in a part message" risk="high" type="part">DCC SEND </event>
+    <event id="dcc-medium" class="re" reason="using the DC.C SE.ND exploit" risk="medium" type="public" xresult="1">\bDCC SEND </event>
+    <event id="dcc-part" class="re" reason="using the DC.C SE.ND exploit in a part message" risk="high" type="part">\bDCC SEND </event>
     <event id="dcc-topic" class="re" reason="setting a bad topic" risk="medium" type="topic">\bDCC SEND </event>
     <event id="debugme" class="re" reason="sending a string designed to trigger a debug test alert, disregard this" risk="debug" type="public">debugantispambotdebug</event>
     <event id="dronebl" class="dnsbl" reason="host $evhost is in dnsbl.dronebl.org ( $xresult )" risk="info" type="join">dnsbl.dronebl.org</event>
     <event id="efnetbl" class="dnsbl" reason="host $evhost is in rbl.efnetrbl.org ( $xresult )" risk="info" type="join">rbl.efnetrbl.org</event>
-    <event id="genspam1" class="re" reason="generic spamming" risk="debug" type="public">([^ ]{4,} +)\1{5,}</event>
-    <event id="genspam2" class="re" reason="generic spamming v2" risk="debug" type="public,caction">^(?:([A-Za-z0-9,.])(?!\1\1)){30,}$</event>
+    <event id="floodqueue10-20" class="floodqueue" reason="flooding (10 msgs in 20 seconds)" risk="low" type="public,caction">10:20</event>
     <event id="gnaa-topic" class="re" reason="setting a GNAA topic" risk="medium" type="topic">(?i)\bgnaa\b</event>
     <event id="gnaaquit" class="re" reason="quitting with a GNAA message" risk="medium" type="quit">(?i)\bgnaa\b</event>
     <event id="joinflood" class="floodqueue" reason="join flood (5 joins in 20 seconds)" risk="medium" type="join">5:20</event>
@@ -551,7 +581,9 @@
     <event id="keylogger-medium" class="re" reason="using the norton start-key-logger exploit" risk="medium" type="public">\bstartkeylogger\b|\bstopkeylogger\b</event>
     <event id="last_measure_regex" class="re" reason="posting what appears to be a last measure link" risk="high" type="public">(?i)(http://(\S+\.)?on\.nimp\.org|http://(\S+\.)?feenode.net|http://wikipaste\.eu|http://(\S+\.)?bioghost\.com|http://(\S+\.)?on\.zoy\.org|http://(lastmeasure|dirtysanchez|doom3|freeipods|halflife2|halo2|lastmeasure4|lastmeasureunified|softmeasure|traceroute)\.zoy\.org)</event>
     <event id="levenflood" class="levenflood" override="flood-5to3" reason="levenshtein flood match" risk="low" type="public">contentisuseless</event>
+    <event id="malspreader1" class="nuhg" reason="suspicious NUHG, rule 1" risk="low" type="join">.*!~NUMONE@.*!REAL_NAME</event>
     <event id="massflood" class="splitflood" reason="distributed flooding" risk="high" type="public,part,caction">4:4</event>
+    <event id="meepsheep1" class="nuhg" reason="common troll (meepsheep)" risk="info" type="join">(?i).*eepsheep.*</event>
     <event id="nickspam" class="nickspam" reason="nickspamming" risk="high" type="public">60:10</event>
     <event id="njabl" class="dnsbl" reason="host $evhost is in dnsbl.njabl.org ( $xresult )" risk="info" type="join">dnsbl.njabl.org</event>
     <event id="notice" class="re" reason="sending a notice to the channel" risk="medium" type="notice">.*</event>
@@ -563,7 +595,7 @@
     <event id="sorbsbl" class="dnsbl" reason="host $evhost is in dnsbl.sorbs.net ( $xresult )" risk="info" type="join">dnsbl.sorbs.net</event>
     <event id="suckmynick" class="re" reason="using a potentially offensive nick" risk="low" type="join">(suck.*dick)</event>
     <event id="wikifags2" class="re" reason="saying 'sure are a lot of wikifag'..." risk="low" type="public">(?i)^sure are a ?lot of .*fags? in here</event>
-    <event id="xchatbroad" class="re" reason="using an x-chat for windows unicode exploit (broad detection version, may be error prone)" risk="low" type="public,part,quit,caction">[&#240;-&#247;][&#128;-&#191;]{3}</event>
+    <event id="xchatbroad" class="re" reason="using an x-chat for windows unicode exploit (broad detection version, may be error prone)" risk="low" type="public,part,quit,caction">THISHASBEENDISABLED[&#240;-&#247;][&#128;-&#191;]{3}</event>
     <event id="xchatexploit" class="re" override="xchatbroad" reason="using an x-chat for windows unicode exploit" risk="high" type="public,part,quit,caction">&#243;&#160;&#129;&#159;</event>
     <hilights>
       <info>Corey</info>
@@ -574,6 +606,7 @@
     </hilights>
     <msgs>
       <debug>##asb-nexus</debug>
+      <debug>#antispammeta</debug>
     </msgs>
   </channel>
 </channels>

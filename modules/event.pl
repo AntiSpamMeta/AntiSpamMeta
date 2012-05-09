@@ -127,6 +127,7 @@ sub on_account
 
 sub on_connect {
   my ($conn, $event) = @_; # need to check for no services
+  $conn->sl('MODE AntiSpamMeta +Q');
   $conn->privmsg( 'NickServ', "ghost $::settings->{nick} $::settings->{pass}" ) if lc $event->{args}->[0] ne lc $::settings->{nick};
   $conn->sl('CAP REQ :extended-join multi-prefix account-notify'); #god help you if you try to use this bot off freenode
 }
@@ -200,7 +201,7 @@ sub on_msg
   my ($conn, $event) = @_;
   $::commander->command($conn, $event);
   print strftime("%F %T  ", gmtime) . "(msg) " . $event->{from} . " - " . $event->{args}->[0] . "\n";
-  $conn->privmsg('##asb-nexus', $event->{from} . ' told me: ' . $event->{args}->[0]);
+  $conn->privmsg('#antispammeta', $event->{from} . ' told me: ' . $event->{args}->[0]);
 }
 
 sub on_public
@@ -241,9 +242,9 @@ sub on_quit
   $event->{to} = \@channels;
   $::db->logg( $event );
   if (($::netsplit == 0) && ($event->{args}->[0] eq "*.net *.split")) { #special, netsplit situation
-    $conn->privmsg("##asb-nexus", "Entering netsplit mode - JOIN and QUIT inspection will be disabled for 60 minutes");
+    $conn->privmsg("#antispammeta", "Entering netsplit mode - JOIN and QUIT inspection will be disabled for 60 minutes");
     $::netsplit = 1;
-    $conn->schedule(60*60, sub { $::netsplit = 0; $conn->privmsg('##asb-nexus', 'Returning to regular operation'); });
+    $conn->schedule(60*60, sub { $::netsplit = 0; $conn->privmsg('#antispammeta', 'Returning to regular operation'); });
   }
   $::inspector->inspect( $conn, $event ) unless $::netsplit;
   $::log->logg( $event );

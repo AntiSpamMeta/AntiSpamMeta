@@ -63,13 +63,13 @@ sub record
 #FIXME: This function is shit. Also, it doesn't work like I want it to with mode.
 sub logg
 {
-  return; #Disabling logging of individual stuff to mysql. no point.
   my $self = shift;
   my ($event) = @_;
   my $dbh = $self->{DBH_LOG};
   my $table = $event->{type};
   $table = 'action' if ($table eq 'caction');
   $table = 'privmsg' if ($table eq 'public');
+  return if (($table eq 'action') or ($table eq 'privmsg')); #Disabling logging of privmsg stuffs to mysql. no point.
   my $realtable = $table;
   $realtable = 'joins' if $realtable eq 'join'; #mysql doesn't like a table named join
   my $string = 'INSERT INTO `' . $realtable . '` (';

@@ -78,6 +78,7 @@ sub dnsbl
 #  return unless index($event->{host}, '/') == -1;
 #  hopefully getting rid of this won't cause shit to assplode
 #  but I'm getting rid of it so it can detect cgi:irc shit
+  return 0;
   if (defined $rev) {
     print "Querying $rev$chk->{content}\n" if $::debugx{dnsbl};
     my $iaddr = gethostbyname( "$rev$chk->{content}" );
@@ -151,7 +152,7 @@ sub splitflood {
     $text=$event->{args}->[0];
   }
   return unless defined($text);
-  return unless length($text) >= 10;
+#  return unless length($text) >= 10;
   if (defined($bs{$id}{$text}) && (time <= $bs{$id}{$text} + 600)) {
     return 1;
   }
@@ -181,7 +182,7 @@ sub advsplitflood {
     $text=$event->{args}->[0];
   }
   return unless defined($text);
-  $text=~s/^\d+(.*)\d+$/$1/;
+  $text=~s/^\d*(.*)\d*$/$1/;
   return unless length($text) >= 10;
   if (defined($bs{$id}{$text}) && (time <= $bs{$id}{$text} + 600)) {
     return 1;
