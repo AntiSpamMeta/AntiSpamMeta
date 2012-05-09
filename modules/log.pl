@@ -46,9 +46,12 @@ sub logg
     my $nostamp = $_;
     $_ = strftime($cfg->{timefmt}, @time) . $_ . "\n";
     my $line = $_;
-    open(FH, $path) or die "Can't open $path: $!";
-    print FH $line;
-    close(FH);
+    if (open(FH, $path)) { # or die "Can't open $path: $!";
+      print FH $line;
+      close(FH);
+    } else {
+      print "COULDN'T PRINT TO $path - $line";
+    }
     if (defined($::spy{$chan})) {
       my $spy = $::spy{$chan};
       print $spy $chan .": " . $nostamp . "\n";
