@@ -23,10 +23,11 @@ sub doServices {
     {
       my @autojoins = @{$::settings->{autojoins}};
       while (@autojoins) {
-        my $joinstr = join (',', shift @autojoins, shift @autojoins, shift @autojoins, shift @autojoins, shift @autojoins);
+        my $joinstr = join (',', shift @autojoins, shift @autojoins, shift @autojoins, shift @autojoins);
         $conn->schedule($i, sub { $conn->join($joinstr); });
-        $i += 5;
+        $i += 7;
       }
+      $conn->schedule($i-6, sub { $conn->privmsg('#antispammeta', 'Now joined to all channels in '. (time - $::starttime) . " seconds."); });
     }
     elsif ($event->{args}->[0] =~ /has been killed$/ )
     {
