@@ -24,6 +24,7 @@ $::cset = '';
 );
 %::dsock = ();
 %::spy = ();
+$::starttime = time;
 
 BEGIN {
 my @modules = qw/Util Xml Inspect Event Services Log Command Classes Mysql/;
