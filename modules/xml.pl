@@ -16,6 +16,7 @@ sub readXML {
   $::commands = $::xs1->XMLin( "$p/commands.xml", ForceArray => [qw/command/]);
   $::mysql    = $::xs1->XMLin( "$p/mysql.xml",    ForceArray => []);
   $::dnsbl    = $::xs1->XMLin( "$p/dnsbl.xml",    ForceArray => []);
+  $::rules    = $::xs1->XMLin( "$p/rules.xml",    ForceArray => []);
 }
 
 sub writeXML {

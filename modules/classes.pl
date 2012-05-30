@@ -25,6 +25,7 @@ sub new
     "gecos" => \&gecos,
     "nuhg" => \&nuhg,
     "levenflood" => \&levenflood,
+    "proxy" => \&proxy
   };
   $self->{ftbl} = $tbl;
   bless($self);
@@ -36,6 +37,17 @@ sub check
   my $self = shift;
   my $item = shift;
   return $self->{ftbl}->{$item}->(@_);
+}
+
+sub proxy
+{
+  my ($chk, $id, $event, $chan, $rev) = @_;
+  if (defined($rev) and ($rev =~ /(\d+)\.(\d+)\.(\d+)\.(\d+)\./)) {
+    if (defined($::proxies{"$4.$3.$2.$1"})) {
+      return 1;
+    }
+  }
+  return 0;
 }
 
 my %ls = ();
@@ -167,7 +179,7 @@ sub splitflood {
     process_cf();
   }
   if ( scalar @{$cf{$id}{$chan}{$text}} == int($cut[0]) ) {
-    $bs{$id}{$text} = time;
+    $bs{$id}{$text} = time unless length($text) < 10;
     return 1;
   }
   return 0;

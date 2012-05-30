@@ -32,11 +32,11 @@ sub inspect {
     }
   }
   else {
-#    $iaddr = gethostbyname($event->{host});
+    $iaddr = gethostbyname($event->{host});
     $rev = join('.', reverse(unpack('C4', $iaddr))).'.' if (defined $iaddr);
   }
   ## NB: isn't there a better way to do this with grep, somehow?
-  %aonx = %{$::channels->{channel}->{master}->{event}};
+  %aonx = %{$::rules->{event}};
   foreach $chan ( @{$event->{to}} ) {
     next unless $chan =~ /^#/;
     next if ((defined($::channels->{channel}->{$chan}->{monitor})) and ($::channels->{channel}->{$chan}->{monitor} eq "no"));

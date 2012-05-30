@@ -52,6 +52,7 @@ sub new
   $conn->add_handler('topic', \&irc_topic);
   $conn->add_handler('topicinfo', \&irc_topic);
   $conn->add_handler('nicknameinuse', \&on_errnickinuse);
+  $conn->add_handler('bannickchange', \&on_bannickchange);
   $conn->add_handler('kick', \&on_kick);
   $conn->add_handler('cping', \&on_ctcp);
   $conn->add_handler('cversion', \&on_ctcp);
@@ -62,6 +63,8 @@ sub new
   $conn->add_handler('cclientinfo', \&on_ctcp);
   $conn->add_handler('cfinger', \&on_ctcp);
   $conn->add_handler('354', \&on_whoxreply);
+  $conn->add_handler('315', \&on_whoxover);
+  $conn->add_handler('263', \&on_whofuckedup);
   $conn->add_handler('account', \&on_account);
   $conn->add_handler('ping', \&on_ping);
   $conn->add_handler('banlist', \&on_banlist);
@@ -128,7 +131,10 @@ sub on_account
 sub on_connect {
   my ($conn, $event) = @_; # need to check for no services
   $conn->sl('MODE AntiSpamMeta +Q');
-  $conn->privmsg( 'NickServ', "ghost $::settings->{nick} $::settings->{pass}" ) if lc $event->{args}->[0] ne lc $::settings->{nick};
+  if (lc $event->{args}->[0] ne lc $::settings->{nick}) {
+    $conn->privmsg( 'NickServ', "ghost $::settings->{nick} $::settings->{pass}" );
+    $conn->privmsg( 'NickServ', "release $::settings->{nick} $::settings->{pass}" );
+  }
   $conn->sl('CAP REQ :extended-join multi-prefix account-notify'); #god help you if you try to use this bot off freenode
 }
 
@@ -141,7 +147,11 @@ sub on_join {
   if ( lc $conn->{_nick} eq lc $nick)  {
     $::sc{$chan} = {};
     mkdir($::settings->{log}->{dir} . $chan);
-    $conn->sl('who ' . $chan . ' %tcnuhra,314');
+    $::synced{$chan} = 0;
+    unless ( @::syncqueue ) {
+      $conn->sl('who ' . $chan . ' %tcnuhra,314');
+    }
+    push @::syncqueue, $chan;
   }
   $::sc{$chan}{users}{$nick} = {};
   $::sc{$chan}{users}{$nick}{hostmask} = $event->{userhost};
@@ -225,6 +235,14 @@ sub on_notice
 }
 
 sub on_errnickinuse
+{
+  my ($conn, $event) = @_;
+  $_ = ${$::settings->{altnicks}}[rand @{$::settings->{altnicks}}];
+  print "Nick is in use, trying $_\n";
+  $conn->nick($_);
+}
+
+sub on_bannickchange
 {
   my ($conn, $event) = @_;
   $_ = ${$::settings->{altnicks}}[rand @{$::settings->{altnicks}}];
@@ -455,6 +473,24 @@ sub on_whoxreply
   $::sn{$nick}->{account} = lc $account;
 }
 
+sub on_whoxover
+{
+  my ($conn, $event) = @_;
+  my $chan = pop @::syncqueue;
+#  print Dumper($event);
+  $::synced{$event->{args}->[1]} = 1;
+  if (defined($chan) ){
+    $conn->sl('who ' . $chan . ' %tcnuhra,314');
+  }
+}
+
+sub on_whofuckedup
+{
+  my ($conn, $event) = @_;
+  if ($::debugx{sync}) {
+    print "on_whofuckedup called!\n";
+  }
+}
 sub on_banlist
 {
   my ($conn, $event) = @_;

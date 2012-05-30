@@ -20,11 +20,14 @@ $::debug = 0;
 $::cset = '';
 %::debugx = (
   "dnsbl" => 0,
-  "pingpong" => 0
+  "pingpong" => 0,
+  "services" => 1,
+  "sync" => 1
 );
 %::dsock = ();
 %::spy = ();
 $::starttime = time;
+@::syncqueue = ();
 
 BEGIN {
 my @modules = qw/Util Xml Inspect Event Services Log Command Classes Mysql/;
@@ -72,6 +75,14 @@ sub init {
   my @strbl = io('string_blacklist.txt')->getlines;
   chomp @strbl;
   @::string_blacklist = @strbl;
+  %::proxies = {};
+  my @proxy = io('proxy.txt')->getlines;
+  chomp @proxy;
+  foreach my $line (@proxy) {
+    if ($line =~ /(\d+\.\d+\.\d+\.\d+):\d+/) {
+      $::proxies{$1} = 1;
+    }
+  }
   $irc->start();
 }
 

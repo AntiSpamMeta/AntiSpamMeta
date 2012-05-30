@@ -22,15 +22,19 @@ sub doServices {
     elsif ( $event->{args}->[0] =~ /^You are now identified/ )
     {
       my @autojoins = @{$::settings->{autojoins}};
-      while (@autojoins) {
-        my $joinstr = join (',', shift @autojoins, shift @autojoins, shift @autojoins, shift @autojoins);
-        $conn->schedule($i, sub { $conn->join($joinstr); });
-        $i += 7;
-      }
-      $conn->schedule($i-6, sub { $conn->privmsg('#antispammeta', 'Now joined to all channels in '. (time - $::starttime) . " seconds."); });
+#      while (@autojoins) {
+#        my $joinstr = join (',', shift @autojoins, shift @autojoins, shift @autojoins, shift @autojoins, shift @autojoins,
+#                                 shift @autojoins, shift @autojoins, shift @autojoins, shift @autojoins, shift @autojoins);
+#        $conn->schedule($i, sub { $conn->join($joinstr); });
+#        $i += 1;
+#      }
+      $conn->join(join(',', @autojoins[0..30]));
+      $conn->join(join(',', @autojoins[30..60]));
+      $conn->schedule(2, sub { $conn->privmsg('#antispammeta', 'Now joined to all channels in '. (time - $::starttime) . " seconds."); });
     }
-    elsif ($event->{args}->[0] =~ /has been killed$/ )
+    elsif ($event->{args}->[0] =~ /has been (killed|released)/ )
     {
+      print "Got kill/release successful from nickserv!\n" if $::debugx{services};
       $conn->nick( $::settings->{nick} );
     }
     elsif ($event->{args}->[0] =~ /Password Incorrect/ )
