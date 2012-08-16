@@ -25,7 +25,8 @@ sub new
     "gecos" => \&gecos,
     "nuhg" => \&nuhg,
     "levenflood" => \&levenflood,
-    "proxy" => \&proxy
+    "proxy" => \&proxy,
+    "nickbl" => \&nickbl
   };
   $self->{ftbl} = $tbl;
   bless($self);
@@ -82,6 +83,21 @@ sub levenflood
   shift @leven if $#leven > 10;
   $ls{$chan} = \@leven;
   return $ret;
+}
+
+sub nickbl
+{
+  my ($chk, $id, $event, $chan) = @_;
+  my $nick = $event->{nick};
+  $nick = $event->{args}->[0] if ($event->{type} eq 'nick');
+  my ($fuzzy, $match) = split(/:/, $chk->{content});
+  my @nicks = split(/,/, $match);
+  foreach my $item (@nicks) {
+    if (distance(lc $nick, lc $item) <= $fuzzy) {
+      return 1;
+    }
+  }
+  return 0;
 }
 
 sub dnsbl
@@ -147,8 +163,13 @@ sub process_cf
       foreach my $host ( keys %{$cf{$nid}{$xchan}} ) {
         next unless defined $cf{$nid}{$xchan}{$host}[0];
         while ( time >= $cf{$nid}{$xchan}{$host}[0] + $cf{$nid}{'timeout'} ) {
-          last if ( $#{ $cf{$nid}{$xchan}{$host} } == 0 );
           shift ( @{$cf{$nid}{$xchan}{$host}} );
+          if ( (scalar @{$cf{$nid}{$xchan}{$host}}) == 0 ) {
+            delete $cf{$nid}{$xchan}{$host};
+            last;
+          }
+#          last if ( $#{ $cf{$nid}{$xchan}{$host} } == 0 );
+#          shift ( @{$cf{$nid}{$xchan}{$host}} );
         }
       }
     }
@@ -305,12 +326,34 @@ sub flood_process
       for my $host ( keys %{$sf{$id}{$chan}} ) {
         next unless defined $sf{$id}{$chan}{$host}[0];
         while ( time >= $sf{$id}{$chan}{$host}[0] + $sf{$id}{'timeout'} ) {
-          last if ( $#{ $sf{$id}{$chan}{$host} } == 0 );
           shift ( @{$sf{$id}{$chan}{$host}} );
+          if ( (scalar @{$sf{$id}{$chan}{$host}}) == 0 ) {
+            delete $sf{$id}{$chan}{$host};
+            last;
+          }
+#          last if ( $#{ $sf{$id}{$chan}{$host} } == 0 );
+#          shift ( @{$sf{$id}{$chan}{$host}} );
         }
       }
     }
   }
+}
+
+sub dump
+{
+  #%sf, %ls, %cf, %bs
+  open(FH, ">", "sf.txt");
+  print FH Dumper(\%sf);
+  close(FH);
+  open(FH, ">", "ls.txt");
+  print FH Dumper(\%ls);
+  close(FH);
+  open(FH, ">", "cf.txt");
+  print FH Dumper(\%cf);
+  close(FH);
+  open(FH, ">", "bs.txt");
+  print FH Dumper(\%bs);
+  close(FH);
 }
 
 1;

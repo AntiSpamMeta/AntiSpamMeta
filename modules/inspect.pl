@@ -25,7 +25,11 @@ sub inspect {
   my $nick = lc $event->{nick};
   my $xresult;
   return if (index($nick, ".") != -1);
-  return if (defined($::eline{$nick}) || defined($::eline{lc $event->{user}}) || defined($::eline{lc $event->{host}}));
+  return unless (ASM::Util->notRestricted($nick, "notrigger"));
+  if (defined($::eline{$nick}) || defined($::eline{lc $event->{user}}) || defined($::eline{lc $event->{host}})) {
+    print "Deprecated eline found for $nick / $event->{user} / $event->{host} !\n";
+    return;
+  }
   if ( $event->{host} =~ /gateway\/web\// ) {
     if ( $event->{user} =~ /([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})/ ) {
       $rev = sprintf("%d.%d.%d.%d.", hex($4), hex($3), hex($2), hex($1));
@@ -63,7 +67,7 @@ sub inspect {
       $xresult = $dct{$id}{xresult};
       my $nicereason = interpolate($dct{$id}{reason});
       $::db->record($chan, $event->{nick}, $event->{user}, $event->{host}, $::sn{lc $event->{nick}}->{gecos}, $dct{$id}{risk}, $id, $nicereason);
-      $txtz = "\x03" . $::RCOLOR{$::RISKS{$dct{$id}{risk}}} . "\u$dct{$id}{risk}\x03 risk threat [\x02$chan\x02]: ".
+      $txtz = "\x03" . $::RCOLOR{$::RISKS{$dct{$id}{risk}}} . "\u$dct{$id}{risk}\x03 risk threat [\x02$chan\x02] - ".
               "\x02$event->{nick}\x02 - ${nicereason}; ping ";
       $txtz = $txtz . ASM::Util->commaAndify(ASM::Util->getAlert(lc $chan, $dct{$id}{risk}, 'hilights')) if (ASM::Util->getAlert(lc $chan, $dct{$id}{risk}, 'hilights'));
       $txtz = $txtz . ' !att-' . $chan . '-' . $dct{$id}{risk};
@@ -72,15 +76,7 @@ sub inspect {
       }
       unless (defined($::ignored{$chan}) && ($::ignored{$chan} >= $::RISKS{$dct{$id}{risk}})) {
         my @tgts = ASM::Util->getAlert($chan, $dct{$id}{risk}, 'msgs');
-#        foreach my $tgt (@tgts) { #unfortunately wikipedia has way too many ops, and it breaks things
-          if (length($txtz) <= 380) {
-            $conn->privmsg(\@tgts, $txtz);
-          } else {
-            my $splitpart = rindex($txtz, " ", 380);
-            $conn->privmsg(\@tgts, substr($txtz, 0, $splitpart));
-            $conn->privmsg(\@tgts, substr($txtz, $splitpart));
-          }
-#        }
+        ASM::Util->sendLongMsg($conn, \@tgts, $txtz);
         $::ignored{$chan} = $::RISKS{$dct{$id}{risk}};
         $conn->schedule(45, sub { delete($::ignored{$chan})});
       }

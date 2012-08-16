@@ -2,6 +2,11 @@
   <channel id="##English">
     <hilights></hilights>
   </channel>
+  <channel id="##Linux">
+    <hilights>
+      <low>DLange</low>
+    </hilights>
+  </channel>
   <channel id="##asb-debug" monitor="no">
     <hilights></hilights>
   </channel>
@@ -42,15 +47,13 @@
   </channel>
   <channel id="##linux" silence="yes">
     <hilights>
-      <disable>ST47</disable>
+      <info>Dominian</info>
       <low>denny</low>
-      <low>numist</low>
       <low>tomaw</low>
       <low>WildPikachu</low>
       <low>Gary</low>
       <medium>vorian</medium>
       <medium>DLange</medium>
-      <medium>pinPoint</medium>
       <medium>njan</medium>
     </hilights>
     <msgs>
@@ -61,12 +64,20 @@
     <hilights>
       <opalert>WildPikachu</opalert>
       <opalert>denny</opalert>
-      <opalert>numist</opalert>
-      <opalert>PhilKC</opalert>
+      <opalert>tomaw</opalert>
+      <opalert>Gary</opalert>
+      <opalert>vorian</opalert>
+      <opalert>DLange</opalert>
+      <opalert>njan</opalert>
+      <opalert>Dominian</opalert>
     </hilights>
     <msgs>
       <opalert>##linux-ops</opalert>
     </msgs>
+  </channel>
+  <channel id="##olympics">
+    <hilights></hilights>
+    <msgs></msgs>
   </channel>
   <channel id="##philosophy" silence="yes">
     <hilights></hilights>
@@ -78,6 +89,12 @@
   </channel>
   <channel id="##posix" silence="yes">
     <hilights></hilights>
+    <msgs></msgs>
+  </channel>
+  <channel id="##trans" silence="yes">
+    <hilights>
+      <info>Kelsie</info>
+    </hilights>
     <msgs></msgs>
   </channel>
   <channel id="##transgender">
@@ -121,6 +138,7 @@
     <hilights></hilights>
     <msgs></msgs>
   </channel>
+  <channel id="#antispammeta-debug" />
   <channel id="#cisco">
     <hilights></hilights>
     <msgs></msgs>
@@ -152,21 +170,18 @@
       <debug>Dave2</debug>
       <debug>Martinp23</debug>
       <debug>SeJo</debug>
-      <debug>pctony</debug>
       <debug>Corey</debug>
-      <debug>theacolyte-</debug>
       <debug>nhandler</debug>
-      <debug>Plazma</debug>
-      <debug>Plazma-Rooolz</debug>
       <high>mquin</high>
       <high>ttuttle</high>
       <info>njan</info>
       <info>ttuttle</info>
+      <info>gry</info>
+      <info>Adran</info>
       <low>denny</low>
       <low>Gary</low>
       <low>JonathanD</low>
       <low>ZoFreX</low>
-      <low>DLange</low>
       <low>PriceChild</low>
       <low>werdan7</low>
       <low>dax</low>
@@ -178,6 +193,10 @@
   </channel>
   <channel id="#freenode-newyears" link="#freenode" silence="yes">
     <hilights></hilights>
+  </channel>
+  <channel id="#frikipedia">
+    <hilights></hilights>
+    <msgs></msgs>
   </channel>
   <channel id="#gentoo" silence="yes">
     <hilights>
@@ -207,7 +226,6 @@
     <hilights>
       <disable>Thehelpfulone</disable>
       <high>tomaw</high>
-      <high>DLange</high>
       <high>RichiH</high>
     </hilights>
     <msgs></msgs>
@@ -317,7 +335,6 @@
       <debug>Martinp23</debug>
       <debug>PeterSymonds</debug>
       <debug>vvv</debug>
-      <debug>Barras</debug>
       <debug>AfterDeath</debug>
       <debug>DeltaQuad</debug>
       <debug>Snowolf</debug>
@@ -371,13 +388,13 @@
       <debug>Not_the_NSA</debug>
       <debug>Kanonkas</debug>
       <debug>PeterSymonds</debug>
-      <debug>Barras</debug>
       <debug>AfterDeath</debug>
       <debug>Logan_</debug>
       <debug>jeremyb</debug>
       <debug>AfterDeath</debug>
       <info>charitwo</info>
       <info>TBloemink</info>
+      <info>Mh7kJ</info>
       <low>slakr</low>
     </hilights>
     <msgs>
@@ -403,7 +420,6 @@
       <debug>Thehelpfulone</debug>
       <debug>Tempodivalse</debug>
       <debug>Tanvir</debug>
-      <debug>Barras</debug>
       <debug>peteforsyth</debug>
       <debug>Az1568</debug>
       <debug>Cbrown1023</debug>
@@ -425,7 +441,6 @@
   </channel>
   <channel id="#wikimedia-stewards">
     <hilights>
-      <debug>Barras</debug>
       <debug>PeterSymonds</debug>
       <debug>Snowolf</debug>
       <debug>Thehelpfulone</debug>
@@ -436,8 +451,8 @@
       <info>Fluffernutter</info>
       <info>Pmlineditor</info>
       <info>juancarlos</info>
-      <info>omtsh</info>
       <info>MBisanz</info>
+      <info>Mh7kJ</info>
     </hilights>
     <msgs>
       <debug>#wikimedia-ops</debug>
@@ -488,7 +503,6 @@
       <debug>jeremyb</debug>
       <debug>Maximillion</debug>
       <debug>stwalkerster</debug>
-      <debug>Barras</debug>
       <debug>DeltaQuad</debug>
       <debug>Gfoley4</debug>
       <debug>Logan_</debug>
@@ -497,6 +511,7 @@
       <debug>Tanvir</debug>
       <debug>TBloemink</debug>
       <debug>Rjd0060</debug>
+      <debug>Shirik</debug>
       <low>bumm13_</low>
       <low>Cyrius</low>
       <low>DanielB</low>
@@ -538,7 +553,6 @@
       <debug>stwalkerster</debug>
       <debug>Jamesofur</debug>
       <debug>SpitfireWP</debug>
-      <debug>Barras</debug>
       <debug>jeremyb</debug>
       <debug>DeltaQuad</debug>
       <debug>Theo10011</debug>
@@ -548,7 +562,6 @@
       <debug>Steven_Zhang</debug>
       <debug>Shirik</debug>
       <debug>TBloemink</debug>
-      <debug>foxj</debug>
       <debug>Rjd0060</debug>
       <low>Cobi</low>
       <low>Golbez</low>
@@ -634,8 +647,6 @@
       <debug>Snowolf</debug>
       <debug>Tanvir</debug>
       <debug>TBloemink</debug>
-      <debug>Barras</debug>
-      <debug>Barras</debug>
       <debug>Ocaasi</debug>
       <info>mabdul</info>
       <low>KFP</low>
@@ -690,13 +701,6 @@
       <debug>#wikimedia-ops</debug>
     </msgs>
   </channel>
-  <channel id="+#wikimedia-ops">
-    <hilights></hilights>
-  </channel>
-  <channel id="antispammeta">
-    <hilights></hilights>
-    <msgs></msgs>
-  </channel>
   <channel id="default">
     <hilights></hilights>
   </channel>
@@ -706,7 +710,6 @@
       <low>marienz</low>
       <low>mrmist</low>
       <medium>dave2</medium>
-      <medium>RichiH</medium>
     </hilights>
     <msgs>
       <debug>##asb-nexus</debug>

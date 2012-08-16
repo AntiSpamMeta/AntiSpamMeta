@@ -137,6 +137,18 @@ sub flood_process {
   }
 }
 
+# If $tgts="#antispammeta" that's fine, and if $tgts = ["#antispammeta", "##linux-ops"] that's cool too
+sub sendLongMsg {
+  my ($module, $conn, $tgts, $txtz) = @_;
+  if (length($txtz) <= 380) {
+    $conn->privmsg($tgts, $txtz);
+  } else {
+    my $splitpart = rindex($txtz, " ", 380);
+    $conn->privmsg($tgts, substr($txtz, 0, $splitpart));
+    $conn->privmsg($tgts, substr($txtz, $splitpart));
+  }
+}
+
 sub getAlert {
   my ($module, $c, $risk, $t) = @_;
   my @disable = ();
@@ -181,6 +193,35 @@ sub seq {
 sub dprint {
   my ($module, $text) = @_;
   print $text if $::debug;
+}
+
+sub notRestricted {
+  my ($module, $nick, $restriction) = @_;
+  $nick = lc $nick;
+  my $host = $::sn{$nick}{host};
+  my $account = lc $::sn{$nick}{account};
+  my $ret = 1;
+  if (defined($::restrictions->{nicks}->{nick}->{$nick})) {
+    if (defined($::restrictions->{nicks}->{nick}->{$nick}->{$restriction})) {
+      $ret= 0;
+    }
+  }
+  if ((defined($host)) && (defined($account))) {
+    if (defined($::restrictions->{accounts}->{account}->{$account})) {
+      if (defined($::restrictions->{accounts}->{account}->{$account}->{$restriction})) {
+        $ret= 0;
+      }
+    }
+    if (defined($::restrictions->{hosts}->{host}->{$host})) {
+      if (defined($::restrictions->{hosts}->{host}->{$host}->{$restriction})) {
+        $ret= 0;
+      }
+    }
+  }
+  if (($ret == 0) && ($::debugx{restrictions})) {
+    print "Restriction $restriction found for $nick\n";
+  }
+  return $ret;
 }
 
 return 1;

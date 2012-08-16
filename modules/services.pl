@@ -15,9 +15,9 @@ sub doServices {
   if ($event->{from} eq 'NickServ!NickServ@services.')
   {
     print "NickServ: $event->{args}->[0]\n";
-    if ( $event->{args}->[0] eq 'This nickname is registered' )
+    if ( $event->{args}->[0] =~ /^This nickname is registered/ )
     {
-      $conn->privmsg( 'NickServ', "identify $::settings->{pass}" );
+      $conn->privmsg( 'NickServ', "identify $::settings->{nick} $::settings->{pass}" );
     }
     elsif ( $event->{args}->[0] =~ /^You are now identified/ )
     {
@@ -36,6 +36,10 @@ sub doServices {
     {
       print "Got kill/release successful from nickserv!\n" if $::debugx{services};
       $conn->nick( $::settings->{nick} );
+    }
+    elsif ($event->{args}->[0] =~ /has been regained/ )
+    {
+      print "Got regain successful from nickserv!\n" if $::debugx{services};
     }
     elsif ($event->{args}->[0] =~ /Password Incorrect/ )
     {

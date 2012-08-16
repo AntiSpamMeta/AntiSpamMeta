@@ -1,4 +1,16 @@
 <commands>
+  <command cmd="^;status$" flag="o">
+  <![CDATA[
+    my $size = `ps -p $$ h -o size`;
+    my $cputime = `ps -p $$ h -o time`;
+    chomp $size; chomp $cputime;
+    $conn->privmsg($event->{to}->[0], "This bot has been running for " . (time - $::starttime) . " seconds" .
+     ", is tracking " . (scalar (keys %::sn)) . " nicks" .
+     " across " . (scalar (keys %::sc)) . " tracked channels." .
+     " It is using " . $size . "KB of RAM" . 
+     " and has used " . $cputime . " of CPU time.");
+  ]]>
+  </command>
   <command cmd="^;mship (\S+)$" flag="c">
   <![CDATA[
     $conn->privmsg($event->{to}->[0], $1 . " is on: " . ASM::Util->commaAndify(@{$::sn{lc $1}->{mship}}));
@@ -164,7 +176,7 @@
   <command cmd="^;hilight (\S+) (\S+) ?(\S*)$" flag="h">
   <![CDATA[
     my $chan = $1;
-    my $nick = $2;
+    my @nicks = split(/,/,$2);
     my $level= $3;
     if ($level eq '') { $level = 'info'; }
     $level = lc $level;
@@ -183,17 +195,19 @@
     unless (defined($::channels->{channel}->{$chan}->{hilights}->{$level})) {
       $::channels->{channel}->{$chan}->{hilights}->{$level} = [];
     }
-    my @tmphl = @{$::channels->{channel}->{$chan}->{hilights}->{$level}};
-    push(@tmphl, $nick);
-    $::channels->{channel}->{$chan}->{hilights}->{$level} = \@tmphl;
+    foreach my $nick (@nicks) {
+      my @tmphl = @{$::channels->{channel}->{$chan}->{hilights}->{$level}};
+      push(@tmphl, $nick);
+      $::channels->{channel}->{$chan}->{hilights}->{$level} = \@tmphl;
+    }
     ASM::XML->writeChannels();
-    $conn->privmsg($event->{to}->[0], "$nick added to $level risk hilights for $chan");
+    $conn->privmsg($event->{to}->[0], ASM::Util->commaAndify(@nicks) . " added to $level risk hilights for $chan");
   ]]>
   </command>
   <command cmd="^;dehilight (\S+) (\S+)" flag="h">
   <![CDATA[
     my $chan = $1;
-    my $nick = $2;
+    my @nicks = split(/,/, $2);
     my $link = ASM::Util->getLink(lc $chan);
     if ( lc $link ne lc $chan ) {
       $conn->privmsg($event->{to}->[0], "Error: $chan is linked to $link - use $link instead.");
@@ -202,11 +216,13 @@
     foreach my $risk ( keys %::RISKS ) {
       next unless defined($::channels->{channel}->{$chan}->{hilights}->{$risk});
       my @ppl = @{$::channels->{channel}->{$chan}->{hilights}->{$risk}};
-      @ppl = grep { lc $_ ne lc $nick } @ppl;
+      foreach my $nick (@nicks) {
+        @ppl = grep { lc $_ ne lc $nick } @ppl;
+      }
       $::channels->{channel}->{$chan}->{hilights}->{$risk} = \@ppl;
     }
     ASM::XML->writeChannels();
-    $conn->privmsg($event->{to}->[0], "Removing hilights for $nick in $chan");
+    $conn->privmsg($event->{to}->[0], "Removing hilights for " . ASM::Util->commaAndify(@nicks) . " in $chan");
   ]]>
   </command>
   <command cmd="^;join (\S+)" flag="a">
@@ -275,15 +291,29 @@
   </command>
   <command cmd="^;exempt (.*)" flag="o">
   <![CDATA[
-    my $x = lc $1;
-    $::eline{$x} = 1;
-    $x . "\n" >> io 'exempt.txt';
-    $conn->privmsg($event->{to}->[0], $x . " exempted");
+    $conn->privmsg($event->{to}->[0], "This command is now deprecated. Use ;restrict nick/account/host lineToRestrict +notrigger instead, i.e. ;restrict account eir +notrigger");
+  ]]>
+  </command>
+  <command cmd="^;restrict (nick|account|host) (\S+) (\+|-)([a-z]+)$" flag="o">
+  <![CDATA[
+    my ($type, $who, $mode, $restriction) = ($1, lc $2, $3, $4);
+    if ($mode eq '-') {
+      delete $::restrictions->{$type . 's'}->{$type}->{$who}->{$restriction};
+      $conn->privmsg($event->{to}->[0], "Removed $restriction restriction for $type $who");
+    }
+    if ($mode eq '+') {
+      if (! defined($::restrictions->{$type . 's'}->{$type}->{$who})) {
+        $::restrictions->{$type . 's'}->{$type}->{$who} = {};
+      }
+      $::restrictions->{$type . 's'}->{$type}->{$who}->{$restriction} = $restriction;
+      $conn->privmsg($event->{to}->[0], "Added $restriction restriction for $type $who");
+    }
+    ASM::XML->writeRestrictions();
   ]]>
   </command>
   <command cmd="^\!ops ?(#\S+)? ?(.*)" nohush="nohush">
   <![CDATA[
-#    if ($::sn{lc $event->{nick}}->{dnsbl} == 0) {
+    if (ASM::Util->notRestricted(lc $event->{nick}, "noops")) {
       my $tgt = $event->{to}->[0];
       $tgt = $1 if (defined($1));
       my $msg = $1;
@@ -293,17 +323,10 @@
         $conn->schedule(30, sub { delete($::ignored{$tgt})});
         my $hilite=ASM::Util->commaAndify(ASM::Util->getAlert($tgt, 'opalert', 'hilights'));
         my $txtz = "[\x02$tgt\x02] - $event->{nick} wants op attention ($msg) $hilite";
-        foreach my $tgt2 (ASM::Util->getAlert($tgt, 'opalert', 'msgs')) { #unfortunately wikipedia has way too many ops, and it breaks things
-          if (length($txtz) <= 380) {
-            $conn->privmsg($tgt2, $txtz);
-          } else {
-            my $splitpart = rindex($txtz, " ", 380);
-            $conn->privmsg($tgt2, substr($txtz, 0, $splitpart));
-            $conn->privmsg($tgt2, substr($txtz, $splitpart));
-          }
-        }
+        my @tgts = ASM::Util->getAlert($tgt, 'opalert', 'msgs');
+        ASM::Util->sendLongMsg($conn, \@tgts, $txtz);
       }
-#    }
+    }
   ]]>
   </command>
   <command cmd="^;blacklist (.*)" flag="o">
@@ -312,6 +335,25 @@
     push(@::string_blacklist, $str);
     "$str\n" >> io 'string_blacklist.txt';
     $conn->privmsg($event->{to}->[0], "$str blacklisted");
+  ]]>
+  </command>
+  <command cmd="^;plugin (\S+) (\S+) (.*)" flag="p">
+  <![CDATA[
+    my $chan = $1;
+    my $risk = $2;
+    my $reason = $3;
+    my $txtz = "\x03" . $::RCOLOR{$::RISKS{$risk}} . "\u$risk\x03 risk threat [\x02$chan\x02] - ".
+            "\x02($event->{nick} plugin)\x02 - ${reason}; ping ";
+    $txtz = $txtz . ASM::Util->commaAndify(ASM::Util->getAlert(lc $chan, $risk, 'hilights')) if (ASM::Util->getAlert(lc $chan, $risk, 'hilights'));
+    $txtz = $txtz . ' !att-' . $chan . '-' . $risk;
+    my @tgts = ASM::Util->getAlert($chan, $risk, 'msgs');
+    if (length($txtz) <= 380) {
+      $conn->privmsg(\@tgts, $txtz);
+    } else {
+      my $splitpart = rindex($txtz, " ", 380);
+      $conn->privmsg(\@tgts, substr($txtz, 0, $splitpart));
+      $conn->privmsg(\@tgts, substr($txtz, $splitpart));
+    }
   ]]>
   </command>
 </commands>

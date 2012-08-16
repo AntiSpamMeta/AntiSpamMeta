@@ -70,6 +70,8 @@ sub new
   $conn->add_handler('banlist', \&on_banlist);
   $conn->add_handler('dcc_open', \&dcc_open);
   $conn->add_handler('chat', \&on_dchat);
+  $conn->add_handler('channelmodeis', \&on_channelmodeis);
+  $conn->add_handler('quietlist', \&on_quietlist);
   $conn->add_handler('pong', \&on_pong);
   bless($self);
   return $self;
@@ -132,8 +134,9 @@ sub on_connect {
   my ($conn, $event) = @_; # need to check for no services
   $conn->sl('MODE AntiSpamMeta +Q');
   if (lc $event->{args}->[0] ne lc $::settings->{nick}) {
-    $conn->privmsg( 'NickServ', "ghost $::settings->{nick} $::settings->{pass}" );
-    $conn->privmsg( 'NickServ', "release $::settings->{nick} $::settings->{pass}" );
+    $conn->privmsg( 'NickServ', "regain $::settings->{nick} $::settings->{pass}" );
+#    $conn->privmsg( 'NickServ', "ghost $::settings->{nick} $::settings->{pass}" );
+#    $conn->privmsg( 'NickServ', "release $::settings->{nick} $::settings->{pass}" );
   }
   $conn->sl('CAP REQ :extended-join multi-prefix account-notify'); #god help you if you try to use this bot off freenode
 }
@@ -150,6 +153,8 @@ sub on_join {
     $::synced{$chan} = 0;
     unless ( @::syncqueue ) {
       $conn->sl('who ' . $chan . ' %tcnuhra,314');
+      $conn->sl('mode ' . $chan);
+      $conn->sl('mode ' . $chan . ' bq');
     }
     push @::syncqueue, $chan;
   }
@@ -211,7 +216,9 @@ sub on_msg
   my ($conn, $event) = @_;
   $::commander->command($conn, $event);
   print strftime("%F %T  ", gmtime) . "(msg) " . $event->{from} . " - " . $event->{args}->[0] . "\n";
-  $conn->privmsg('#antispammeta', $event->{from} . ' told me: ' . $event->{args}->[0]);
+  if (ASM::Util->notRestricted($event->{nick}, "nomsgs")) {
+    $conn->privmsg('#antispammeta', $event->{from} . ' told me: ' . $event->{args}->[0]);
+  }
 }
 
 sub on_public
@@ -259,7 +266,7 @@ sub on_quit
   }
   $event->{to} = \@channels;
   $::db->logg( $event );
-  if (($::netsplit == 0) && ($event->{args}->[0] eq "*.net *.split")) { #special, netsplit situation
+  if (($::netsplit == 0) && ($event->{args}->[0] eq "*.net *.split") && (lc $event->{nick} ne 'chanserv')) { #special, netsplit situation
     $conn->privmsg("#antispammeta", "Entering netsplit mode - JOIN and QUIT inspection will be disabled for 60 minutes");
     $::netsplit = 1;
     $conn->schedule(60*60, sub { $::netsplit = 0; $conn->privmsg('#antispammeta', 'Returning to regular operation'); });
@@ -301,21 +308,25 @@ sub irc_topic {
   $::inspector->inspect($conn, $event) if ($event->{format} ne 'server');
   if ($event->{format} eq 'server')
   {
+    my $chan = lc $event->{args}->[1];
     if ($event->{type} eq 'topic')
     {
-      $::sc{lc $event->{args}->[1]}{topic}{text} = $event->{args}->[2];
+      $::sc{$chan}{topic}{text} = $event->{args}->[2];
     }
     elsif ($event->{type} eq 'topicinfo')
     {
-      $::sc{lc $event->{args}->[1]}{topic}{time} = $event->{args}->[3];
-      $::sc{lc $event->{args}->[1]}{topic}{by} = $event->{args}->[2];
+      $::sc{$chan}{topic}{time} = $event->{args}->[3];
+      $::sc{$chan}{topic}{by} = $event->{args}->[2];
     }
   }
   else
   {
     if ($event->{type} eq 'topic')
     {
-      $::sc{lc $event->{to}->[0]}{topic}{text} = $event->{args}->[0];
+      my $chan = lc $event->{args}->[1];
+      $::sc{$chan}{topic}{text} = $event->{args}->[0];
+      $::sc{$chan}{topic}{time} = time;
+      $::sc{$chan}{topic}{by} = $event->{from};
     }
     $::log->logg($event);
     $::db->logg( $event );
@@ -381,11 +392,11 @@ sub parse_modes
     if (($c eq '-') || ($c eq '+')) {
       $t=$c;
     }
-    else {
-      if ( defined( grep( /[abdefhIJkloqv]/,($c) ) ) ) { #modes that take args
+    else { #eIbq,k,flj,CFLMPQcgimnprstz
+      if ( grep( /[eIbqkfljov]/,($c) ) ) { #modes that take args
         push (@new_modes, [$t.$c, shift @args]);
       }
-      elsif ( defined( grep( /[cgijLmnpPQrRstz]/, ($c) ) ) ) {
+      elsif ( grep( /[CFLMPQcgimnprstz]/, ($c) ) ) {
         push (@new_modes, [$t.$c]);
       }
       else {
@@ -394,6 +405,29 @@ sub parse_modes
     }
   }
   return \@new_modes;
+}
+
+sub on_channelmodeis
+{
+  my ($conn, $event) = @_;
+  my $chan = lc $event->{args}->[1];
+  my @temp = @{$event->{args}};
+  shift @temp; shift @temp;
+  my @modes = @{parse_modes(\@temp)};
+  foreach my $line ( @modes ) {
+    my @ex = @{$line};
+    my ($what, $mode) = split (//, $ex[0]);
+    if ($what eq '+') {
+      if (defined($ex[1])) {
+        push @{$::sc{$chan}{modes}}, $mode . ' ' . $ex[1];
+      } else {
+        push @{$::sc{$chan}{modes}}, $mode;
+      }
+    } else {
+      my @modes = grep {!/^$mode/} @{$::sc{$chan}{modes}};
+      $::sc{$chan}{modes} = \@modes;
+    }
+  }
 }
 
 sub on_mode
@@ -416,9 +450,77 @@ sub on_mode
       elsif ( $ex[0] eq '-v' ) {
         $::sc{$chan}{users}{lc $ex[1]}{voice}=0;
       }
+      elsif ( $ex[0] eq '+b') {
+        $::sc{$chan}{bans}{$ex[1]} = { bannedBy => $event->{from}, bannedOn => time };
+      }
+      elsif ( $ex[0] eq '-b') {
+        delete $::sc{$chan}{bans}{$ex[1]};
+      }
+      elsif ( $ex[0] eq '+q') {
+        $::sc{$chan}{quiets}{$ex[1]} = { bannedBy => $event->{from}, bannedOn => time };
+      }
+      elsif ( $ex[0] eq '-q') {
+        delete $::sc{$chan}{quiets}{$ex[1]};
+      }
+      else {
+        my ($what, $mode) = split (//, $ex[0]);
+        if ($what eq '+') {
+          push @{$::sc{$chan}{modes}}, $mode . ' ' . $ex[1];
+        } else {
+          my @modes = grep {!/^$mode/} @{$::sc{$chan}{modes}};
+          $::sc{$chan}{modes} = \@modes;
+        }
+        if ( ($ex[0] eq '+r') && (! defined($::watchRegged{$chan})) ) {
+          $::watchRegged{$chan} = 1;
+          $conn->schedule(60*45, sub { checkRegged($conn, $chan); });
+        }
+      }
     }
     $::log->logg($event);
   }
+}
+
+sub checkRegged
+{
+  my ($conn, $chan) = @_;
+  if (grep {/r/} @{$::sc{$chan}{modes}}) {
+    my $tgt = $chan;
+    my $risk = "debug";
+    my $hilite=ASM::Util->commaAndify(ASM::Util->getAlert($tgt, $risk, 'hilights'));
+    my $txtz  ="\x03" . $::RCOLOR{$::RISKS{$risk}} . "\u$risk\x03 risk threat [\x02$chan\x02] - channel appears to still be +r after 45 minutes; $hilite";
+    my @tgts = ASM::Util->getAlert($tgt, $risk, 'msgs');
+    ASM::Util->sendLongMsg($conn, \@tgts, $txtz)
+  }
+  delete $::watchRegged{$chan};
+}
+
+sub on_banlist
+{
+  my ($conn, $event) = @_;
+#                 'args' => [
+#                             'AntiSpamMetaBeta',
+#                             '#antispammeta',
+#                             'test!*@*',
+#                             'fn-troll!icxcnika@freenode/weird-exception/network-troll/afterdeath',
+#                             '1344235684'
+#                           ],
+  my ($me, $chan, $ban, $banner, $bantime) = @{$event->{args}};
+  $::sc{lc $chan}{bans}{$ban} = { bannedBy => $banner, bannedOn => $bantime };
+}
+
+sub on_quietlist
+{
+  my ($conn, $event) = @_;
+#                 'args' => [
+#                             'AntiSpamMetaBeta',
+#                             '#antispammeta',
+#                             'q',
+#                             'loltest!*@*',
+#                             'fn-troll!icxcnika@freenode/weird-exception/network-troll/afterdeath',
+#                             '1344755722'
+#                           ],
+  my ($me, $chan, $mode, $ban, $banner, $bantime) = @{$event->{args}};
+  $::sc{lc $chan}{quiets}{$ban} = { bannedBy => $banner, bannedOn => $bantime };
 }
 
 sub on_ctcp
@@ -481,6 +583,23 @@ sub on_whoxover
   $::synced{$event->{args}->[1]} = 1;
   if (defined($chan) ){
     $conn->sl('who ' . $chan . ' %tcnuhra,314');
+    $conn->sl('mode ' . $chan);
+    $conn->sl('mode ' . $chan . ' bq');
+  } else {
+    my $size = `ps -p $$ h -o size`;
+    my $cputime = `ps -p $$ h -o time`;
+    chomp $size; chomp $cputime;
+    $conn->privmsg("#antispammeta", "Finished syncing after " . (time - $::starttime) . " seconds. " .
+     "I'm tracking " . (scalar (keys %::sn)) . " nicks" .
+     " across " . (scalar (keys %::sc)) . " tracked channels." .
+     " I'm using " . $size . "KB of RAM" . 
+     " and have used " . $cputime . " of CPU time.");
+    my %x = ();
+    foreach my $c (@{$::settings->{autojoins}}) { $x{$c} = 1; }
+    foreach my $cx (keys %::sc) { delete $x{$cx}; }
+    if (scalar (keys %x)) {
+      $conn->privmsg("#antispammeta", "Syncing appears to have failed for " . ASM::Util->commaAndify(keys %x));
+    }
   }
 }
 
@@ -490,10 +609,6 @@ sub on_whofuckedup
   if ($::debugx{sync}) {
     print "on_whofuckedup called!\n";
   }
-}
-sub on_banlist
-{
-  my ($conn, $event) = @_;
 }
 
 sub on_bannedfromchan {

@@ -22,12 +22,15 @@ $::cset = '';
   "dnsbl" => 0,
   "pingpong" => 0,
   "services" => 1,
-  "sync" => 1
+  "sync" => 1,
+  "chanstate" => 1,
+  "restrictions" => 1
 );
 %::dsock = ();
 %::spy = ();
 $::starttime = time;
 @::syncqueue = ();
+%::watchRegged = ();
 
 BEGIN {
 my @modules = qw/Util Xml Inspect Event Services Log Command Classes Mysql/;
@@ -60,7 +63,7 @@ sub init {
                          Ircname => $::settings->{realname},
                          Username => $::settings->{username},
                          Password => $::settings->{pass},
-			 Pacing => 1 );
+			 Pacing => 0 );
   $conn->debug($::debug);
   $::inspector = ASM::Inspect->new();
   $::services = ASM::Services->new();

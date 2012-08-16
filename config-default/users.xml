@@ -1,27 +1,29 @@
 <people>
-  <person id="afterdeath" flags="hocdat" />
+  <person id="afterdeath" flags="hocdatp" />
   <person id="cbrown1023" flags="oath" />
-  <person id="charitwo" flags="oath" />
   <person id="dave2" flags="oath" />
   <person id="denny" flags="ha" />
-  <person id="dlange" flags="oathd" />
+  <person id="dlange" flags="coathd" />
   <person id="dmcdevit" flags="oath" />
+  <person id="dominian" flags="oath" />
   <person id="dungodung" flags="oath" />
   <person id="errantego" flags="doath" />
   <person id="gary" flags="oath" />
   <person id="idleone" flags="o" />
   <person id="jeremyb" flags="th" />
   <person id="jonathand" flags="oath" />
+  <person id="kelsie" flags="a" />
   <person id="kindone" flags="t" />
   <person id="ljl" flags="o" />
   <person id="logan_" flags="oath" />
   <person id="lstarnes" flags="oath" />
-  <person id="marienz" flags="oath" />
+  <person id="marienz" flags="doath" />
   <person id="martinp23" flags="oath" />
   <person id="mquin" flags="hota" />
   <person id="myrtti" flags="htoa" />
   <person id="nhandler" flags="oath" />
   <person id="njan" flags="oath" />
+  <person id="o_o" flags="oath" />
   <person id="paradox" flags="h" />
   <person id="petersymonds" flags="oath" />
   <person id="pricechild" flags="oath" />
@@ -29,6 +31,7 @@
   <person id="rjd0060" flags="th" />
   <person id="sauvin" flags="oath" />
   <person id="seanw" flags="oath" />
+  <person id="shiibot" flags="p" />
   <person id="snowolf" flags="oath" />
   <person id="th1" flags="th" />
   <person id="thehelpfulone" flags="oath" />
@@ -36,6 +39,6 @@
   <person id="troubled" flags="oath" />
   <person id="ttuttle" flags="oath" />
   <person id="werdan7" flags="oath" />
-  <person id="wildpikachu" flags="oath" />
+  <person id="wildpikachu" flags="doath" />
   <person id="windowshasyou" flags="oath" />
 </people>
