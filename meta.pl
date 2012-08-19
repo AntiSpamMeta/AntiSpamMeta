@@ -11,6 +11,10 @@ use Net::IRC;
 use Data::Dumper;
 use IO::All;
 use Getopt::Long;
+use POSIX qw(strftime);
+use Term::ANSIColor qw(:constants);
+
+$Data::Dumper::Useqq=1;
 
 %::eline=();
 $::pass = '';
@@ -18,19 +22,34 @@ $::pass = '';
 $::netsplit = 0;
 $::debug = 0;
 $::cset = '';
+
+## debug variables. 0 to turn off debugging, else set it to a Term::ANSIColor constant.
 %::debugx = (
   "dnsbl" => 0,
   "pingpong" => 0,
-  "services" => 1,
-  "sync" => 1,
-  "chanstate" => 1,
-  "restrictions" => 1
+  "services" => YELLOW,
+  "sync" => CYAN,
+  "chanstate" => MAGENTA,
+  "restrictions" => BLUE,
+  "startup" => YELLOW,
+  "mysql" => 0,
+  "inspector" => 0,
+  "commander" => GREEN,
+  "msg" => GREEN,
+  "dcc" => RED,
 );
 %::dsock = ();
 %::spy = ();
 $::starttime = time;
 @::syncqueue = ();
 %::watchRegged = ();
+$::lastline = "";
+
+$SIG{__WARN__} = sub {
+  $Data::Dumper::Useqq=1;
+  print STDERR 'last line: ' . Dumper($::lastline);
+  print STDERR strftime("%F %T", gmtime), RED, ' WARNING: ', RESET, $_[0];
+};
 
 BEGIN {
 my @modules = qw/Util Xml Inspect Event Services Log Command Classes Mysql/;
@@ -44,17 +63,14 @@ sub init {
               'pass|p=s'   => \$::pass,
               'config|c=s' => \$::cset
             );
-  if ($::cset eq '') {
-    $::cset = 'config-default';
-  } else {
-    $::cset = "config-$::cset";
-  }
+  if ($::cset eq '') { $::cset = 'config-default'; }
+                else { $::cset = "config-$::cset"; }
   ASM::XML->readXML();
   mkdir($::settings->{log}->{dir});
   $::log = ASM::Log->new($::settings->{log});
   $::pass = $::settings->{pass} if $::pass eq '';
   $host = ${$::settings->{server}}[rand @{$::settings->{server}}];
-  print "Connecting to $host\n";
+  ASM::Util->dprint( "Connecting to $host", "startup");
   $irc->debug($::debug);
   $::db = ASM::DB->new($::mysql->{db}, $::mysql->{host}, $::mysql->{port}, $::mysql->{user}, $::mysql->{pass}, $::mysql->{table}, $::mysql->{dblog});
   $conn = $irc->newconn( Server => $host,
@@ -78,7 +94,7 @@ sub init {
   my @strbl = io('string_blacklist.txt')->getlines;
   chomp @strbl;
   @::string_blacklist = @strbl;
-  %::proxies = {};
+  %::proxies = ();
   my @proxy = io('proxy.txt')->getlines;
   chomp @proxy;
   foreach my $line (@proxy) {
