@@ -108,23 +108,19 @@ sub dnsbl
 #  but I'm getting rid of it so it can detect cgi:irc shit
   return 0;
   if (defined $rev) {
-    print "Querying $rev$chk->{content}\n" if $::debugx{dnsbl};
+    ASM::Util->dprint("Querying $rev$chk->{content}", "dnsbl");
     my $iaddr = gethostbyname( "$rev$chk->{content}" );
     my @dnsbl = unpack( 'C4', $iaddr ) if defined $iaddr;
     my $strip;
     if (@dnsbl) {
       $strip = sprintf("%s.%s.%s.%s", @dnsbl);
-      if ($::debug) {
-        print "found host (rev $rev) in $chk->{content} - $strip\n" unless ($strip eq '216.234.246.150');
-      }
+      ASM::Util->dprint("found host (rev $rev) in $chk->{content} - $strip", 'dnsbl') unless ($strip eq '216.234.246.150');
     }
     if ((@dnsbl) && (defined($::dnsbl->{query}->{$chk->{content}}->{response}->{$strip}))) {
       $::lastlookup=$::dnsbl->{query}->{$chk->{content}}->{response}->{$strip}->{content};
-      if ($::debug) {
-        print "chk->content: $chk->{content}\n";
-        print "strip: $strip\n";
-        print "result: " . $::dnsbl->{query}->{$chk->{content}}->{response}->{$strip}->{content} . "\n";
-      }
+      ASM::Util->dprint("chk->content: $chk->{content}", 'dnsbl');
+      ASM::Util->dprint("strip: $strip", 'dnsbl');
+      ASM::Util->dprint("result: " . $::dnsbl->{query}->{$chk->{content}}->{response}->{$strip}->{content}, 'dnsbl');
       $::sn{lc $event->{nick}}->{dnsbl} = 1;
       # lol really icky hax
       return $::dnsbl->{query}->{$chk->{content}}->{response}->{$strip}->{content};

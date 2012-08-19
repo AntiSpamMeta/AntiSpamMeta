@@ -2,6 +2,9 @@ package ASM::Services;
 use warnings;
 use strict;
 
+use Data::Dumper;
+$Data::Dumper::Useqq=1;
+
 sub new
 {
   my $self = {};
@@ -14,7 +17,7 @@ sub doServices {
   my $i = 1;
   if ($event->{from} eq 'NickServ!NickServ@services.')
   {
-    print "NickServ: $event->{args}->[0]\n";
+    ASM::Util->dprint("NickServ: $event->{args}->[0]", 'services');
     if ( $event->{args}->[0] =~ /^This nickname is registered/ )
     {
       $conn->privmsg( 'NickServ', "identify $::settings->{nick} $::settings->{pass}" );
@@ -22,24 +25,27 @@ sub doServices {
     elsif ( $event->{args}->[0] =~ /^You are now identified/ )
     {
       my @autojoins = @{$::settings->{autojoins}};
-#      while (@autojoins) {
-#        my $joinstr = join (',', shift @autojoins, shift @autojoins, shift @autojoins, shift @autojoins, shift @autojoins,
-#                                 shift @autojoins, shift @autojoins, shift @autojoins, shift @autojoins, shift @autojoins);
-#        $conn->schedule($i, sub { $conn->join($joinstr); });
-#        $i += 1;
-#      }
-      $conn->join(join(',', @autojoins[0..30]));
-      $conn->join(join(',', @autojoins[30..60]));
+      if (defined($autojoins[30])) {
+        $conn->join(join(',', @autojoins[0..30]));
+        if (defined($autojoins[60])) {
+          $conn->join(join(',', @autojoins[30..60]));
+          $conn->join(join(',', @autojoins[60..$#autojoins]));
+        } else {
+          $conn->join(join(',', @autojoins[30..$#autojoins]));
+        }
+      } else {
+        $conn->join(join(',', @autojoins));
+      }
       $conn->schedule(2, sub { $conn->privmsg('#antispammeta', 'Now joined to all channels in '. (time - $::starttime) . " seconds."); });
     }
     elsif ($event->{args}->[0] =~ /has been (killed|released)/ )
     {
-      print "Got kill/release successful from nickserv!\n" if $::debugx{services};
+      ASM::Util->dprint('Got kill/release successful from NickServ!', 'services');
       $conn->nick( $::settings->{nick} );
     }
     elsif ($event->{args}->[0] =~ /has been regained/ )
     {
-      print "Got regain successful from nickserv!\n" if $::debugx{services};
+      ASM::Util->dprint('Got regain successful from nickserv!', 'services');
     }
     elsif ($event->{args}->[0] =~ /Password Incorrect/ )
     {
@@ -48,7 +54,10 @@ sub doServices {
   }
   elsif ($event->{from} eq 'ChanServ!ChanServ@services.')
   {
-    print "ChanServ: $event->{args}->[0] \n";
+    if ( $event->{args}->[0] =~ /^\[#/ ) {
+      return;
+    }
+    ASM::Util->dprint('ChanServ: '. Dumper($event->{args}->[0]), 'services');
     if ( $event->{args}->[0] =~ /^All.*bans matching.*have been cleared on(.*)/)
     {
       $conn->join($1);

@@ -34,7 +34,7 @@ sub new
   my $self = {};
   $self->{CONN} = $conn;
   $self->{INSPECTOR} = $inspector;
-  print "Installing handler routines...\n";
+  ASM::Util->dprint('Installing handler routines...', 'startup');
   $conn->add_default_handler(\&blah);
   $conn->add_handler('bannedfromchan', \&on_bannedfromchan);
   $conn->add_handler('mode', \&on_mode);
@@ -82,15 +82,14 @@ sub on_pong
   my ($conn, $event) = @_;
   alarm 60;
   $conn->schedule( 30, sub { $conn->sl("PING :" . time); } );
-  return unless $::debugx{pingpong};
-  print strftime("%F %T  ", gmtime) . "Ping? Pong!\n";
-  print Dumper($event);
+  ASM::Util->dprint('Ping? Pong!', 'pingpong');
+  ASM::Util->dprint(Dumper($event), 'pingpong');
 }
 
 sub on_dchat
 {
   my ($conn, $event) = @_;
-  print Dumper($event);
+  ASM::Util->dprint(Dumper($event), 'dcc');
   if ( #(lc $event->{nick} eq 'afterdeath') && 
       ($event->{args}->[0] ne '')) {
     my $msg = $event->{args}->[0];
@@ -119,9 +118,8 @@ sub on_ping
   my ($conn, $event) = @_;
   $conn->sl("PONG " . $event->{args}->[0]);
   alarm 200;
-  return unless $::debugx{pingpong};
-  print strftime("%F %T  ", gmtime) . "Ping? Pong!\n";
-  print Dumper($event);
+  ASM::Util->dprint('Ping! Pong?', 'pingpong');
+  ASM::Util->dprint(Dumper($event), 'pingpong');
 }
 
 sub on_account
@@ -134,9 +132,8 @@ sub on_connect {
   my ($conn, $event) = @_; # need to check for no services
   $conn->sl('MODE AntiSpamMeta +Q');
   if (lc $event->{args}->[0] ne lc $::settings->{nick}) {
+    ASM::Util->dprint('Attempting to regain my main nick', 'startup');
     $conn->privmsg( 'NickServ', "regain $::settings->{nick} $::settings->{pass}" );
-#    $conn->privmsg( 'NickServ', "ghost $::settings->{nick} $::settings->{pass}" );
-#    $conn->privmsg( 'NickServ', "release $::settings->{nick} $::settings->{pass}" );
   }
   $conn->sl('CAP REQ :extended-join multi-prefix account-notify'); #god help you if you try to use this bot off freenode
 }
@@ -215,7 +212,7 @@ sub on_msg
 {
   my ($conn, $event) = @_;
   $::commander->command($conn, $event);
-  print strftime("%F %T  ", gmtime) . "(msg) " . $event->{from} . " - " . $event->{args}->[0] . "\n";
+  ASM::Util->dprint($event->{from} . " - " . $event->{args}->[0], 'msg');
   if (ASM::Util->notRestricted($event->{nick}, "nomsgs")) {
     $conn->privmsg('#antispammeta', $event->{from} . ' told me: ' . $event->{args}->[0]);
   }
@@ -245,7 +242,7 @@ sub on_errnickinuse
 {
   my ($conn, $event) = @_;
   $_ = ${$::settings->{altnicks}}[rand @{$::settings->{altnicks}}];
-  print "Nick is in use, trying $_\n";
+  ASM::Util->dprint("Nick is in use, trying $_", 'startup');
   $conn->nick($_);
 }
 
@@ -253,7 +250,7 @@ sub on_bannickchange
 {
   my ($conn, $event) = @_;
   $_ = ${$::settings->{altnicks}}[rand @{$::settings->{altnicks}}];
-  print "Nick is in use, trying $_\n";
+  ASM::Util->dprint("Nick is in use, trying $_", 'startup');
   $conn->nick($_);
 }
 
@@ -279,7 +276,7 @@ sub on_quit
 sub blah
 {
   my ($self, $event) = @_;
-  print Dumper($event) if $::debug;
+  ASM::Util->dprint(Dumper($event), 'misc');
   $::inspector->inspect($self, $event);
 }
 
@@ -438,18 +435,12 @@ sub on_mode
     my @modes = @{parse_modes($event->{args})};
     foreach my $line ( @modes ) {
       my @ex = @{$line};
-      if ( $ex[0] eq '+o' ) {
-        $::sc{$chan}{users}{lc $ex[1]}{op}=1;
-      }
-      elsif ( $ex[0] eq '-o' ) {
-        $::sc{$chan}{users}{lc $ex[1]}{op}=0;
-      }
-      elsif ( $ex[0] eq '+v' ) {
-        $::sc{$chan}{users}{lc $ex[1]}{voice}=1;
-      }
-      elsif ( $ex[0] eq '-v' ) {
-        $::sc{$chan}{users}{lc $ex[1]}{voice}=0;
-      }
+
+      if    ( $ex[0] eq '+o' ) { $::sc{$chan}{users}{lc $ex[1]}{op}    = 1; }
+      elsif ( $ex[0] eq '-o' ) { $::sc{$chan}{users}{lc $ex[1]}{op}    = 0; }
+      elsif ( $ex[0] eq '+v' ) { $::sc{$chan}{users}{lc $ex[1]}{voice} = 1; }
+      elsif ( $ex[0] eq '-v' ) { $::sc{$chan}{users}{lc $ex[1]}{voice} = 0; }
+
       elsif ( $ex[0] eq '+b') {
         $::sc{$chan}{bans}{$ex[1]} = { bannedBy => $event->{from}, bannedOn => time };
       }
@@ -465,7 +456,8 @@ sub on_mode
       else {
         my ($what, $mode) = split (//, $ex[0]);
         if ($what eq '+') {
-          push @{$::sc{$chan}{modes}}, $mode . ' ' . $ex[1];
+          if (defined($ex[1])) { push @{$::sc{$chan}{modes}}, $mode . ' ' . $ex[1]; }
+          else                { push @{$::sc{$chan}{modes}}, $mode; }
         } else {
           my @modes = grep {!/^$mode/} @{$::sc{$chan}{modes}};
           $::sc{$chan}{modes} = \@modes;
@@ -497,13 +489,6 @@ sub checkRegged
 sub on_banlist
 {
   my ($conn, $event) = @_;
-#                 'args' => [
-#                             'AntiSpamMetaBeta',
-#                             '#antispammeta',
-#                             'test!*@*',
-#                             'fn-troll!icxcnika@freenode/weird-exception/network-troll/afterdeath',
-#                             '1344235684'
-#                           ],
   my ($me, $chan, $ban, $banner, $bantime) = @{$event->{args}};
   $::sc{lc $chan}{bans}{$ban} = { bannedBy => $banner, bannedOn => $bantime };
 }
@@ -511,14 +496,6 @@ sub on_banlist
 sub on_quietlist
 {
   my ($conn, $event) = @_;
-#                 'args' => [
-#                             'AntiSpamMetaBeta',
-#                             '#antispammeta',
-#                             'q',
-#                             'loltest!*@*',
-#                             'fn-troll!icxcnika@freenode/weird-exception/network-troll/afterdeath',
-#                             '1344755722'
-#                           ],
   my ($me, $chan, $mode, $ban, $banner, $bantime) = @{$event->{args}};
   $::sc{lc $chan}{quiets}{$ban} = { bannedBy => $banner, bannedOn => $bantime };
 }
@@ -531,7 +508,7 @@ sub on_ctcp
       (defined($::users->{person}->{$acct})) &&
       (defined($::users->{person}->{$acct}->{flags})) &&
       (grep {$_ eq 'c'} split('', $::users->{person}->{$acct}->{flags}))) {
-    print Dumper($event);
+    ASM::Util->dprint(Dumper($event), 'dcc');
     my @spit = split(/ /, $event->{args}->[0]);
     if (($spit[0] eq 'CHAT') && ($spit[1] eq 'CHAT')) {
       $::chat = Net::IRC::DCC::CHAT->new($conn, 0, lc $event->{nick}, $spit[2], $spit[3]);
@@ -544,7 +521,6 @@ sub on_ctcp
 sub dcc_open
 {
   my ($conn, $event) = @_;
-#  print Dumper($event);
   $::dsock{lc $event->{nick}} = $event->{args}->[1];
 }
 
@@ -579,7 +555,6 @@ sub on_whoxover
 {
   my ($conn, $event) = @_;
   my $chan = pop @::syncqueue;
-#  print Dumper($event);
   $::synced{$event->{args}->[1]} = 1;
   if (defined($chan) ){
     $conn->sl('who ' . $chan . ' %tcnuhra,314');
@@ -606,15 +581,13 @@ sub on_whoxover
 sub on_whofuckedup
 {
   my ($conn, $event) = @_;
-  if ($::debugx{sync}) {
-    print "on_whofuckedup called!\n";
-  }
+  ASM::Util->dprint('on_whofuckedup called!', 'sync');
 }
 
 sub on_bannedfromchan {
   my ($conn, $event) = @_;
+  ASM::Util->dprint("I'm banned from " . $event->{args}->[1] . "... attempting to unban myself", 'startup');
   $conn->privmsg('ChanServ', "unban $event->{args}->[1]");
-  print "I'm banned from " . $event->{args}->[1] . "... attempting to unban myself\n";
 }
 
 sub on_byechan {
