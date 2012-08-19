@@ -37,6 +37,7 @@ $::cset = '';
   "commander" => GREEN,
   "msg" => GREEN,
   "dcc" => RED,
+  "misc" => RED
 );
 %::dsock = ();
 %::spy = ();
