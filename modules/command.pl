@@ -1,8 +1,10 @@
 package ASM::Commander;
+
 use warnings;
 use strict;
 use IO::All;
 use POSIX qw(strftime);
+use Data::Dumper;
 
 sub new
 {
@@ -33,7 +35,7 @@ sub command
       next unless (grep {$_ eq $command->{flag}} split('', $::users->{person}->{$acct}->{flags})); #make sure the requester has the needed flags
     }
     if ($cmd=~/$command->{cmd}/) {
-      print strftime("%F %T  ", gmtime) . "$event->{from} told me: $cmd \n";
+      ASM::Util->dprint("$event->{from} told me: $cmd", "commander");
       eval $command->{content};
       warn $@ if $@;
       last;
