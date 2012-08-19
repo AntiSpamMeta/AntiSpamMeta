@@ -1,9 +1,9 @@
 package ASM::Util;
 use Array::Utils qw(:all);
+use POSIX qw(strftime);
 use warnings;
 use strict;
-
-my %sf;
+use Term::ANSIColor qw (:constants);
 
 %::RISKS =
 (
@@ -113,30 +113,6 @@ sub hostip {
   return gethostbyname($_[0]);
 }
 
-sub flood_add {
-    my ( $chan, $id, $host, $to ) = @_;
-    push( @{$sf{$id}{$chan}{$host}}, time );
-    while ( time >= $sf{$id}{$chan}{$host}[0] + $to ) {
-      last if ( $#{ $sf{$id}{$chan}{$host} } == 0 );
-      shift( @{$sf{$id}{$chan}{$host}} );
-    }
-    return $#{ @{$sf{$id}{$chan}{$host}}}+1;
-}
-
-sub flood_process {
-  for my $id ( keys %sf ) {
-    for my $chan ( keys %{$sf{$id}} ) {
-      for my $host ( keys %{$sf{$id}{$chan}} ) {
-        next unless defined $sf{$id}{$chan}{$host}[0];
-        while ( time >= $sf{$id}{$chan}{$host}[0] + $sf{$id}{'timeout'} ) {
-          last if ( $#{ $sf{$id}{$chan}{$host} } == 0 );
-          shift ( @{$sf{$id}{$chan}{$host}} );
-        }
-      }
-    }
-  }
-}
-
 # If $tgts="#antispammeta" that's fine, and if $tgts = ["#antispammeta", "##linux-ops"] that's cool too
 sub sendLongMsg {
   my ($module, $conn, $tgts, $txtz) = @_;
@@ -190,9 +166,21 @@ sub seq {
   return ($n1 eq $n2);
 }
 
+#I last worked on this function while having way too many pain meds, if it's fucked up, that's why.
 sub dprint {
-  my ($module, $text) = @_;
-  print $text if $::debug;
+  my ($module, $text, $type) = @_;
+  if (!defined($type)) {
+    die "old method for dprint called!\n";
+  }
+  if (!defined($::debugx{$type})) {
+    die "dprint called with invalid type!\n";
+  }
+  if ($::debugx{$type} eq 0) {
+    return;
+  }
+  print STDERR strftime("%F %T ", gmtime);
+  print STDERR GREEN, 'DEBUG', RESET, '(', $::debugx{$type}, $type, RESET, ') ';
+  print STDERR $text, "\n";
 }
 
 sub notRestricted {
@@ -218,8 +206,8 @@ sub notRestricted {
       }
     }
   }
-  if (($ret == 0) && ($::debugx{restrictions})) {
-    print "Restriction $restriction found for $nick\n";
+  if ($ret == 0) {
+    dprint("blah", "Restriction $restriction found for $nick", "restrictions");;
   }
   return $ret;
 }
