@@ -110,7 +110,7 @@ sub logg
     $string = $string . ', ' . $dbh->quote($event->{args}->[1]);
   }
   $string = $string . ');';
-  print $string . "\n" if $::debug;
+  ASM::Util->dprint($string, "mysql");
   $dbh->do($string);
 }
   
