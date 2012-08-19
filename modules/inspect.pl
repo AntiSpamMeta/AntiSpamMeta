@@ -25,11 +25,6 @@ sub inspect {
   my $nick = lc $event->{nick};
   my $xresult;
   return if (index($nick, ".") != -1);
-  return unless (ASM::Util->notRestricted($nick, "notrigger"));
-  if (defined($::eline{$nick}) || defined($::eline{lc $event->{user}}) || defined($::eline{lc $event->{host}})) {
-    print "Deprecated eline found for $nick / $event->{user} / $event->{host} !\n";
-    return;
-  }
   if ( $event->{host} =~ /gateway\/web\// ) {
     if ( $event->{user} =~ /([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})/ ) {
       $rev = sprintf("%d.%d.%d.%d.", hex($4), hex($3), hex($2), hex($1));
@@ -49,7 +44,7 @@ sub inspect {
       next if ($aonx{$id}{class} eq 'dnsbl') && ($event->{host} =~ /(fastwebnet\.it|fastres\.net)$/); #this is a bad hack
       $xresult = $::classes->check($aonx{$id}{class}, $aonx{$id}, $id, $event, $chan, $rev); # this is another bad hack done for dnsbl-related stuff
       next unless (defined($xresult)) && ($xresult ne 0);
-      ASM::Util->dprint(Dumper( $xresult ));
+      ASM::Util->dprint(Dumper($xresult), 'inspector');
       $dct{$id} = $aonx{$id};
       $dct{$id}{xresult} = $xresult;
     }
@@ -64,6 +59,11 @@ sub inspect {
   my $evhost = $event->{host};
   foreach $chan (@{$event->{to}}) {
     foreach $id ( keys %dct ) {
+      return unless (ASM::Util->notRestricted($nick, "notrigger"));
+      if (defined($::eline{$nick}) || defined($::eline{lc $event->{user}}) || defined($::eline{lc $event->{host}})) {
+        print "Deprecated eline found for $nick / $event->{user} / $event->{host} !\n";
+        return;
+      }
       $xresult = $dct{$id}{xresult};
       my $nicereason = interpolate($dct{$id}{reason});
       $::db->record($chan, $event->{nick}, $event->{user}, $event->{host}, $::sn{lc $event->{nick}}->{gecos}, $dct{$id}{risk}, $id, $nicereason);
