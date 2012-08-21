@@ -1,0 +1,145 @@
+diff -Naur Net_old/IRC/Connection.pm Net/IRC/Connection.pm
+--- Net_old/IRC/Connection.pm	2003-12-05 01:50:16.000000000 +0300
++++ Net/IRC/Connection.pm	2012-08-21 11:20:55.000000000 +0400
+@@ -866,6 +866,7 @@
+    
+    print STDERR "<<< $line\n" if $self->{_debug};
+    
++   $::lastline = $line; #this is so __WARN__ can print the last line received on IRC.
+    # Like the RFC says: "respond as quickly as possible..."
+    if ($line =~ /^PING/) {
+      $ev = (Net::IRC::Event->new( "ping",
+@@ -908,7 +909,12 @@
+      $type = lc $type;
+      # This should be fairly intuitive... (cperl-mode sucks, though)
+      
+-     if (defined $line and index($line, "\001") >= 0) {
++     # The order of this was changed by AfterDeath because a \x01 in a geco fucked shit up
++     if ($type eq "join" or $type eq "part" or
++              $type eq "mode" or $type eq "topic" or
++              $type eq "kick") {
++       $itype = "channel";
++     } elsif (defined $line and index($line, "\001") >= 0) {
+        $itype = "ctcp";
+        unless ($type eq "notice") {
+          $type = (($stuff[0] =~ tr/\#\&//) ? "public" : "msg");
+@@ -917,16 +923,12 @@
+        $itype = $type = (($stuff[0] =~ tr/\#\&//) ? "public" : "msg");
+      } elsif ($type eq "notice") {
+        $itype = "notice";
+-     } elsif ($type eq "join" or $type eq "part" or
+-              $type eq "mode" or $type eq "topic" or
+-              $type eq "kick") {
+-       $itype = "channel";
+      } elsif ($type eq "nick") {
+        $itype = "nick";
+      } else {
+        $itype = "other";
+      }
+-     
++
+      # This goes through the list of ignored addresses for this message
+      # type and drops out of the sub if it's from an ignored hostmask.
+      
+@@ -992,6 +994,24 @@
+                                   '',
+                                   $type,
+                                   $line);  
++     } elsif ($type eq "account") { #these next 3 event hooks added by AfterDeath
++       $ev = Net::IRC::Event->new($type,
++                                  $from,
++                                  '',
++                                  $type,
++                                  @stuff);
++     } elsif ($type eq "cap") {
++       $ev = Net::IRC::Event->new($type,
++                                  $from,
++                                  '',
++                                  $type,
++                                  @stuff);
++     } elsif ($type eq "pong") {
++       $ev = Net::IRC::Event->new($type,
++                                  $from,
++                                  $self->{nick},
++                                  'server',
++                                  $stuff[1]);
+      } else {
+        carp "Unknown event type: $type";
+      }
+@@ -1183,7 +1203,7 @@
+   }
+   
+   my $buf = CORE::join '', @_;
+-  my $length = $self->{_maxlinelen} - 11 - length($to);
++  my $length = $self->{_maxlinelen} - 80 - length($to);
+   my $line;
+   
+   if (ref($to) =~ /^(GLOB|IO::Socket)/) {
+diff -Naur Net_old/IRC/Event.pm Net/IRC/Event.pm
+--- Net_old/IRC/Event.pm	2003-09-24 10:33:40.000000000 +0400
++++ Net/IRC/Event.pm	2012-08-21 11:03:42.000000000 +0400
+@@ -189,6 +189,16 @@
+     return $self->{'userhost'};
+ }
+ 
++#added by AfterDeath. Use this to reply to channel messages in channel, but private messages to the nick that sent it.
++sub replyto {
++    my $self = shift;
++    if ($self->{to}->[0] =~ /^#/) {
++      return $self->{to}->[0];
++    } else {
++      return $self->{nick};
++    }
++}
++
+ # Simple sub for translating server numerics to their appropriate names.
+ # Takes one arg:  the number to be translated.
+ sub trans {
+@@ -266,6 +276,7 @@
+ 	   259 => "adminemail",
+ 	   261 => "tracelog",
+ 	   262 => "endoftrace",  # 1997-11-24 -- archon
++           263 => "rpl_tryagain",
+ 	   265 => "n_local",     # 1997-10-16 -- tkil
+ 	   266 => "n_global",    # 1997-10-16 -- tkil
+ 	   271 => "silelist",		# Undernet Extension, Kajetan@Hinner.com, 17/10/98
+@@ -305,6 +316,7 @@
+ 	   322 => "list",
+ 	   323 => "listend",
+ 	   324 => "channelmodeis",
++           328 => "channelurlis",
+ 	   329 => "channelcreate",  # 1997-11-24 -- archon
+ 	   331 => "notopic",
+ 	   332 => "topic",
+@@ -353,6 +365,7 @@
+ 	   393 => "users",
+ 	   394 => "endofusers",
+ 	   395 => "nousers",
++           396 => "hosthidden",
+ 
+ 	   401 => "nosuchnick",
+ 	   402 => "nosuchserver",
+@@ -451,8 +464,10 @@
+            641 => "rpl_dumprpl",        # UnrealIrcd, Hendrik Frenzel
+            642 => "rpl_eodump",         # UnrealIrcd, Hendrik Frenzel
+ 
++           728 => "quietlist",
++           729 => "quietlistend",
+            999 => "numericerror",           # Bahamut IRCD
+-
++           'pong' => "pong",
+ 	  );
+ 
+ 
+diff -Naur Net_old/IRC.pm Net/IRC.pm
+--- Net_old/IRC.pm	2009-12-27 04:57:24.000000000 +0300
++++ Net/IRC.pm	2012-08-21 11:14:27.000000000 +0400
+@@ -33,7 +33,7 @@
+ use strict;
+ use vars qw($VERSION);
+ 
+-$VERSION = "0.79";
++$VERSION = "0.80";
+ 
+ sub new {
+   my $proto = shift;
