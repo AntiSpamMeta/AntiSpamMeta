@@ -4,7 +4,7 @@
     my $size = `ps -p $$ h -o size`;
     my $cputime = `ps -p $$ h -o time`;
     chomp $size; chomp $cputime;
-    $conn->privmsg($event->{to}->[0], "This bot has been running for " . (time - $::starttime) . " seconds" .
+    $conn->privmsg($event->replyto, "This bot has been running for " . (time - $::starttime) . " seconds" .
      ", is tracking " . (scalar (keys %::sn)) . " nicks" .
      " across " . (scalar (keys %::sc)) . " tracked channels." .
      " It is using " . $size . "KB of RAM" . 
@@ -13,12 +13,12 @@
   </command>
   <command cmd="^;mship (\S+)$" flag="c">
   <![CDATA[
-    $conn->privmsg($event->{to}->[0], $1 . " is on: " . ASM::Util->commaAndify(@{$::sn{lc $1}->{mship}}));
+    $conn->privmsg($event->replyto, $1 . " is on: " . ASM::Util->commaAndify(@{$::sn{lc $1}->{mship}}));
   ]]>
   </command>
   <command cmd="^;source$">
   <![CDATA[
-    $conn->privmsg($event->{to}->[0], "source is at http://svn.linuxrulz.org/repos/antispammeta");
+    $conn->privmsg($event->replyto, "source is at http://svn.linuxrulz.org/repos/antispammeta");
   ]]>
   </command>
   <command cmd="^;sql (main|log) (.*)" flag="d">
@@ -36,23 +36,23 @@
     my $switch = lc $2;
     my $link = ASM::Util->getLink(lc $chan);
     if ( lc $link ne lc $chan ) {
-      $conn->privmsg($event->{to}->[0], "Error: $chan is linked to $link - use $link instead.");
+      $conn->privmsg($event->replyto, "Error: $chan is linked to $link - use $link instead.");
       return;
     }
     $::channels->{channel}->{$chan}->{monitor} = $switch;
     ASM::XML->writeChannels();
-    $conn->privmsg($event->{to}->[0], "Monitor flag for $chan set to $switch");
+    $conn->privmsg($event->replyto, "Monitor flag for $chan set to $switch");
   ]]>
   </command>
   <command cmd="^;help$">
   <![CDATA[
-    $conn->privmsg($event->{to}->[0], "help is at http://meta.wikimedia.org/wiki/User:WHeimbigner/AntiSpamMeta");
-    $conn->privmsg($event->{to}->[0], "You can also get faster help by emailing william dot heimbigner at ttu dot edu - or bug ErrantEgo or tomaw");
+    $conn->privmsg($event->replyto, "help is at http://meta.wikimedia.org/wiki/User:WHeimbigner/AntiSpamMeta");
+    $conn->privmsg($event->replyto, "You can also get faster help by emailing william dot heimbigner at ttu dot edu - or bug ErrantEgo or tomaw");
   ]]>
   </command>
   <command cmd="^;db$">
   <![CDATA[
-    $conn->privmsg($event->{to}->[0], "db is at http://antispammeta.net/query.html");
+    $conn->privmsg($event->replyto, "db is at http://antispammeta.net/query.html");
   ]]>
   </command>
   <command cmd="^;query (\S+) (\S+)$">
@@ -60,34 +60,34 @@
     my $channel = $1;
     my @nuh = split(/(\!|\@)/, $2);
     my $result = $::db->query($channel, $nuh[0], $nuh[2], $nuh[4]);
-    $conn->privmsg($event->{to}->[0], "$result results found.");
+    $conn->privmsg($event->replyto, "$result results found.");
   ]]>
   </command>
   <command cmd="^;userx add (\S+) (\S+)$" flag="a">
   <![CDATA[
     my $acct = lc $1;
     my $flags = $2;
-    if ($flags =~ /d/) {
-      $conn->privmsg($event->{to}->[0], "The d flag may not be assigned over IRC. Edit the configuration manually.");
+    if ($flags =~ /d/i) {
+      $conn->privmsg($event->replyto, "The d flag may not be assigned over IRC. Edit the configuration manually.");
       return;
     }
     $::users->{person}->{$acct} = { 'flags' => $flags };
     ASM::XML->writeUsers();
-    $conn->privmsg($event->{to}->[0], "Flags for NickServ account $acct set to $flags");
+    $conn->privmsg($event->replyto, "Flags for NickServ account $acct set to $flags");
   ]]>
   </command>
   <command cmd="^;user add (\S+) ?(\S*)$" flag="a">
   <![CDATA[
-    $conn->privmsg($event->{to}->[0], "This command has been deprecated");
+    $conn->privmsg($event->replyto, "This command has been deprecated");
   ]]>
   </command>
   <command cmd="^;userx? flags (\S+) ?$">
   <![CDATA[
     my $nick = lc $1;
     if (defined($::users->{person}->{$nick}->{flags})) {
-      $conn->privmsg($event->{to}->[0], "Flags for $nick: $::users->{person}->{$nick}->{flags}");
+      $conn->privmsg($event->replyto, "Flags for $nick: $::users->{person}->{$nick}->{flags}");
     } else {
-      $conn->privmsg($event->{to}->[0], "$nick has no flags");
+      $conn->privmsg($event->replyto, "$nick has no flags");
     }
   ]]>
   </command>
@@ -95,13 +95,13 @@
   <![CDATA[
     my $nick = lc $1;
     my $flags = $2;
-    if ($flags =~ /d/) {
-      $conn->privmsg($event->{to}->[0], "The d flag may not be assigned over IRC. Edit the configuration manually.");
+    if ($flags =~ /d/i) {
+      $conn->privmsg($event->replyto, "The d flag may not be assigned over IRC. Edit the configuration manually.");
       return;
     }
     $::users->{person}->{$nick}->{flags} = $flags;
     ASM::XML->writeUsers();
-    $conn->privmsg($event->{to}->[0], "Flags for $nick set to $flags");
+    $conn->privmsg($event->replyto, "Flags for $nick set to $flags");
   ]]>
   </command>
   <command cmd="^;userx? del (\S+)$" flag="a">
@@ -109,7 +109,7 @@
     my $nick = lc $1;
     delete($::users->{person}->{$nick});
     ASM::XML->writeUsers();
-    $conn->privmsg($event->{to}->[0], "Byebye $nick");
+    $conn->privmsg($event->replyto, "Byebye $nick");
   ]]>
   </command>
   <command cmd="^;target (\S+) (\S+) ?(\S*)$" flag="a">
@@ -119,7 +119,7 @@
     my $level= $3;
     my $link = ASM::Util->getLink(lc $chan);
     if ( lc $link ne lc $chan ) {
-      $conn->privmsg($event->{to}->[0], "Error: $chan is linked to $link - use $link instead.");
+      $conn->privmsg($event->replyto, "Error: $chan is linked to $link - use $link instead.");
       return;
     }
     if ($level eq '') { $level = 'low'; }
@@ -133,7 +133,7 @@
     push(@tmphl, $nick);
     $::channels->{channel}->{$chan}->{msgs}->{$level} = \@tmphl;
     ASM::XML->writeChannels();
-    $conn->privmsg($event->{to}->[0], "$nick added to $level risk messages for $chan");
+    $conn->privmsg($event->replyto, "$nick added to $level risk messages for $chan");
   ]]>
   </command>
   <command cmd="^;detarget (\S+) (\S+)" flag="a">
@@ -142,7 +142,7 @@
     my $nick = $2;
     my $link = ASM::Util->getLink(lc $chan);
     if ( lc $link ne lc $chan ) {
-      $conn->privmsg($event->{to}->[0], "Error: $chan is linked to $link - use $link instead.");
+      $conn->privmsg($event->replyto, "Error: $chan is linked to $link - use $link instead.");
       return;
     }
     foreach my $risk ( keys %::RISKS ) {
@@ -152,7 +152,7 @@
       $::channels->{channel}->{$chan}->{msgs}->{$risk} = \@ppl;
     }
     ASM::XML->writeChannels();
-    $conn->privmsg($event->{to}->[0], "$nick removed from targets for $chan");
+    $conn->privmsg($event->replyto, "$nick removed from targets for $chan");
   ]]>
   </command>
   <command cmd="^;showhilights (\S+) *$" flag="h">
@@ -167,9 +167,9 @@
       }
     }
     if (! @channels) {
-      $conn->privmsg($event->{to}->[0], "$nick isn't on any hilights");
+      $conn->privmsg($event->replyto, "$nick isn't on any hilights");
     } else {
-      $conn->privmsg($event->{to}->[0], "$nick is hilighted for " . join(', ', @channels));
+      $conn->privmsg($event->replyto, "$nick is hilighted for " . join(', ', @channels));
     }
   ]]>
   </command>
@@ -181,12 +181,12 @@
     if ($level eq '') { $level = 'info'; }
     $level = lc $level;
     if ($level !~ /^(disable|debug|info|low|medium|high|opalert)$/) {
-      $conn->privmsg($event->{to}->[0], "Error: I don't recognize $level as a valid level.");
+      $conn->privmsg($event->replyto, "Error: I don't recognize $level as a valid level.");
       return;
     }
     my $link = ASM::Util->getLink(lc $chan);
     if ( lc $link ne lc $chan ) {
-      $conn->privmsg($event->{to}->[0], "Error: $chan is linked to $link - use $link instead.");
+      $conn->privmsg($event->replyto, "Error: $chan is linked to $link - use $link instead.");
       return;
     }
     unless (defined($::channels->{channel}->{$chan}->{hilights})) {
@@ -201,7 +201,7 @@
       $::channels->{channel}->{$chan}->{hilights}->{$level} = \@tmphl;
     }
     ASM::XML->writeChannels();
-    $conn->privmsg($event->{to}->[0], ASM::Util->commaAndify(@nicks) . " added to $level risk hilights for $chan");
+    $conn->privmsg($event->replyto, ASM::Util->commaAndify(@nicks) . " added to $level risk hilights for $chan");
   ]]>
   </command>
   <command cmd="^;dehilight (\S+) (\S+)" flag="h">
@@ -210,7 +210,7 @@
     my @nicks = split(/,/, $2);
     my $link = ASM::Util->getLink(lc $chan);
     if ( lc $link ne lc $chan ) {
-      $conn->privmsg($event->{to}->[0], "Error: $chan is linked to $link - use $link instead.");
+      $conn->privmsg($event->replyto, "Error: $chan is linked to $link - use $link instead.");
       return;
     }
     foreach my $risk ( keys %::RISKS ) {
@@ -222,7 +222,7 @@
       $::channels->{channel}->{$chan}->{hilights}->{$risk} = \@ppl;
     }
     ASM::XML->writeChannels();
-    $conn->privmsg($event->{to}->[0], "Removing hilights for " . ASM::Util->commaAndify(@nicks) . " in $chan");
+    $conn->privmsg($event->replyto, "Removing hilights for " . ASM::Util->commaAndify(@nicks) . " in $chan");
   ]]>
   </command>
   <command cmd="^;join (\S+)" flag="a">
@@ -276,22 +276,22 @@
     foreach my $item (@eline) {
 	$::eline{lc $item} = 1;
     }
-    $conn->privmsg($event->{to}->[0], 'config files were re-read');
+    $conn->privmsg($event->replyto, 'config files were re-read');
   ]]>
   </command>
   <command cmd="^;say (.*)" flag="t">
   <![CDATA[
-    $conn->privmsg($event->{to}->[0], $1);
+    $conn->privmsg($event->replyto, $1);
   ]]>
   </command>
   <command cmd="^;do (.*)" flag="t">
   <![CDATA[
-    $conn->me($event->{to}->[0], $1);
+    $conn->me($event->replyto, $1);
   ]]>
   </command>
   <command cmd="^;exempt (.*)" flag="o">
   <![CDATA[
-    $conn->privmsg($event->{to}->[0], "This command is now deprecated. Use ;restrict nick/account/host lineToRestrict +notrigger instead, i.e. ;restrict account eir +notrigger");
+    $conn->privmsg($event->replyto, "This command is now deprecated. Use ;restrict nick/account/host lineToRestrict +notrigger instead, i.e. ;restrict account eir +notrigger");
   ]]>
   </command>
   <command cmd="^;restrict (nick|account|host) (\S+) (\+|-)([a-z]+)$" flag="o">
@@ -299,14 +299,14 @@
     my ($type, $who, $mode, $restriction) = ($1, lc $2, $3, $4);
     if ($mode eq '-') {
       delete $::restrictions->{$type . 's'}->{$type}->{$who}->{$restriction};
-      $conn->privmsg($event->{to}->[0], "Removed $restriction restriction for $type $who");
+      $conn->privmsg($event->replyto, "Removed $restriction restriction for $type $who");
     }
     if ($mode eq '+') {
       if (! defined($::restrictions->{$type . 's'}->{$type}->{$who})) {
         $::restrictions->{$type . 's'}->{$type}->{$who} = {};
       }
       $::restrictions->{$type . 's'}->{$type}->{$who}->{$restriction} = $restriction;
-      $conn->privmsg($event->{to}->[0], "Added $restriction restriction for $type $who");
+      $conn->privmsg($event->replyto, "Added $restriction restriction for $type $who");
     }
     ASM::XML->writeRestrictions();
   ]]>
@@ -363,7 +363,7 @@
     my $str = lc $1;
     push(@::string_blacklist, $str);
     "$str\n" >> io 'string_blacklist.txt';
-    $conn->privmsg($event->{to}->[0], "$str blacklisted");
+    $conn->privmsg($event->replyto, "$str blacklisted");
   ]]>
   </command>
   <command cmd="^;plugin (\S+) (\S+) (.*)" flag="p">
