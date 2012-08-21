@@ -346,9 +346,9 @@
                          "  - this allows ops to be notified while minimizing channel hostility.");
         } elsif (lc $event->{to}->[0] eq lc $conn->{_nick}) {
           if (lc $tgt eq lc $conn->{_nick}) { # they privmsged the bot without providing a target
-            $conn->privmsg($event->{nick}, "Sorry, it looks like you've tried to use the !ops command" .
-                           "via PM but haven't specified a target. Try again with /msg $conn->{_nick}" .
-                           " !ops #channelGoesHere ReasonGoesHere");
+            $conn->privmsg($event->{nick}, "Sorry, it looks like you've tried to use the !ops command " .
+                           "via PM but haven't specified a target. Try again with /msg $conn->{_nick} " .
+                           "!ops #channelGoesHere ReasonGoesHere");
             return;
           } else {
             $conn->privmsg($event->{nick}, "I've already recently notified $tgt ops.");
