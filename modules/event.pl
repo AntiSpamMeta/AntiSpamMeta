@@ -73,17 +73,60 @@ sub new
   $conn->add_handler('channelmodeis', \&on_channelmodeis);
   $conn->add_handler('quietlist', \&on_quietlist);
   $conn->add_handler('pong', \&on_pong);
+  $conn->add_handler('statsdebug', \&on_statsdebug);
+  $conn->add_handler('endofstats', \&on_endofstats);
+  $conn->add_handler('channelurlis', \&on_channelurlis);
   bless($self);
   return $self;
+}
+
+my $clearstatsp = 1;
+my %statsp = ();
+
+sub on_statsdebug
+{
+  my ($conn, $event) = @_;
+  my ($char, $line) = ($event->{args}->[1], $event->{args}->[2]);
+  if ($char eq 'p') {
+    if ($line =~ /^(\d+) staff members$/) {
+      #this is the end of the report
+    } else {
+      my ($nick, $userhost) = split(" ", $line);
+      $userhost =~ s/\((.*)\)/$1/;
+      my ($user, $host) = split("@", $userhost);
+      if ($clearstatsp) {
+        $clearstatsp = 0;
+        %statsp = ();
+      }
+      $statsp{$nick}= [$user, $host];
+    }
+  }
+}
+
+sub on_endofstats
+{
+  my ($conn, $event) = @_;
+  if ($event->{args}->[1] eq 'p') {
+    $clearstatsp=1;
+    my $tmp = Dumper(\%statsp); chomp $tmp;
+    ASM::Util->dprint($tmp, 'statsp');
+    # $event->{args}->[2] == "End of /STATS report"
+    #end of /stats p
+  }
 }
 
 sub on_pong
 {
   my ($conn, $event) = @_;
-  alarm 60;
-  $conn->schedule( 30, sub { $conn->sl("PING :" . time); } );
-  ASM::Util->dprint('Ping? Pong!', 'pingpong');
-  ASM::Util->dprint(Dumper($event), 'pingpong');
+  alarm 90;
+  $conn->schedule( 60, sub { $conn->sl("PING :" . time); } );
+  ASM::Util->dprint('Pong? ... Ping!', 'pingpong');
+#  ASM::Util->dprint(Dumper($event), 'pingpong');
+  $conn->sl("STATS p");
+  my $lag = time - $event->{args}->[0];
+  if ($lag > 1) {
+    ASM::Util->dprint("Latency: $lag", 'latency');
+  }
 }
 
 sub on_dchat
@@ -117,9 +160,9 @@ sub on_ping
 {
   my ($conn, $event) = @_;
   $conn->sl("PONG " . $event->{args}->[0]);
-  alarm 200;
-  ASM::Util->dprint('Ping! Pong?', 'pingpong');
-  ASM::Util->dprint(Dumper($event), 'pingpong');
+#  alarm 200;
+  ASM::Util->dprint('Ping? Pong!', 'pingpong');
+#  ASM::Util->dprint(Dumper($event), 'pingpong');
 }
 
 sub on_account
@@ -130,7 +173,7 @@ sub on_account
 
 sub on_connect {
   my ($conn, $event) = @_; # need to check for no services
-  $conn->sl('MODE AntiSpamMeta +Q');
+  $conn->sl("MODE $event->{args}->[0] +Q");
   if (lc $event->{args}->[0] ne lc $::settings->{nick}) {
     ASM::Util->dprint('Attempting to regain my main nick', 'startup');
     $conn->privmsg( 'NickServ', "regain $::settings->{nick} $::settings->{pass}" );
@@ -143,7 +186,7 @@ sub on_join {
   my $nick = lc $event->{nick};
   my $chan = lc $event->{to}->[0];
   my $rate;
-  alarm 200;
+#  alarm 200;
   if ( lc $conn->{_nick} eq lc $nick)  {
     $::sc{$chan} = {};
     mkdir($::settings->{log}->{dir} . $chan);
@@ -214,14 +257,14 @@ sub on_msg
   $::commander->command($conn, $event);
   ASM::Util->dprint($event->{from} . " - " . $event->{args}->[0], 'msg');
   if (ASM::Util->notRestricted($event->{nick}, "nomsgs")) {
-    $conn->privmsg('#antispammeta', $event->{from} . ' told me: ' . $event->{args}->[0]);
+    $conn->privmsg($::settings->{masterchan}, $event->{from} . ' told me: ' . $event->{args}->[0]);
   }
 }
 
 sub on_public
 {
   my ($conn, $event) = @_;
-  alarm 200;
+#  alarm 200;
   $::inspector->inspect( $conn, $event );
   $::log->logg( $event );
   $::db->logg( $event );
@@ -264,9 +307,9 @@ sub on_quit
   $event->{to} = \@channels;
   $::db->logg( $event );
   if (($::netsplit == 0) && ($event->{args}->[0] eq "*.net *.split") && (lc $event->{nick} ne 'chanserv')) { #special, netsplit situation
-    $conn->privmsg("#antispammeta", "Entering netsplit mode - JOIN and QUIT inspection will be disabled for 60 minutes");
+    $conn->privmsg($::settings->{masterchan}, "Entering netsplit mode - JOIN and QUIT inspection will be disabled for 60 minutes");
     $::netsplit = 1;
-    $conn->schedule(60*60, sub { $::netsplit = 0; $conn->privmsg('#antispammeta', 'Returning to regular operation'); });
+    $conn->schedule(60*60, sub { $::netsplit = 0; $conn->privmsg($::settings->{masterchan}, 'Returning to regular operation'); });
   }
   $::inspector->inspect( $conn, $event ) unless $::netsplit;
   $::log->logg( $event );
@@ -500,6 +543,12 @@ sub on_quietlist
   $::sc{lc $chan}{quiets}{$ban} = { bannedBy => $banner, bannedOn => $bantime };
 }
 
+sub on_channelurlis
+{
+  my ($conn, $event) = @_;
+  $::sc{lc $event->{args}->[1]}{url} = $event->{args}->[2];
+}
+
 sub on_ctcp
 {
   my ($conn, $event) = @_;
@@ -564,7 +613,7 @@ sub on_whoxover
     my $size = `ps -p $$ h -o size`;
     my $cputime = `ps -p $$ h -o time`;
     chomp $size; chomp $cputime;
-    $conn->privmsg("#antispammeta", "Finished syncing after " . (time - $::starttime) . " seconds. " .
+    $conn->privmsg($::settings->{masterchan}, "Finished syncing after " . (time - $::starttime) . " seconds. " .
      "I'm tracking " . (scalar (keys %::sn)) . " nicks" .
      " across " . (scalar (keys %::sc)) . " tracked channels." .
      " I'm using " . $size . "KB of RAM" . 
@@ -573,7 +622,7 @@ sub on_whoxover
     foreach my $c (@{$::settings->{autojoins}}) { $x{$c} = 1; }
     foreach my $cx (keys %::sc) { delete $x{$cx}; }
     if (scalar (keys %x)) {
-      $conn->privmsg("#antispammeta", "Syncing appears to have failed for " . ASM::Util->commaAndify(keys %x));
+      $conn->privmsg($::settings->{masterchan}, "Syncing appears to have failed for " . ASM::Util->commaAndify(keys %x));
     }
   }
 }

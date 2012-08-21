@@ -139,6 +139,7 @@
     <msgs></msgs>
   </channel>
   <channel id="#antispammeta-debug" />
+  <channel id="#baadf00d" />
   <channel id="#cisco">
     <hilights></hilights>
     <msgs></msgs>
@@ -701,6 +702,7 @@
       <debug>#wikimedia-ops</debug>
     </msgs>
   </channel>
+  <channel id="antispammetabeta" />
   <channel id="default">
     <hilights></hilights>
   </channel>

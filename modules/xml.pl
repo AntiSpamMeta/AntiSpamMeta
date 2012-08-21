@@ -23,9 +23,10 @@ sub readXML {
 sub writeXML {
   $::xs1->XMLout($::settings,     RootName => 'settings', KeyAttr => ['id'],
                  GroupTags => { altnicks => 'altnick', server => 'host', autojoins => 'autojoin' },
-                 ValueAttr => { debug => 'content',     nick => 'content',    port => 'content',
-                             realname => 'content', username => 'content',     dir => 'content',
-                                 zone => 'content',  filefmt => 'content', timefmt => 'content'}) > io("$::cset/settings.xml");
+                 ValueAttr => { debug => 'content',      nick => 'content',    port => 'content',
+                             realname => 'content',  username => 'content',     dir => 'content',
+                                 zone => 'content',   filefmt => 'content', timefmt => 'content',
+                           masterchan => 'content', debugchan => 'content'}) > io("$::cset/settings.xml");
   writeChannels();
   writeUsers();
   writeRestrictions();

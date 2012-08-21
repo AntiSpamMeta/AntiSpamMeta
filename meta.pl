@@ -26,7 +26,7 @@ $::cset = '';
 ## debug variables. 0 to turn off debugging, else set it to a Term::ANSIColor constant.
 %::debugx = (
   "dnsbl" => 0,
-  "pingpong" => 0,
+  "pingpong" => 0, #BLUE,
   "services" => YELLOW,
   "sync" => CYAN,
   "chanstate" => MAGENTA,
@@ -37,7 +37,9 @@ $::cset = '';
   "commander" => GREEN,
   "msg" => GREEN,
   "dcc" => RED,
-  "misc" => RED
+  "misc" => 0, #RED
+  "latency" => RED,
+  "statsp" => 0 #MAGENTA
 );
 %::dsock = ();
 %::spy = ();
@@ -85,7 +87,7 @@ sub init {
   $::inspector = ASM::Inspect->new();
   $::services = ASM::Services->new();
   $::commander = ASM::Commander->new();
-  $::event = ASM::Event->new($conn, $::inspector);
+  ASM::Event->new($conn, $::inspector);
   $::classes = ASM::Classes->new();
   my @eline=io('exempt.txt')->getlines;
   chomp @eline;

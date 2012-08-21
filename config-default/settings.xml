@@ -34,4 +34,6 @@
   </server>
   <username>MetaBot</username>
   <lookupexpire>2419200</lookupexpire>
+  <masterchan>#antispammeta</masterchan>
+  <debugchan>#antispammeta-debug</debugchan>
 </settings>

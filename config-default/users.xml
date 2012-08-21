@@ -10,7 +10,7 @@
   <person id="errantego" flags="doath" />
   <person id="gary" flags="oath" />
   <person id="idleone" flags="o" />
-  <person id="jeremyb" flags="th" />
+  <person id="jeremyb" flags="oth" />
   <person id="jonathand" flags="oath" />
   <person id="kelsie" flags="a" />
   <person id="kindone" flags="t" />
@@ -18,6 +18,7 @@
   <person id="logan_" flags="oath" />
   <person id="lstarnes" flags="oath" />
   <person id="marienz" flags="doath" />
+  <person id="mrmist" flags="doath" />
   <person id="martinp23" flags="oath" />
   <person id="mquin" flags="hota" />
   <person id="myrtti" flags="htoa" />

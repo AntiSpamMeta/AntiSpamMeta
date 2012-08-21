@@ -36,7 +36,8 @@ sub doServices {
       } else {
         $conn->join(join(',', @autojoins));
       }
-      $conn->schedule(2, sub { $conn->privmsg('#antispammeta', 'Now joined to all channels in '. (time - $::starttime) . " seconds."); });
+      $conn->sl("PING :" . time);
+      $conn->schedule(2, sub { $conn->privmsg($::settings->{masterchan}, 'Now joined to all channels in '. (time - $::starttime) . " seconds."); });
     }
     elsif ($event->{args}->[0] =~ /has been (killed|released)/ )
     {
