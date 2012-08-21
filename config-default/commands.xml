@@ -319,12 +319,41 @@
       my $msg = $1;
       $msg = $2 if defined($2);
       unless (defined($::ignored{$tgt}) && ($::ignored{$tgt} >= $::RISKS{'opalert'})) {
+        if (lc $event->{to}->[0] eq '##linux') {
+          $conn->privmsg($event->{nick}, "I've summoned op attention. In the future, please use /msg " .
+                         "$conn->{_nick} !ops $event->{to}->[0] reasonGoesHere  - this allows ops to " .
+                         "be notified while minimizing channel hostility.");
+        } elsif (lc $event->{to}->[0] eq lc $conn->{_nick}) {
+          if (lc $tgt eq lc $conn->{_nick}) { # they privmsged the bot without providing a target
+            $conn->privmsg($event->{nick}, "Sorry, it looks like you've tried to use the !ops command " .
+                           "via PM but haven't specified a target. Try again with /msg $conn->{_nick} " .
+                           "!ops #channelGoesHere ReasonGoesHere");
+            return;
+          } else {
+            $conn->privmsg($event->{nick}, "Thanks, I'm notifying $tgt ops.");
+          }
+        }
         $::ignored{$tgt} = $::RISKS{'opalert'};
         $conn->schedule(30, sub { delete($::ignored{$tgt})});
         my $hilite=ASM::Util->commaAndify(ASM::Util->getAlert($tgt, 'opalert', 'hilights'));
         my $txtz = "[\x02$tgt\x02] - $event->{nick} wants op attention ($msg) $hilite";
         my @tgts = ASM::Util->getAlert($tgt, 'opalert', 'msgs');
         ASM::Util->sendLongMsg($conn, \@tgts, $txtz);
+      } else { # ops has recently been called
+        if (lc $event->{to}->[0] eq '##linux') {
+          $conn->privmsg($event->{nick}, "I've already been recently asked to summon op attention. " .
+                         "In the future, please use /msg $conn->{_nick} !ops $event->{to}->[0] reasonGoesHere" .
+                         "  - this allows ops to be notified while minimizing channel hostility.");
+        } elsif (lc $event->{to}->[0] eq lc $conn->{_nick}) {
+          if (lc $tgt eq lc $conn->{_nick}) { # they privmsged the bot without providing a target
+            $conn->privmsg($event->{nick}, "Sorry, it looks like you've tried to use the !ops command" .
+                           "via PM but haven't specified a target. Try again with /msg $conn->{_nick}" .
+                           " !ops #channelGoesHere ReasonGoesHere");
+            return;
+          } else {
+            $conn->privmsg($event->{nick}, "I've already recently notified $tgt ops.");
+          }
+        }
       }
     }
   ]]>
