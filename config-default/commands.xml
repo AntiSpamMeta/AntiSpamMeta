@@ -13,7 +13,7 @@
   </command>
   <command cmd="^;mship (\S+)$" flag="c">
   <![CDATA[
-    $conn->privmsg($event->replyto, $1 . " is on: " . ASM::Util->commaAndify(@{$::sn{lc $1}->{mship}}));
+    $conn->privmsg($event->replyto, $1 . " is on: " . ASM::Util->commaAndify(sort @{$::sn{lc $1}->{mship}}));
   ]]>
   </command>
   <command cmd="^;source$">
@@ -314,15 +314,21 @@
   <command cmd="^\!ops ?(#\S+)? ?(.*)" nohush="nohush">
   <![CDATA[
     if (ASM::Util->notRestricted(lc $event->{nick}, "noops")) {
-      my $tgt = $event->{to}->[0];
-      $tgt = $1 if (defined($1));
+      my $tgt = lc $event->{to}->[0];
+      $tgt = lc $1 if (defined($1));
       my $msg = $1;
       $msg = $2 if defined($2);
+      unless (defined($::sc{$tgt}{users}{lc $event->{nick}})) {
+        return; #they're not on the channel they're calling !ops for
+      }
       unless (defined($::ignored{$tgt}) && ($::ignored{$tgt} >= $::RISKS{'opalert'})) {
         if (lc $event->{to}->[0] eq '##linux') {
           $conn->privmsg($event->{nick}, "I've summoned op attention. In the future, please use /msg " .
                          "$conn->{_nick} !ops $event->{to}->[0] reasonGoesHere  - this allows ops to " .
                          "be notified while minimizing channel hostility.");
+        } elsif ((lc $event->{to}->[0] eq '#wikipedia-en-help') && (!defined($msg))) {
+          $conn->privmsg($event->{nick}, "I've summoned op attention, but in the future, please specify " .
+                         "a reason, e.g. !ops reasongoeshere - so ops know what is going on. Thanks! :)");
         } elsif (lc $event->{to}->[0] eq lc $conn->{_nick}) {
           if (lc $tgt eq lc $conn->{_nick}) { # they privmsged the bot without providing a target
             $conn->privmsg($event->{nick}, "Sorry, it looks like you've tried to use the !ops command " .
@@ -336,9 +342,14 @@
         $::ignored{$tgt} = $::RISKS{'opalert'};
         $conn->schedule(30, sub { delete($::ignored{$tgt})});
         my $hilite=ASM::Util->commaAndify(ASM::Util->getAlert($tgt, 'opalert', 'hilights'));
-        my $txtz = "[\x02$tgt\x02] - $event->{nick} wants op attention ($msg) $hilite";
+        my $txtz = "[\x02$tgt\x02] - $event->{nick} wants op attention ($msg)";
+        if ((time-$::sc{$tgt}{users}{lc $event->{nick}}{jointime}) > 90) {
+#          return; #they've been on the channel for less than 90 seconds, probably nuisance botspam
+          $txtz = $txtz . " " . $hilite;
+        }
         my @tgts = ASM::Util->getAlert($tgt, 'opalert', 'msgs');
         ASM::Util->sendLongMsg($conn, \@tgts, $txtz);
+        $::log->incident($tgt, "$tgt: $event->{nick} requested op attention\n");
       } else { # ops has recently been called
         if (lc $event->{to}->[0] eq '##linux') {
           $conn->privmsg($event->{nick}, "I've already been recently asked to summon op attention. " .
