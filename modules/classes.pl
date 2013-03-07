@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use Text::LevenshteinXS qw(distance);
 use Data::Dumper;
+use Regexp::Wildcards;
 
 my %sf = ();
 
@@ -15,6 +16,7 @@ sub new
     "strbl" => \&strbl,
     "dnsbl" => \&dnsbl,
     "floodqueue" => \&floodqueue,
+    "floodqueue2" => \&floodqueue2,
     "nickspam" => \&nickspam,
     "splitflood" => \&splitflood,
     "advsplitflood" => \&advsplitflood,
@@ -31,7 +33,8 @@ sub new
     "asciiflood" => \&asciiflood,
     "joinmsgquit" => \&joinmsgquit,
     "garbagemeter" => \&garbagemeter,
-    "cyclebotnet" => \&cyclebotnet
+    "cyclebotnet" => \&cyclebotnet,
+    "banevade" => \&banevade
   };
   $self->{ftbl} = $tbl;
   bless($self);
@@ -91,6 +94,18 @@ sub nickbl
   }
   return 0;
 }
+
+sub banevade
+{
+  my ($chk, $id, $event, $chan, $rev) = @_;
+  my $ip = ASM::Util->getNickIP($event->{nick});
+  return 0 unless defined($ip);
+  if (defined($::sc{lc $chan}{ipbans}{$ip})) {
+    return 1;
+  }
+  return 0;
+}
+
 sub proxy
 {
   my ($chk, $id, $event, $chan, $rev) = @_;
@@ -177,6 +192,33 @@ sub dnsbl
       return $::dnsbl->{query}->{$chk->{content}}->{response}->{$strip}->{content};
     }
   }
+  return 0;
+}
+
+sub floodqueue2 {
+  my ($chk, $id, $event, $chan, $rev) = @_;
+  my @cut = split(/:/, $chk->{content});
+
+  my $cvt = Regexp::Wildcards->new(type => 'jokers');
+  my $hit = 0;
+  foreach my $mask ( keys %{$::sc{lc $chan}{quiets}}) {
+    if ($mask !~ /^\$/) {
+      my @div = split(/\$/, $mask);
+      my $regex = $cvt->convert($div[0]);
+      if (lc $event->{from} =~ lc $regex) {
+        $hit = 1;
+      }
+    } elsif ( (defined($::sn{lc $event->{nick}}{account})) && ($mask =~ /^\$a:(.*)/)) {
+      my @div = split(/\$/, $mask);
+      my $regex = $cvt->convert($div[0]);
+      if (lc ($::sn{lc $event->{nick}}{account}) =~ lc $regex) {
+        $hit = 1;
+      }
+    }
+  }
+  return 0 unless $hit;
+
+  return 1 if ( flood_add( $chan, $id, $event->{host}, int($cut[1]) ) == int($cut[0]) );
   return 0;
 }
 

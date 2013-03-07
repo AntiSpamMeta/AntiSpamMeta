@@ -14,4 +14,6 @@
   <event id="phishing1" class="re" override="notice" reason="trying to steal passwords (v1)" risk="high" type="notice">identify.*/msg .* identify &lt;password&gt;</event>
   <event id="phishing2" class="re" override="notice" reason="trying to steal passwords (v2)" risk="high" type="notice">^This nickname is registered</event>
   <event id="proxylist" class="proxy" reason="IP is blacklisted" risk="info" type="join">lolz</event>
+  <event id="banevade" class="banevade" reason="appears to be ban evading" risk="debug" type="join">contentisuseless</event>
+  <event id="joinfloodquiet" class="floodqueue2" reason="join flood (3 joins in 90 seconds) by quieted user" risk="debug" type="join">5:30</event>
 </events>

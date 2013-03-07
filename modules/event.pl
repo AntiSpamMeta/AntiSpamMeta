@@ -596,9 +596,19 @@ sub on_mode
               $::log->sqlIncident( $chan, $idx ) if $idx;
             }
           }
+          if ($ex[1] =~ /^\*\!\*\@(.*)$/) {
+            my $ip = ASM::Util->getHostIP($1);
+            $::sc{$chan}{ipbans}{$ip} = { bannedBy => $event->{from}, bannedOn => time } if defined($ip);
+          }
         }
       }
-      elsif ( $ex[0] eq '-b' ) { delete $::sc{$chan}{bans}{$ex[1]}; }
+      elsif ( $ex[0] eq '-b' ) { 
+        delete $::sc{$chan}{bans}{$ex[1]};
+        if ($ex[1] =~ /^\*\!\*\@(.*)$/) {
+          my $ip = ASM::Util->getHostIP($1);
+          delete $::sc{$chan}{ipbans}{$ip} if defined($ip);
+        }
+      }
 
       elsif ( $ex[0] eq '+q' ) {
         $::sc{$chan}{quiets}{$ex[1]} = { bannedBy => $event->{from}, bannedOn => time };
@@ -610,9 +620,19 @@ sub on_mode
               $::log->sqlIncident( $chan, $idx ) if $idx;
             }
           }
+          if ($ex[1] =~ /^\*\!\*\@(.*)$/) {
+            my $ip = ASM::Util->getHostIP($1);
+            $::sc{$chan}{ipquiets}{$ip} = { bannedBy => $event->{from}, bannedOn => time } if defined($ip);
+          }
         }
       }
-      elsif ( $ex[0] eq '-q' ) { delete $::sc{$chan}{quiets}{$ex[1]}; }
+      elsif ( $ex[0] eq '-q' ) {
+        delete $::sc{$chan}{quiets}{$ex[1]};
+        if ($ex[1] =~ /^\*\!\*\@(.*)$/) {
+          my $ip = ASM::Util->getHostIP($1);
+          delete $::sc{$chan}{ipquiets}{$ip} if defined($ip);
+        }
+      }
 
       else {
         my ($what, $mode) = split (//, $ex[0]);
@@ -652,6 +672,10 @@ sub on_banlist
   my ($conn, $event) = @_;
   my ($me, $chan, $ban, $banner, $bantime) = @{$event->{args}};
   $::sc{lc $chan}{bans}{$ban} = { bannedBy => $banner, bannedOn => $bantime };
+  if ($ban =~ /^\*\!\*\@(.*)$/) {
+    my $ip = ASM::Util->getHostIP($1);
+    $::sc{lc $chan}{ipbans}{$ip} = { bannedBy => $banner, bannedOn => $bantime } if defined($ip);
+  }
 }
 
 sub on_quietlist
@@ -659,6 +683,10 @@ sub on_quietlist
   my ($conn, $event) = @_;
   my ($me, $chan, $mode, $ban, $banner, $bantime) = @{$event->{args}};
   $::sc{lc $chan}{quiets}{$ban} = { bannedBy => $banner, bannedOn => $bantime };
+  if ($ban =~ /^\*\!\*\@(.*)$/) {
+    my $ip = ASM::Util->getHostIP($1);
+    $::sc{lc $chan}{ipquiets}{$ip} = { bannedBy => $banner, bannedOn => $bantime } if defined($ip);
+  }
 }
 
 sub on_channelurlis

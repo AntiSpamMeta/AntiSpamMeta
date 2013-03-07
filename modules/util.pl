@@ -4,6 +4,7 @@ use POSIX qw(strftime);
 use warnings;
 use strict;
 use Term::ANSIColor qw (:constants);
+use Socket qw( inet_aton inet_ntoa );
 
 %::RISKS =
 (
@@ -183,16 +184,44 @@ sub dprint {
   print STDERR $text, "\n";
 }
 
+
+sub intToDottedQuad {
+  my ($module, $num) = @_;
+ return inet_ntoa(pack('N', $num)); 
+}
+
 sub dottedQuadToInt
 {
   my ($module, $dottedquad) = @_;
-  my $ip_number = 0;
-  my @octets = split(/\./, $dottedquad);
-  foreach my $octet (@octets) {
-    $ip_number <<= 8;
-    $ip_number |= $octet;
+#  my $ip_number = 0;
+#  my @octets = split(/\./, $dottedquad);
+#  foreach my $octet (@octets) {
+#    $ip_number <<= 8;
+#    $ip_number |= $octet;
+#  }
+#  return $ip_number;
+ return unpack('N', inet_aton($dottedquad)); 
+}
+
+sub getHostIP
+{
+  my ($module, $host) = @_;
+  if ( ($host =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/) or
+       ($host =~ /^gateway\/web\/freenode\/ip\.(\d+)\.(\d+)\.(\d+)\.(\d+)$/) ) {
+    #yay, easy IP!   
+    return dottedQuadToInt(undef, "$1.$2.$3.$4");
+  } elsif (index($host, '/') != -1) {
+    return;
+  } elsif ($host =~ /^2001:0:/) {
+    my @splitip = split(/:/, $host);
+    return unless defined($splitip[6]) && defined($splitip[7]);
+    #I think I can just do (hex($splitip[6] . $splitip[7]) ^ hex('ffffffff')) here but meh
+    my $host = join('.', unpack('C4', pack('N', (hex($splitip[6] . $splitip[7])^hex('ffffffff')))));
+    return dottedQuadToInt(undef, $host);
   }
-  return $ip_number;
+  my @resolve = gethostbyname($host);
+  return unless @resolve;
+  return dottedQuadToInt(undef, join('.', unpack('C4', $resolve[4])));
 }
 
 sub getNickIP
@@ -204,24 +233,30 @@ sub getNickIP
     return $::sn{$nick}{ip};
   }
   my $host = $::sn{$nick}{host};
-  if ( ($host =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/) or
-       ($host =~ /^gateway\/web\/freenode\/ip\.(\d+)\.(\d+)\.(\d+)\.(\d+)$/) ) {
-    #yay, easy IP!
-    $::sn{$nick}{ip} = dottedQuadToInt(undef, "$1.$2.$3.$4");
-    return $::sn{$nick}{ip};
-  } elsif (index($host, '/') != -1) {
-    return;
-  } elsif ($host =~ /^2001:0:/) {
-    my @splitip = split(/:/, $host);
-    #I think I can just do (hex($splitip[6] . $splitip[7]) ^ hex('ffffffff')) here but meh
-    my $host = join('.', unpack('C4', pack('N', (hex($splitip[6] . $splitip[7])^hex('ffffffff')))));
-    $::sn{$nick}{ip} = dottedQuadToInt(undef, $host);
-    return $::sn{$nick}{ip};
+  my $ip = getHostIP(undef, $host);
+  if (defined($ip)) {
+    $::sn{$nick}{ip} = $ip;
+    return $ip;
   }
-  my @resolve = gethostbyname($::sn{$nick}{host});
-  return unless @resolve;
-  $::sn{$nick}{ip} = dottedQuadToInt(undef, join('.', unpack('C4', $resolve[4])));
-  return $::sn{$nick}{ip};
+  return;
+#  if ( ($host =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/) or
+#       ($host =~ /^gateway\/web\/freenode\/ip\.(\d+)\.(\d+)\.(\d+)\.(\d+)$/) ) {
+#    #yay, easy IP!
+#    $::sn{$nick}{ip} = dottedQuadToInt(undef, "$1.$2.$3.$4");
+#    return $::sn{$nick}{ip};
+#  } elsif (index($host, '/') != -1) {
+#    return;
+#  } elsif ($host =~ /^2001:0:/) {
+#    my @splitip = split(/:/, $host);
+#    #I think I can just do (hex($splitip[6] . $splitip[7]) ^ hex('ffffffff')) here but meh
+#    my $host = join('.', unpack('C4', pack('N', (hex($splitip[6] . $splitip[7])^hex('ffffffff')))));
+#    $::sn{$nick}{ip} = dottedQuadToInt(undef, $host);
+#    return $::sn{$nick}{ip};
+#  }
+#  my @resolve = gethostbyname($::sn{$nick}{host});
+#  return unless @resolve;
+#  $::sn{$nick}{ip} = dottedQuadToInt(undef, join('.', unpack('C4', $resolve[4])));
+#  return $::sn{$nick}{ip};
 }
 
 sub notRestricted {
