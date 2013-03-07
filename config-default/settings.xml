@@ -21,6 +21,7 @@
   </autojoins>
   <log>
     <dir>logs/</dir>
+    <actiondir>actionlogs/</actiondir>
     <filefmt>-%m-%d-%Y.log</filefmt>
     <timefmt>%B %d %T  </timefmt>
     <zone>GMT</zone>

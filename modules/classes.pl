@@ -26,11 +26,51 @@ sub new
     "nuhg" => \&nuhg,
     "levenflood" => \&levenflood,
     "proxy" => \&proxy,
-    "nickbl" => \&nickbl
+    "nickbl" => \&nickbl,
+    "nickfuzzy" => \&nickfuzzy,
+    "asciiflood" => \&asciiflood,
+    "joinmsgquit" => \&joinmsgquit,
+    "garbagemeter" => \&garbagemeter,
+    "cyclebotnet" => \&cyclebotnet
   };
   $self->{ftbl} = $tbl;
   bless($self);
   return $self;
+}
+
+sub garbagemeter {
+  my ($chk, $id, $event, $chan, $rev) = @_;
+  my @cut = split(/:/, $chk->{content});
+  my $limit = int($cut[0]);
+  my $timeout = int($cut[1]);
+  my $threshold = int($cut[2]);
+  my $threshold2 = int($cut[3]);
+  my $wordcount = 0;
+  my $line = $event->{args}->[0];
+  return 0 unless ($line =~ /^[A-Za-z: ]+$/);
+  my @words = split(/ /, $line);
+  return 0 unless ((scalar @words) >= $threshold2);
+  foreach my $word (@words) {
+    if (defined($::wordlist{lc $word})) {
+      $wordcount += 1;
+    }
+    return 0 if ($wordcount >= $threshold);
+  }
+  return 1 if ( flood_add( $chan, $id, 0, $timeout ) == $limit );
+  return 0;
+}
+
+sub joinmsgquit
+{
+  my ($chk, $id, $event, $chan, $rev) = @_;
+  my $time = $chk->{content};
+##STATE
+  $chan = lc $chan; #don't know if this is necessary but I'm trying to track down some mysterious state tracking corruption
+  return 0 unless defined($::sc{$chan}{users}{lc $event->{nick}}{jointime});
+  return 0 unless defined($::sc{$chan}{users}{lc $event->{nick}}{msgtime});
+  return 0 if ((time - $::sc{$chan}{users}{lc $event->{nick}}{jointime}) > $time);
+  return 0 if ((time - $::sc{$chan}{users}{lc $event->{nick}}{msgtime}) > $time);
+  return 1;
 }
 
 sub check
@@ -40,6 +80,17 @@ sub check
   return $self->{ftbl}->{$item}->(@_);
 }
 
+sub nickbl
+{
+  my ($chk, $id, $event, $chan, $rev) = @_;
+  my $match = lc $event->{nick};
+  foreach my $line (@::nick_blacklist) {
+    if ($line eq $match) {
+      return 1;
+    }
+  }
+  return 0;
+}
 sub proxy
 {
   my ($chk, $id, $event, $chan, $rev) = @_;
@@ -85,7 +136,7 @@ sub levenflood
   return $ret;
 }
 
-sub nickbl
+sub nickfuzzy
 {
   my ($chk, $id, $event, $chan) = @_;
   my $nick = $event->{nick};
@@ -133,6 +184,26 @@ sub floodqueue {
   my ($chk, $id, $event, $chan, $rev) = @_;
   my @cut = split(/:/, $chk->{content});
   return 1 if ( flood_add( $chan, $id, $event->{host}, int($cut[1]) ) == int($cut[0]) );
+  return 0;
+}
+
+sub asciiflood {
+  my ($chk, $id, $event, $chan, $rev) = @_;
+  my @cut = split(/:/, $chk->{content});
+  return 0 if (length($event->{args}->[0]) < $cut[0]);
+  return 0 if ($event->{args}->[0] =~ /[A-Za-z0-9]/);
+  return 1 if ( flood_add( $chan, $id, $event->{host}, int($cut[2]) ) == int($cut[1]) );
+  return 0;
+}
+
+sub cyclebotnet
+{
+  my ($chk, $id, $event, $chan, $rev) = @_;
+  my ($cycletime, $queueamt, $queuetime) = split(/:/, $chk->{content});
+  $chan = lc $chan; #don't know if this is necessary but I'm trying to track down some mysterious state tracking corruption
+  return 0 unless defined($::sc{$chan}{users}{lc $event->{nick}}{jointime});
+  return 0 if ((time - $::sc{$chan}{users}{lc $event->{nick}}{jointime}) > int($cycletime));
+  return 1 if ( flood_add( $chan, $id, "cycle", int($queuetime)) == int($queueamt) );
   return 0;
 }
 

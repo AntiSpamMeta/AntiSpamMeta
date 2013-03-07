@@ -5,6 +5,7 @@ use strict;
 use IO::All;
 use POSIX qw(strftime);
 use Data::Dumper;
+use URI::Escape;
 
 sub new
 {

@@ -31,7 +31,7 @@ sub inspect {
     }
   }
   else {
-    $iaddr = gethostbyname($event->{host});
+    $iaddr = gethostbyname($event->{host}) if ($event->{host} !~ /\//);
     $rev = join('.', reverse(unpack('C4', $iaddr))).'.' if (defined $iaddr);
   }
   ## NB: isn't there a better way to do this with grep, somehow?
@@ -74,12 +74,16 @@ sub inspect {
       if ($id eq 'last_measure_regex') { #TODO: Note that this is another example of things that shouldn't be hardcoded, but are.
 
       }
-      unless (defined($::ignored{$chan}) && ($::ignored{$chan} >= $::RISKS{$dct{$id}{risk}})) {
+      if (
+          (!(defined($::ignored{$chan}) && ($::ignored{$chan} >= $::RISKS{$dct{$id}{risk}}))) ||
+          (($::pacealerts == 0) && ($dct{$id}{risk} eq 'info'))
+         ) {
         my @tgts = ASM::Util->getAlert($chan, $dct{$id}{risk}, 'msgs');
         ASM::Util->sendLongMsg($conn, \@tgts, $txtz);
         $::ignored{$chan} = $::RISKS{$dct{$id}{risk}};
         $conn->schedule(45, sub { delete($::ignored{$chan})});
       }
+      $::log->incident($chan, "$chan: $dct{$id}{risk} risk: $event->{nick} - $nicereason\n");
       delete $dct{$id}{xresult};
     }
   }

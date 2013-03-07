@@ -6,13 +6,14 @@ use DBI;
 
 sub new {
   my $module = shift;
-  my ($db, $host, $port, $user, $pass, $table, $dblog) = @_;
+  my ($db, $host, $port, $user, $pass, $table, $actiontable, $dblog) = @_;
   my $self = {};
   $self->{DBH} = DBI->connect("DBI:mysql:database=$db;host=$host;port=$port", $user, $pass);
   $self->{DBH_LOG} = DBI->connect("DBI:mysql:database=$dblog;host=$host;port=$port", $user, $pass);
   $self->{DBH}->{mysql_auto_reconnect} = 1;
   $self->{DBH_LOG}->{mysql_auto_reconnect} = 1;
   $self->{TABLE} = $table;
+  $self->{ACTIONTABLE} = $actiontable;
   bless($self);
   return $self;
 }
@@ -58,6 +59,122 @@ sub record
              $dbh->quote($channel) . ", " . $dbh->quote($nick) . ", " . $dbh->quote($user) .
              ", " . $dbh->quote($host) . ", " . $dbh->quote($gecos) . ", " . $dbh->quote($level) . ", " .
              $dbh->quote($id) . ", " . $dbh->quote($reason) . ");");
+}
+
+sub actionlog
+{
+  my ($self, $event, $modedata1, $modedata2) = @_;
+  my $dbh = $self->{DBH};
+  my ($action, $reason, $channel,
+        $nick,   $user,   $host,   $gecos,   $account, $ip,
+      $bynick, $byuser, $byhost, $bygecos, $byaccount);
+
+  if ($event->{type} eq 'mode') {
+    $action = $modedata1;
+    $nick = $modedata2;
+    $channel = lc $event->{to}->[0];
+    $bynick = $event->{nick};
+    $byuser = $event->{user};
+    $byhost = $event->{host};
+  } elsif ($event->{type} eq 'quit') {
+    my $quitmsg = $event->{args}->[0];
+    if ($quitmsg =~ /^Killed \((\S+) \((.*)\)\)$/) {
+      $bynick = $1;
+      $reason = $2 unless ($2 eq '<No reason given>');
+      return if ($reason =~ /Nickname regained by services/);
+      $action = 'kill';
+    } elsif ($quitmsg =~ /^K-Lined$/) {
+      $action = 'k-line';
+    } else {
+      return; #quit not forced/tracked
+    }
+    $nick = $event->{nick};
+    $user = $event->{user};
+    $host = $event->{host};
+  } elsif (($event->{type} eq 'part') && ($event->{args}->[0] =~ /^requested by (\S+) \((.*)\)/)) {
+    $bynick = $1;
+    $reason = $2 unless (lc $reason eq lc $event->{nick});
+    $action = 'remove';
+    $nick = $event->{nick};
+    $user = $event->{user};
+    $host = $event->{host};
+    $channel = $event->{to}->[0];
+  } elsif ($event->{type} eq 'kick') {
+    $action = 'kick';
+    $bynick = $event->{nick};
+    $byuser = $event->{user};
+    $byhost = $event->{host};
+    $reason = $event->{args}->[1] unless ($event->{args}->[1] eq $event->{to}->[0]);
+    $nick = $event->{to}->[0];
+    $channel = $event->{args}->[0];
+  }
+  return unless defined($action);
+#  $bynick = lc $bynick if defined $bynick; #we will lowercase the NUHGA info later.
+  if ( (defined($bynick)) && (defined($::sn{lc $bynick})) ) { #we have the nick taking the action available, fill in missing NUHGA info
+    $byuser = $::sn{lc $bynick}{user} unless defined($byuser);
+    $byhost = $::sn{lc $bynick}{host} unless defined($byhost);
+    $bygecos = $::sn{lc $bynick}{gecos} unless defined($bygecos);
+    $byaccount = $::sn{lc $bynick}{account} unless defined($byaccount);
+    if (($byaccount eq '0') or ($byaccount eq '*')) {
+      $byaccount = undef;
+    }
+  }
+#  $nick = lc $nick if defined $nick;
+  if ( (defined($nick)) && (defined($::sn{lc $nick})) ) { #this should always be true, else something has gone FUBAR
+    $user = $::sn{lc $nick}{user} unless defined($user);
+    $host = $::sn{lc $nick}{host} unless defined($host);
+    $gecos = $::sn{lc $nick}{gecos} unless defined($gecos);
+    $account = $::sn{lc $nick}{account} unless defined($account);
+    if (($account eq '0') or ($account eq '*')) {
+      $account = undef;
+    }
+    $ip = ASM::Util->getNickIP(lc $nick);
+  }
+#  my ($action, $reason, $channel,
+#        $nick,   $user,   $host,   $gecos,   $account, $ip
+#      $bynick, $byuser, $byhost, $bygecos, $byaccount);
+#Now, time to escape/NULLify everything
+  $action = $dbh->quote($action);
+  if (defined($reason))  {  $reason = $dbh->quote($reason);     } else {  $reason = 'NULL'; }
+## removed lc's from everything except IP
+  if (defined($channel)) { $channel = $dbh->quote($channel); } else { $channel = 'NULL'; }
+
+  if (defined($nick))    {    $nick = $dbh->quote($nick);    } else {    $nick = 'NULL'; }
+  if (defined($user))    {    $user = $dbh->quote($user);    } else {    $user = 'NULL'; }
+  if (defined($host))    {    $host = $dbh->quote($host);    } else {    $host = 'NULL'; }
+  if (defined($gecos))   {   $gecos = $dbh->quote($gecos);   } else {   $gecos = 'NULL'; }
+  if (defined($account)) { $account = $dbh->quote($account); } else { $account = 'NULL'; }
+  if (defined($ip))      {      $ip = $dbh->quote($ip);         } else {      $ip = 'NULL'; }
+
+  if (defined($bynick))    {    $bynick = $dbh->quote($bynick);    } else {    $bynick = 'NULL'; }
+  if (defined($byuser))    {    $byuser = $dbh->quote($byuser);    } else {    $byuser = 'NULL'; }
+  if (defined($byhost))    {    $byhost = $dbh->quote($byhost);    } else {    $byhost = 'NULL'; }
+  if (defined($bygecos))   {   $bygecos = $dbh->quote($bygecos);   } else {   $bygecos = 'NULL'; }
+  if (defined($byaccount)) { $byaccount = $dbh->quote($byaccount); } else { $byaccount = 'NULL'; }
+  my $sqlstr = "INSERT INTO $self->{ACTIONTABLE} " .
+           "(action, reason, channel, " .
+           "nick, user, host, gecos, account, ip, " .
+           "bynick, byuser, byhost, bygecos, byaccount)" .
+           " VALUES " .
+           "($action, $reason, $channel, " .
+           "$nick, $user, $host, $gecos, $account, $ip, " .
+           "$bynick, $byuser, $byhost, $bygecos, $byaccount);";
+  ASM::Util->dprint( $sqlstr, 'mysql' );
+  $dbh->do( $sqlstr );
+  return $dbh->last_insert_id(undef, undef, $self->{ACTIONTABLE}, undef);
+# $::sn{ow} looks like:
+#$VAR1 = { 
+#          "account" => "afterdeath",
+#          "gecos" => "William Athanasius Heimbigner",
+#          "user" => "icxcnika",
+#          "mship" => [ 
+#                       "#baadf00d",
+#                       "#antispammeta-debug",
+#                       "#antispammeta"
+#                     ],
+#          "host" => "freenode/weird-exception/network-troll/afterdeath"
+#        };
+
 }
 
 #FIXME: This function is shit. Also, it doesn't work like I want it to with mode.
@@ -110,7 +227,7 @@ sub logg
     $string = $string . ', ' . $dbh->quote($event->{args}->[1]);
   }
   $string = $string . ');';
-  ASM::Util->dprint($string, "mysql");
+#  ASM::Util->dprint($string, "mysql");
   $dbh->do($string);
 }
   

@@ -41,7 +41,14 @@
       <debug>##hamradio-ops</debug>
     </msgs>
   </channel>
+  <channel id="##hamradio-banappeal">
+    <hilights></hilights>
+  </channel>
   <channel id="##hamradio-ops">
+    <hilights></hilights>
+    <msgs></msgs>
+  </channel>
+  <channel id="##hardware">
     <hilights></hilights>
     <msgs></msgs>
   </channel>
@@ -106,6 +113,7 @@
   <channel id="##wikia">
     <hilights>
       <info>vegadark</info>
+      <info>Furry</info>
     </hilights>
     <msgs></msgs>
   </channel>
@@ -117,6 +125,7 @@
       <disable>Thehelpfulone</disable>
       <high>werdan7</high>
       <info>njan</info>
+      <info>PZt</info>
       <low>numist</low>
       <low>HentaiXP</low>
       <low>TechSalvager</low>
@@ -138,8 +147,15 @@
     <hilights></hilights>
     <msgs></msgs>
   </channel>
-  <channel id="#antispammeta-debug" />
-  <channel id="#baadf00d" />
+  <channel id="#antispammeta-debug">
+    <hilights></hilights>
+  </channel>
+  <channel id="#baadf00d">
+    <hilights></hilights>
+  </channel>
+  <channel id="#chromium-support">
+    <hilights></hilights>
+  </channel>
   <channel id="#cisco">
     <hilights></hilights>
     <msgs></msgs>
@@ -196,7 +212,9 @@
     <hilights></hilights>
   </channel>
   <channel id="#frikipedia">
-    <hilights></hilights>
+    <hilights>
+      <info>Nietzsche</info>
+    </hilights>
     <msgs></msgs>
   </channel>
   <channel id="#gentoo" silence="yes">
@@ -233,12 +251,10 @@
   </channel>
   <channel id="#mediawiki" silence="yes">
     <hilights>
-      <debug>flyingparchment</debug>
-      <debug>roberthl</debug>
       <debug>Snowolf</debug>
-      <disable>seanw</disable>
+      <debug>techman224</debug>
       <info>charitwo</info>
-      <low>vvv</low>
+      <medium>Jasper_Deng</medium>
     </hilights>
     <msgs>
       <debug>#wikimedia-ops</debug>
@@ -255,14 +271,13 @@
   </channel>
   <channel id="#persian">
     <hilights></hilights>
+    <msgs></msgs>
   </channel>
   <channel id="#persians">
     <hilights></hilights>
   </channel>
   <channel id="#reddit">
     <hilights>
-      <debug>KyleXY</debug>
-      <debug>kylexy</debug>
       <debug>TheMoonMaster</debug>
       <debug>Paradox</debug>
       <debug>Mortvert</debug>
@@ -333,20 +348,20 @@
   </channel>
   <channel id="#wikimedia" silence="yes">
     <hilights>
-      <debug>Martinp23</debug>
       <debug>PeterSymonds</debug>
-      <debug>vvv</debug>
       <debug>AfterDeath</debug>
-      <debug>DeltaQuad</debug>
       <debug>Snowolf</debug>
       <debug>Thehelpfulone</debug>
       <debug>Tanvir</debug>
       <debug>jeremyb</debug>
       <debug>Logan_</debug>
+      <debug>Rjd0060</debug>
       <info>charitwo</info>
       <info>Rjd0060</info>
       <info>Fluffernutter</info>
       <info>TBloemink</info>
+      <info>Steven_Zhang</info>
+      <low>DeltaQuad</low>
     </hilights>
     <msgs>
       <debug>#wikimedia-ops</debug>
@@ -360,10 +375,27 @@
       <debug>Thehelpfulone</debug>
       <debug>Snowolf</debug>
       <debug>Logan_</debug>
-      <low>Kanonkas</low>
+      <debug>Rjd0060</debug>
+      <info>James_F</info>
     </hilights>
     <msgs>
       <debug>#wikimedia-ops</debug>
+    </msgs>
+  </channel>
+  <channel id="#wikimedia-irc">
+    <hilights>
+      <info>seanw</info>
+      <info>martinp23</info>
+      <info>Rjd0060</info>
+      <info>Cbrown1023</info>
+      <info>dungodung</info>
+      <info>PeterSymonds</info>
+      <info>Barras</info>
+      <info>Thehelpfulone</info>
+    </hilights>
+    <msgs>
+      <debug>#wikimedia-ops</debug>
+      <low>#wikimedia-ops</low>
     </msgs>
   </channel>
   <channel id="#wikimedia-office">
@@ -378,21 +410,17 @@
       <info>Theo10011</info>
       <info>Ironholds</info>
     </hilights>
-    <msgs>
-      <debug>#wikimedia-ops</debug>
-    </msgs>
+    <msgs></msgs>
   </channel>
   <channel id="#wikimedia-ops">
     <hilights>
       <debug>Cbrown1023</debug>
       <debug>Thehelpfulone</debug>
-      <debug>Not_the_NSA</debug>
-      <debug>Kanonkas</debug>
       <debug>PeterSymonds</debug>
-      <debug>AfterDeath</debug>
       <debug>Logan_</debug>
       <debug>jeremyb</debug>
       <debug>AfterDeath</debug>
+      <debug>Snowolf</debug>
       <info>charitwo</info>
       <info>TBloemink</info>
       <info>Mh7kJ</info>
@@ -427,9 +455,7 @@
       <debug>fschulenburg</debug>
       <debug>Bastique</debug>
     </hilights>
-    <msgs>
-      <debug>#wikimedia-ops</debug>
-    </msgs>
+    <msgs></msgs>
   </channel>
   <channel id="#wikimedia-overflow">
     <hilights>
@@ -445,6 +471,7 @@
       <debug>PeterSymonds</debug>
       <debug>Snowolf</debug>
       <debug>Thehelpfulone</debug>
+      <debug>Rjd0060</debug>
       <info>Snowolf</info>
       <info>Rjd0060</info>
       <info>TBloemink</info>
@@ -464,10 +491,18 @@
       <debug>Thehelpfulone</debug>
       <debug>Snowolf</debug>
       <debug>Rjd0060</debug>
+      <debug>techman224</debug>
+      <medium>Jasper_Deng</medium>
     </hilights>
     <msgs>
       <low>#wikimedia-ops</low>
     </msgs>
+  </channel>
+  <channel id="#wikimedia-techJasper_Deng">
+    <hilights></hilights>
+  </channel>
+  <channel id="#wikimedia-techjasper_deng">
+    <hilights></hilights>
   </channel>
   <channel id="#wikimedia-toolserver">
     <hilights>
@@ -481,53 +516,36 @@
       <info>Simetrical</info>
       <info>Werdna</info>
     </hilights>
-    <msgs>
-      <debug>#wikimedia-ops</debug>
-    </msgs>
+    <msgs></msgs>
   </channel>
   <channel id="#wikipedia" silence="yes">
     <hilights>
-      <debug>Golbez</debug>
       <debug>Prodego</debug>
       <debug>Snowolf</debug>
       <debug>AfterDeath</debug>
       <debug>Thehelpfulone</debug>
       <debug>werdan7</debug>
-      <debug>wimt</debug>
-      <debug>Jake_Wartenberg</debug>
       <debug>shimgray</debug>
-      <debug>kibble</debug>
       <debug>PeterSymonds</debug>
       <debug>Jamesofur</debug>
       <debug>killiondude</debug>
       <debug>SpitfireWP</debug>
       <debug>jeremyb</debug>
-      <debug>Maximillion</debug>
       <debug>stwalkerster</debug>
-      <debug>DeltaQuad</debug>
       <debug>Gfoley4</debug>
       <debug>Logan_</debug>
-      <debug>Theo10011</debug>
       <debug>Snowolf</debug>
       <debug>Tanvir</debug>
       <debug>TBloemink</debug>
       <debug>Rjd0060</debug>
       <debug>Shirik</debug>
-      <low>bumm13_</low>
-      <low>Cyrius</low>
+      <info>Steven_Zhang</info>
       <low>DanielB</low>
       <low>FastLizard4</low>
       <low>James_F</low>
       <low>JohnReaves</low>
-      <low>Lucifer_Cat</low>
-      <low>Luna-San</low>
-      <low>Mike42</low>
-      <low>Mike_H</low>
-      <low>skenmy</low>
-      <low>ST47</low>
-      <low>tawker</low>
       <low>slakr</low>
-      <low>Courcelles</low>
+      <low>DeltaQuad</low>
       <medium>closedmouth</medium>
       <medium>Fluffernutter</medium>
     </hilights>
@@ -555,8 +573,6 @@
       <debug>Jamesofur</debug>
       <debug>SpitfireWP</debug>
       <debug>jeremyb</debug>
-      <debug>DeltaQuad</debug>
-      <debug>Theo10011</debug>
       <debug>Gfoley4</debug>
       <debug>Logan_</debug>
       <debug>Snowolf</debug>
@@ -564,12 +580,10 @@
       <debug>Shirik</debug>
       <debug>TBloemink</debug>
       <debug>Rjd0060</debug>
-      <low>Cobi</low>
-      <low>Golbez</low>
+      <info>DeltaQuad</info>
       <low>agkwiki</low>
       <low>KFP</low>
       <low>slakr</low>
-      <low>Courcelles</low>
       <medium>closedmouth</medium>
       <medium>Fluffernutter</medium>
     </hilights>
@@ -581,41 +595,21 @@
     <hilights>
       <info>Thehelpfulone</info>
       <info>jamesofur</info>
-      <info>Nixeagle</info>
       <info>DeltaQuad</info>
-      <info>Netalarm</info>
-      <info>JoeGazz84</info>
-      <info>MacMed</info>
       <info>Snowolf</info>
     </hilights>
-    <msgs>
-      <debug>#wikimedia-ops</debug>
-      <low>#wikimedia-ops</low>
-    </msgs>
+    <msgs></msgs>
   </channel>
   <channel id="#wikipedia-en-ambassadors">
     <hilights>
-      <info>anowlin</info>
-      <info>ragesoss</info>
       <info>stwalkerster</info>
-      <info>chzz</info>
       <info>Prodego</info>
-      <info>Deskana</info>
-      <info>Pathoschild</info>
-      <info>fetchcomms</info>
-      <info>BarkingFish</info>
-      <info>Cbrown1023</info>
-      <info>Earwig</info>
-      <info>ldavis</info>
-      <info>annielin</info>
       <info>PeterSymonds</info>
       <info>Shirik</info>
       <info>Fluffernutter</info>
       <info>Thehelpfulone</info>
     </hilights>
-    <msgs>
-      <debug>#wikimedia-ops</debug>
-    </msgs>
+    <msgs></msgs>
   </channel>
   <channel id="#wikipedia-en-classroom">
     <hilights></hilights>
@@ -623,25 +617,13 @@
   <channel id="#wikipedia-en-help" silence="yes">
     <hilights>
       <debug>werdan7</debug>
-      <debug>GDonato</debug>
       <debug>Thehelpfulone</debug>
-      <debug>Mike42</debug>
-      <debug>bjelleklang</debug>
-      <debug>JohnReaves</debug>
-      <debug>After-Midnight</debug>
-      <debug>Srikeit</debug>
-      <debug>Deon555</debug>
-      <debug>Luna-San</debug>
-      <debug>Golbez</debug>
       <debug>stwalkerster</debug>
       <debug>PeterSymonds</debug>
-      <debug>Hersfold</debug>
       <debug>killiondude</debug>
-      <debug>DeltaQuad</debug>
       <debug>Logan_</debug>
       <debug>Shirik</debug>
       <debug>slakr</debug>
-      <debug>JoeGazz84</debug>
       <debug>Steven_Zhang</debug>
       <debug>SteveMobile</debug>
       <debug>TBloemink</debug>
@@ -649,11 +631,13 @@
       <debug>Tanvir</debug>
       <debug>TBloemink</debug>
       <debug>Ocaasi</debug>
+      <debug>Rjd0060</debug>
       <info>mabdul</info>
+      <info>gwickwire</info>
       <low>KFP</low>
       <low>Gfoley4</low>
-      <low>sonia</low>
       <low>Pine</low>
+      <low>DeltaQuad</low>
     </hilights>
     <msgs>
       <debug>#wikimedia-ops</debug>
@@ -672,12 +656,35 @@
       <info>PeterSymonds</info>
       <info>Shirik</info>
     </hilights>
+    <msgs></msgs>
+  </channel>
+  <channel id="#wikipedia-media">
+    <hilights></hilights>
+  </channel>
+  <channel id="#wikipedia-otrs">
+    <hilights></hilights>
+  </channel>
+  <channel id="#wikipedia-social" silence="yes">
+    <hilights></hilights>
     <msgs>
-      <debug>#wikimedia-ops</debug>
       <low>#wikimedia-ops</low>
     </msgs>
   </channel>
-  <channel id="#wikipedia-social" silence="yes">
+  <channel id="#wikitravel">
+    <hilights></hilights>
+  </channel>
+  <channel id="#wikivoyage">
+    <hilights>
+      <debug>Snowolf</debug>
+      <debug>Rschen7754</debug>
+      <info>Thehelpfulone</info>
+      <info>Logan_</info>
+    </hilights>
+    <msgs>
+      <debug>#wikimedia-ops</debug>
+    </msgs>
+  </channel>
+  <channel id="#wikivoyage-es">
     <hilights></hilights>
     <msgs>
       <low>#wikimedia-ops</low>
@@ -698,11 +705,14 @@
       <info>Wytukaze</info>
       <info>Tawker</info>
     </hilights>
-    <msgs>
-      <debug>#wikimedia-ops</debug>
-    </msgs>
+    <msgs></msgs>
   </channel>
-  <channel id="antispammetabeta" />
+  <channel id="antispammeta">
+    <hilights></hilights>
+  </channel>
+  <channel id="antispammetabeta">
+    <hilights></hilights>
+  </channel>
   <channel id="default">
     <hilights></hilights>
   </channel>
@@ -714,7 +724,6 @@
       <medium>dave2</medium>
     </hilights>
     <msgs>
-      <debug>##asb-nexus</debug>
       <debug>#antispammeta</debug>
     </msgs>
   </channel>

@@ -3,6 +3,7 @@
   <pass>PASS</pass>
   <db>asm_main</db>
   <table>alertlog</table>
+  <actiontable>actionlog</actiontable>
   <host>localhost</host>
   <port>3307</port>
 </mysql>

@@ -1,19 +1,69 @@
 <commands>
-  <command cmd="^;status$" flag="o">
+  <command cmd="^;makemelunch">
+  <![CDATA[
+    $conn->me($event->replyto, "makes " . $event->{nick} . " a sandwich");
+  ]]>
+  </command>
+  <command cmd="^;teredo (\S+)">
+  <![CDATA[
+    my $arg1 = $1;
+    my @splitip = split(/:/, $arg1);
+    if ( (int($splitip[0]) != 2001) || (int($splitip[1]) != 0) ) {
+      $conn->privmsg($event->replyto, "This is not a teredo-tunnelled IP.");
+      return;
+    }
+    print Dumper(\@splitip);
+    my $server = join('.', unpack('C4', pack('N', hex($splitip[2] . $splitip[3]))));
+    my $host = join('.', unpack('C4', pack('N', (hex($splitip[6] . $splitip[7])^hex('ffffffff')))));
+    my $port = hex($splitip[5]) ^ hex('ffff');
+    $conn->privmsg($event->replyto, "Source is $host:$port; teredo server in use is $server.");
+#hex('41379e76') ^ hex('ffffffff'); print join ('.', unpack('C4', pack('N', $ip))) . "\n"
+#join '.', unpack "C*", pack "H*", $ip;
+    #2001:0:4137:9e76:3094:127d:51a2:6952
+    #2001:0 - teredo marker
+    #4137:9e76 - teredo server
+    #3094 - teredo flags
+    #127d - xor 0xff - UDP port in use
+    #51a2:6952 - xor 0xff - source IP
+  ]]>
+  </command>
+  <command cmd="^;status$">
   <![CDATA[
     my $size = `ps -p $$ h -o size`;
     my $cputime = `ps -p $$ h -o time`;
     chomp $size; chomp $cputime;
-    $conn->privmsg($event->replyto, "This bot has been running for " . (time - $::starttime) . " seconds" .
+    my $upstr = '';
+    my $up = (time - $::starttime);
+    if (int($up/86400) != 0) { #days
+      $upstr = $upstr . int($up/86400) . 'd';
+      $up = $up % 86400;
+    }
+    if (int($up/3600) != 0) { #hours
+      $upstr = $upstr . int($up/3600) . 'h';
+      $up = $up % 3600;
+    }
+    if (int($up/60) != 0) { #minutes
+      $upstr = $upstr . int($up/60) . 'm';
+      $up = $up % 60;
+    }
+    if (int($up/1) != 0) { #seconds
+      $upstr = $upstr . int($up/1) . 's';
+      $up = $up % 1;
+    }
+    $conn->privmsg($event->replyto, "This bot has been running for " . $upstr .
      ", is tracking " . (scalar (keys %::sn)) . " nicks" .
      " across " . (scalar (keys %::sc)) . " tracked channels." .
      " It is using " . $size . "KB of RAM" . 
      " and has used " . $cputime . " of CPU time.");
   ]]>
   </command>
-  <command cmd="^;mship (\S+)$" flag="c">
+  <command cmd="^;mship (\S+)$" flag="s">
   <![CDATA[
-    $conn->privmsg($event->replyto, $1 . " is on: " . ASM::Util->commaAndify(sort @{$::sn{lc $1}->{mship}}));
+    if (defined($::sn{lc $1}->{mship})) {
+      $conn->privmsg($event->replyto, $1 . " is on: " . ASM::Util->commaAndify(sort @{$::sn{lc $1}->{mship}}));
+    } else {
+      $conn->privmsg($event->replyto, "I don't see $1.");
+    }
   ]]>
   </command>
   <command cmd="^;source$">
@@ -46,8 +96,8 @@
   </command>
   <command cmd="^;help$">
   <![CDATA[
-    $conn->privmsg($event->replyto, "help is at http://meta.wikimedia.org/wiki/User:WHeimbigner/AntiSpamMeta");
-    $conn->privmsg($event->replyto, "You can also get faster help by emailing william dot heimbigner at ttu dot edu - or bug ErrantEgo or tomaw");
+    $conn->privmsg($event->replyto, "command list is at http://antispammeta.net/syntax.txt ; see also http://meta.wikimedia.org/wiki/User:WHeimbigner/AntiSpamMeta (not as up to date but contains some additonal info)");
+    $conn->privmsg($event->replyto, "You can also get faster help by bugging ow, DLa\x02\x02nge, tom\x02\x02aw, or mari\x02\x02enz");
   ]]>
   </command>
   <command cmd="^;db$">
@@ -63,10 +113,95 @@
     $conn->privmsg($event->replyto, "$result results found.");
   ]]>
   </command>
+  <command cmd="^;investigate (\S+) *$">
+  <![CDATA[
+    my $nick = lc $1;
+    unless (defined($::sn{$nick})) {
+      $conn->privmsg($event->replyto, "I don't see $nick in my state tracking database, so I can't run any queries on their info, sorry :(" .
+        " You can try https://antispammeta.net/cgi-bin/secret/investigate.pl?nick=$nick instead!");
+      return;
+    }
+    my $person = $::sn{$nick};
+    my $dbh = $::db->{DBH};
+
+    my $mnicks = $dbh->do("SELECT * from $::db->{ACTIONTABLE} WHERE nick like " .    $dbh->quote($nick) . ';');
+    my $musers = $dbh->do("SELECT * from $::db->{ACTIONTABLE} WHERE user like " .    $dbh->quote($person->{user}) . ';');
+    my $mhosts = $dbh->do("SELECT * from $::db->{ACTIONTABLE} WHERE host like " .    $dbh->quote($person->{host}) . ';');
+    my $maccts = $dbh->do("SELECT * from $::db->{ACTIONTABLE} WHERE account like " . $dbh->quote($person->{account}) . ';');
+    my $mgecos = $dbh->do("SELECT * from $::db->{ACTIONTABLE} WHERE gecos like " .   $dbh->quote($person->{gecos}) . ';');
+
+    my $ip = ASM::Util->getNickIP($nick);
+    my $matchedip = 0;
+    $matchedip = $dbh->do("SELECT * from $::db->{ACTIONTABLE} WHERE ip = " . $dbh->quote($ip) . ';') if defined($ip);
+    $conn->privmsg($event->replyto, "I found $mnicks matches by nick, $musers user matches, $mhosts by hostname, " .
+                                 "$maccts by NickServ account, $mgecos by gecos field, and $matchedip by real IP.");
+  ]]>
+  </command>
+  <command cmd="^;investigate2 (\S+) ?(\d*)$" flag="s">
+  <![CDATA[
+    my $nick = lc $1;
+    my $skip = 0;
+    $skip = $2 if (defined($2) and ($2 ne ""));
+    unless (defined($::sn{$nick})) {
+      $conn->privmsg($event->replyto, "I don't see $nick in my state tracking database, so I can't run any queries on their info, sorry :(" .
+        " You can try https://antispammeta.net/cgi-bin/secret/investigate.pl?nick=$nick instead!");
+      return;
+    }
+    my $person = $::sn{$nick};
+    my $dbh = $::db->{DBH};
+
+    my $query = "SELECT * from $::db->{ACTIONTABLE} WHERE nick like " . $dbh->quote($nick) .
+                                                     ' or user like ' . $dbh->quote($person->{user}) . 
+                                                     ' or host like ' . $dbh->quote($person->{host}) .
+                                                  ' or account like ' . $dbh->quote($person->{account}) .
+                                                    ' or gecos like ' . $dbh->quote($person->{gecos});
+    my $ip = ASM::Util->getNickIP($nick);
+    if (defined($ip)) {
+      $query = $query . ' or ip = ' . $dbh->quote($ip);
+    }
+    $query = $query . " order by time desc limit $skip,5;";
+    print Dumper($query);
+    my $query_handle = $dbh->prepare($query);
+    $query_handle->execute();
+    my @data = @{$query_handle->fetchall_arrayref()};
+#    reverse @data;
+#$data will be an array of arrays,
+    my ($xindex, $xtime, $xaction, $xreason, $xchannel, $xnick, $xuser, $xhost, $xip, $xgecos, $xaccount, $xbynick, $xbyuser, $xbyhost, $xbygecos, $xbyaccount ) = 
+       (   0,      1,       2,        3,         4,       5,      6,      7,     8,     9,       10,        11,       12,        13,       14,   15);
+    $conn->privmsg($event->replyto, "PM'ing you the list of results");
+    foreach my $line (@data) {
+      my $reason = '';
+      $reason = $line->[$xreason] if defined($line->[$xreason]);
+      $conn->privmsg($event->nick, '#' . $line->[$xindex] . ': ' . $line->[$xtime] . ' ' .
+       $line->[$xnick] . '!' . $line->[$xuser] . '@' . $line->[$xhost] . ' (' . $line->[$xgecos] . ') ' . 
+       $line->[$xaction] . ' (' . $reason . ')' .
+       ' on ' . $line->[$xchannel] . ' by ' . $line->[$xbynick]); # . "\n";
+    }
+    my $dq = '';
+    if (defined($ip)) {
+      $dq = '&realip=' . join '.', unpack 'C4', pack 'N', $ip;
+    }
+    $conn->privmsg($event->nick, "Only 5 results are shown at a time. For more, do ;investigate2 $nick " . ($skip+5) .
+      '   or better yet, check out https://antispammeta.net/cgi-bin/secret/investigate.pl?nick=' . uri_escape($nick) .
+      '&user=' . uri_escape($person->{user}) . '&host=' . uri_escape($person->{host}) . '&account=' . uri_escape($person->{account}) .
+      '&gecos=' . uri_escape($person->{gecos}) . $dq );
+#    print Dumper($data);
+  ]]>
+  </command>
   <command cmd="^;userx add (\S+) (\S+)$" flag="a">
   <![CDATA[
     my $acct = lc $1;
     my $flags = $2;
+    my %hasflagshash = ();
+    foreach my $item (split(//, $::users->{person}->{lc $::sn{lc $event->{nick}}->{account}}->{flags})) {
+      $hasflagshash{$item} = 1;
+    }
+    foreach my $flag (split(//, $flags)) {
+      if (!defined($hasflagshash{$flag})) {
+        $conn->privmsg($event->replyto, "You can't give a flag you don't already have.");
+        return;
+      }
+    }
     if ($flags =~ /d/i) {
       $conn->privmsg($event->replyto, "The d flag may not be assigned over IRC. Edit the configuration manually.");
       return;
@@ -95,6 +230,16 @@
   <![CDATA[
     my $nick = lc $1;
     my $flags = $2;
+    my %hasflagshash = ();
+    foreach my $item (split(//, $::users->{person}->{lc $::sn{lc $event->{nick}}->{account}}->{flags})) {
+      $hasflagshash{$item} = 1;
+    }
+    foreach my $flag (split(//, $flags)) {
+      if (!defined($hasflagshash{$flag})) {
+        $conn->privmsg($event->replyto, "You can't give a flag you don't already have.");
+        return;
+      }
+    }
     if ($flags =~ /d/i) {
       $conn->privmsg($event->replyto, "The d flag may not be assigned over IRC. Edit the configuration manually.");
       return;

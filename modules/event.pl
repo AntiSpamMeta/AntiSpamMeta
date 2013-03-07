@@ -6,6 +6,7 @@ use Data::Dumper;
 use Text::LevenshteinXS qw(distance);
 use IO::All;
 use POSIX qw(strftime);
+use Regexp::Wildcards;
 
 sub cs {
   my ($chan) = @_;
@@ -20,12 +21,6 @@ sub maxlen {
   return $la if ($la > $lb);
   return $lb;
 }
-
-sub alarmdeath
-{
-  die "SIG ALARM!!!\n";
-}
-$SIG{ALRM} = \&alarmdeath;
 
 sub new
 {
@@ -82,22 +77,24 @@ sub new
 
 my $clearstatsp = 1;
 my %statsp = ();
+my %oldstatsp = ();
 
 sub on_statsdebug
 {
   my ($conn, $event) = @_;
   my ($char, $line) = ($event->{args}->[1], $event->{args}->[2]);
   if ($char eq 'p') {
+    if ($clearstatsp) {
+      $clearstatsp = 0;
+      %oldstatsp = %statsp;
+      %statsp = ();
+    }
     if ($line =~ /^(\d+) staff members$/) {
       #this is the end of the report
     } else {
       my ($nick, $userhost) = split(" ", $line);
       $userhost =~ s/\((.*)\)/$1/;
       my ($user, $host) = split("@", $userhost);
-      if ($clearstatsp) {
-        $clearstatsp = 0;
-        %statsp = ();
-      }
       $statsp{$nick}= [$user, $host];
     }
   }
@@ -109,23 +106,54 @@ sub on_endofstats
   if ($event->{args}->[1] eq 'p') {
     $clearstatsp=1;
     my $tmp = Dumper(\%statsp); chomp $tmp;
-    ASM::Util->dprint($tmp, 'statsp');
+    if ( join(",", sort(keys %oldstatsp)) ne join(",", sort(keys %statsp)) ) {
+      open(FH, '>>', 'statsplog.txt');
+      print FH strftime("%F %T ", gmtime) . join(",", sort(keys %statsp)) . "\n";
+      close(FH);
+      ASM::Util->dprint(join(",", keys %statsp), 'statsp');
+    }
     # $event->{args}->[2] == "End of /STATS report"
     #end of /stats p
   }
 }
 
+my $lagcycles = 0;
+my $pongcount = 0;
+
 sub on_pong
 {
   my ($conn, $event) = @_;
-  alarm 90;
-  $conn->schedule( 60, sub { $conn->sl("PING :" . time); } );
+  alarm 120;
+  $conn->schedule( 30, sub { $conn->sl("PING :" . time); } );
   ASM::Util->dprint('Pong? ... Ping!', 'pingpong');
-#  ASM::Util->dprint(Dumper($event), 'pingpong');
-  $conn->sl("STATS p");
   my $lag = time - $event->{args}->[0];
   if ($lag > 1) {
     ASM::Util->dprint("Latency: $lag", 'latency');
+  }
+  if (($pongcount % 3) == 0) { #easiest way to do something roughly every 90 seconds
+    $conn->sl('STATS p');
+  }
+  if ((time - $::starttime) < 60 ) {
+    return; #we don't worry about lag if we've just started up and are still syncing etc.
+  }
+  if (($lag > 2) && ($lag < 5)) {
+    $conn->privmsg( $::settings->{masterchan}, "Warning: I'm currently lagging by $lag seconds.");
+  }
+  if ($lag >= 5) {
+    $lagcycles++;
+    if ($lagcycles >= 3) {
+      $conn->quit("Automatic restart triggered due to persistent lag. Freenode staff: If this is happening too frequently, please " .
+                  "set a nickserv freeze on my account, and once my connection is stable, unfreeze the account and /kill me to tri" .
+                  "gger a reconnect.");
+    } elsif ($lagcycles >=2) {
+      $conn->privmsg( $::settings->{masterchan}, "Warning: I'm currently lagging by $lag seconds. This marks heavy lag cycle " .
+                      "$lagcycles - automatic restart will be triggered after 3 lag cycles." );
+    }
+  }
+  if (($lag <= 2) && ($lagcycles > 0)) {
+    $lagcycles--;
+#    $conn->privmsg( $::settings->{masterchan}, "Warning: Heavy lag cycle count has been reduced to $lagcycles" );
+    ASM::Util->dprint('$lag = ' . $lag . '; $lagcycles = ' . $lagcycles, 'latency');
   }
 }
 
@@ -202,6 +230,8 @@ sub on_join {
   $::sc{$chan}{users}{$nick}{hostmask} = $event->{userhost};
   $::sc{$chan}{users}{$nick}{op} = 0;
   $::sc{$chan}{users}{$nick}{voice} = 0;
+  $::sc{$chan}{users}{$nick}{jointime} = time;
+  $::sc{$chan}{users}{$nick}{msgtime} = 0;
   if (defined($::sn{$nick})) {
     my @mship = ();
     if (defined($::sn{$nick}->{mship})) {
@@ -219,35 +249,43 @@ sub on_join {
   $::sn{$nick}->{user} = $event->{user};
   $::sn{$nick}->{host} = $event->{host};
   $::sn{$nick}->{account} = lc $event->{args}->[0];
-  $::inspector->inspect( $conn, $event ) unless $::netsplit;
   $::db->logg($event);
   $::log->logg( $event );
+  $::inspector->inspect( $conn, $event ) unless $::netsplit;
 }
 	
 sub on_part
 {
   my ($conn, $event) = @_;
-  $::inspector->inspect( $conn, $event );
   my $nick = lc $event->{nick};
+  my $chan = lc $event->{to}->[0];
   $::log->logg( $event );
   $::db->logg( $event );
+  if ($event->{args}->[0] =~ /^requested by/) {
+    my $idx = $::db->actionlog( $event);
+    $::log->sqlIncident($chan, $idx) if $idx;
+  }
+#                 "to" => [ "#antispammeta" ],
+#                 "args" => [ "requested by ow (test)" ],
+#                 "nick" => "aoregcdu",
+  $::inspector->inspect( $conn, $event );
   if (defined($::sn{$nick}) && defined($::sn{$nick}->{mship})) {
     my @mship = @{$::sn{$nick}->{mship}};
-    @mship = grep { lc $_ ne lc $event->{to}->[0] } @mship;
+    @mship = grep { lc $_ ne $chan } @mship;
     if ( @mship ) {
       $::sn{$nick}->{mship} = \@mship;
     } else {
       delete($::sn{$nick});
     }
   }
-  if ( lc $conn->{_nick} eq lc $nick )
+  if ( lc $conn->{_nick} eq $nick )
   {
-    delete( $::sc{lc $event->{to}->[0]} );
-    on_byechan(lc $event->{to}->[0]);
+    delete( $::sc{$chan} );
+    on_byechan($chan);
   }
   else
   {
-    delete( $::sc{lc $event->{to}->[0]}{users}{$nick} );
+    delete( $::sc{$chan}{users}{$nick} );
   }
 }
 
@@ -265,19 +303,20 @@ sub on_public
 {
   my ($conn, $event) = @_;
 #  alarm 200;
-  $::inspector->inspect( $conn, $event );
+  $::sc{lc $event->{to}->[0]}{users}{lc $event->{nick}}{msgtime} = time;
   $::log->logg( $event );
   $::db->logg( $event );
+  $::inspector->inspect( $conn, $event );
   $::commander->command( $conn, $event );
 }
 
 sub on_notice
 {
   my ($conn, $event) = @_;
-  return if ( $event->{to}->[0] eq '$*' );
-  $::inspector->inspect( $conn, $event );
+  return if ( $event->{to}->[0] eq '$*' ); # if this is a global notice FUCK THAT SHIT
   $::log->logg( $event );
   $::db->logg( $event );
+  $::inspector->inspect( $conn, $event );
   $::services->doServices($conn, $event);
 }
 
@@ -302,17 +341,24 @@ sub on_quit
   my ($conn, $event) = @_;
   my @channels=();
   for ( keys %::sc ) {
-    push ( @channels, $_ ) if delete $::sc{lc $_}{users}{lc $event->{nick}};
+    push ( @channels, lc $_ ) if delete $::sc{lc $_}{users}{lc $event->{nick}};
   }
   $event->{to} = \@channels;
+  my $idx = $::db->actionlog($event);
+  $::log->sqlIncident( join(',', @channels), $idx ) if $idx;
   $::db->logg( $event );
+  $::log->logg( $event );
+
   if (($::netsplit == 0) && ($event->{args}->[0] eq "*.net *.split") && (lc $event->{nick} ne 'chanserv')) { #special, netsplit situation
     $conn->privmsg($::settings->{masterchan}, "Entering netsplit mode - JOIN and QUIT inspection will be disabled for 60 minutes");
     $::netsplit = 1;
     $conn->schedule(60*60, sub { $::netsplit = 0; $conn->privmsg($::settings->{masterchan}, 'Returning to regular operation'); });
   }
   $::inspector->inspect( $conn, $event ) unless $::netsplit;
-  $::log->logg( $event );
+  #ugh. Repurge some shit, hopefully this will fix some stuff where things are going wrong
+  foreach my $chan ( keys %::sc ) {
+    delete $::sc{$chan}{users}{lc $event->{nick}};
+  }
   delete($::sn{lc $event->{nick}});
 }
 
@@ -335,6 +381,7 @@ sub irc_users
     $::sc{lc $channel}{users}{lc $_} = {};
     $::sc{lc $channel}{users}{lc $_}{op} = $op;
     $::sc{lc $channel}{users}{lc $_}{voice} = $voice;
+    $::sc{lc $channel}{users}{lc $_}{jointime} = 0;
   }
 }
 
@@ -345,7 +392,6 @@ sub on_names {
 
 sub irc_topic {
   my ($conn, $event) = @_;
-  $::inspector->inspect($conn, $event) if ($event->{format} ne 'server');
   if ($event->{format} eq 'server')
   {
     my $chan = lc $event->{args}->[1];
@@ -363,34 +409,42 @@ sub irc_topic {
   {
     if ($event->{type} eq 'topic')
     {
-      my $chan = lc $event->{args}->[1];
+      my $chan = lc $event->{to}->[0];
       $::sc{$chan}{topic}{text} = $event->{args}->[0];
       $::sc{$chan}{topic}{time} = time;
       $::sc{$chan}{topic}{by} = $event->{from};
     }
     $::log->logg($event);
     $::db->logg( $event );
+    $::inspector->inspect($conn, $event);
   }
 }
 
 sub on_nick {
   my ($conn, $event) = @_;
   my @channels=();
-  for ( keys %::sc )
+  my $oldnick = lc $event->{nick};
+  my $newnick = lc $event->{args}->[0];
+  foreach my $chan ( keys %::sc )
   {
-    if ( defined $::sc{lc $_}{users}{lc $event->{nick}} )
+    $chan = lc $chan;
+    if ( defined $::sc{$chan}{users}{$oldnick} )
     {
-      $::sc{lc $_}{users}{lc $event->{args}->[0]} = $::sc{lc $_}{users}{lc $event->{nick}};
-      delete( $::sc{lc $_}{users}{lc $event->{nick}} );
-      push ( @channels, lc $_ );
+      if ($oldnick ne $newnick) { #otherwise a nick change where they're only
+                                  #changing the case of their nick means that
+                                  #ASM forgets about them.
+        $::sc{$chan}{users}{$newnick} = $::sc{$chan}{users}{$oldnick};
+        delete( $::sc{$chan}{users}{$oldnick} );
+      }
+      push ( @channels, $chan );
     }
   }
-  $::sn{lc $event->{args}->[0]} = $::sn{lc $event->{nick}};
+  $::sn{$newnick} = $::sn{$oldnick} if ($oldnick ne $newnick);
   $::db->logg( $event );
-  delete( $::sn{lc $event->{nick}});
+  delete( $::sn{$oldnick}) if ($oldnick ne $newnick);
   $event->{to} = \@channels;
-  $::inspector->inspect($conn, $event);
   $::log->logg($event);
+  $::inspector->inspect($conn, $event);
 }
 
 sub on_kick {
@@ -399,18 +453,21 @@ sub on_kick {
     $conn->join($event->{args}->[0]);
   }
   my $nick = lc $event->{to}->[0];
+  my $chan = lc $event->{args}->[0];
   $::log->logg( $event );
   $::db->logg( $event );
+  my $idx = $::db->actionlog($event);
+  $::log->sqlIncident($chan, $idx) if $idx;
   if (defined($::sn{$nick}) && defined($::sn{$nick}->{mship})) {
     my @mship = @{$::sn{$nick}->{mship}};
-    @mship = grep { lc $_ ne lc $event->{to}->[0] } @mship;
+    @mship = grep { lc $_ ne $chan } @mship;
     if ( @mship ) {
       $::sn{$nick}->{mship} = \@mship;
     } else {
       delete($::sn{$nick});
     }
   }
-  if ( lc $conn->{_nick} eq lc $nick )
+  if ( lc $conn->{_nick} eq $nick )
   {
     delete( $::sc{lc $event->{args}->[0]} );
     on_byechan(lc $event->{to}->[0]);
@@ -433,14 +490,26 @@ sub parse_modes
       $t=$c;
     }
     else { #eIbq,k,flj,CFLMPQcgimnprstz
-      if ( grep( /[eIbqkfljov]/,($c) ) ) { #modes that take args
-        push (@new_modes, [$t.$c, shift @args]);
-      }
-      elsif ( grep( /[CFLMPQcgimnprstz]/, ($c) ) ) {
-        push (@new_modes, [$t.$c]);
-      }
-      else {
-        die "Unknown mode $c !\n";
+      if ($t eq '+') {
+        if ( grep( /[eIbqkfljov]/,($c) ) ) { #modes that take args WHEN BEING ADDED
+          push (@new_modes, [$t.$c, shift @args]);
+        }
+        elsif ( grep( /[CFLMPQcgimnprstz]/, ($c) ) ) {
+          push (@new_modes, [$t.$c]);
+        }
+        else {
+          die "Unknown mode $c !\n";
+        }
+      } else {
+        if ( grep( /[eIbqov]/,($c) ) ) { #modes that take args WHEN BEING REMOVED
+          push (@new_modes, [$t.$c, shift @args]);
+        }
+        elsif ( grep( /[CFLMPQcgimnprstzkflj]/, ($c) ) ) {
+          push (@new_modes, [$t.$c]);
+        }
+        else {
+          die "Unknown mode $c !\n";
+        }
       }
     }
   }
@@ -470,12 +539,45 @@ sub on_channelmodeis
   }
 }
 
+sub whoGotHit
+{
+  my ($chan, $mask) = @_;
+  my $cvt = Regexp::Wildcards->new(type => 'jokers');
+  my @affected = ();
+  if ($mask !~ /^\$/) {
+    my @div = split(/\$/, $mask);
+    my $regex = $cvt->convert($div[0]);
+    foreach my $nick (keys %::sn) { 
+      next unless defined($::sn{$nick}{user});
+      if (lc ($nick.'!'.$::sn{$nick}{user}.'@'.$::sn{$nick}{host}) =~ lc $regex) {
+        push @affected, $nick if defined($::sc{$chan}{users}{$nick});
+      }
+    }
+  } elsif ($mask =~ /^\$a:(.*)/) {
+    my @div = split(/\$/, $1);
+    my $regex = $cvt->convert($div[0]);
+    foreach my $nick (keys %::sn) {
+      next unless defined($::sn{$nick}{account});
+      if (lc ($::sn{$nick}{account}) =~ lc $regex) {
+        push @affected, $nick if defined($::sc{$chan}{users}{$nick});
+      }
+    }
+  }
+  return @affected;
+}
+
 sub on_mode
 {
   my ($conn, $event) = @_;
   my $chan = lc $event->{to}->[0];
+# holy shit, I feel so bad doing this
+# I have no idea how or why Net::IRC fucks up modes if they've got a ':' in one of the args
+# but you do what you must...
+  my @splitted = split(/ /, $::lastline); shift @splitted; shift @splitted; shift @splitted;
+  $event->{args}=\@splitted;
   if ($chan =~ /^#/) {
     my @modes = @{parse_modes($event->{args})};
+    ASM::Util->dprint(Dumper(\@modes), 'misc');
     foreach my $line ( @modes ) {
       my @ex = @{$line};
 
@@ -484,23 +586,39 @@ sub on_mode
       elsif ( $ex[0] eq '+v' ) { $::sc{$chan}{users}{lc $ex[1]}{voice} = 1; }
       elsif ( $ex[0] eq '-v' ) { $::sc{$chan}{users}{lc $ex[1]}{voice} = 0; }
 
-      elsif ( $ex[0] eq '+b') {
+      elsif ( $ex[0] eq '+b' ) { 
         $::sc{$chan}{bans}{$ex[1]} = { bannedBy => $event->{from}, bannedOn => time };
+        if (lc $event->{nick} !~ /^(floodbot)/) { #ignore the ubuntu floodbots 'cause they quiet people a lot
+          my @affected = whoGotHit($chan, $ex[1]);
+          if ( (@affected) && (scalar @affected <= 4) ) {
+            foreach my $victim (@affected) {
+              my $idx = $::db->actionlog($event, 'ban', $victim);
+              $::log->sqlIncident( $chan, $idx ) if $idx;
+            }
+          }
+        }
       }
-      elsif ( $ex[0] eq '-b') {
-        delete $::sc{$chan}{bans}{$ex[1]};
-      }
-      elsif ( $ex[0] eq '+q') {
+      elsif ( $ex[0] eq '-b' ) { delete $::sc{$chan}{bans}{$ex[1]}; }
+
+      elsif ( $ex[0] eq '+q' ) {
         $::sc{$chan}{quiets}{$ex[1]} = { bannedBy => $event->{from}, bannedOn => time };
+        if (lc $event->{nick} !~ /^(floodbot)/) {
+          my @affected = whoGotHit($chan, $ex[1]);
+          if ( (@affected) && (scalar @affected <= 4) ) {
+            foreach my $victim (@affected) {
+              my $idx = $::db->actionlog($event, 'quiet', $victim);
+              $::log->sqlIncident( $chan, $idx ) if $idx;
+            }
+          }
+        }
       }
-      elsif ( $ex[0] eq '-q') {
-        delete $::sc{$chan}{quiets}{$ex[1]};
-      }
+      elsif ( $ex[0] eq '-q' ) { delete $::sc{$chan}{quiets}{$ex[1]}; }
+
       else {
         my ($what, $mode) = split (//, $ex[0]);
         if ($what eq '+') {
           if (defined($ex[1])) { push @{$::sc{$chan}{modes}}, $mode . ' ' . $ex[1]; }
-          else                { push @{$::sc{$chan}{modes}}, $mode; }
+          else                 { push @{$::sc{$chan}{modes}}, $mode; }
         } else {
           my @modes = grep {!/^$mode/} @{$::sc{$chan}{modes}};
           $::sc{$chan}{modes} = \@modes;
@@ -518,7 +636,7 @@ sub on_mode
 sub checkRegged
 {
   my ($conn, $chan) = @_;
-  if (grep {/r/} @{$::sc{$chan}{modes}}) {
+  if (grep {/^r/} @{$::sc{$chan}{modes}}) {
     my $tgt = $chan;
     my $risk = "debug";
     my $hilite=ASM::Util->commaAndify(ASM::Util->getAlert($tgt, $risk, 'hilights'));
@@ -553,6 +671,7 @@ sub on_ctcp
 {
   my ($conn, $event) = @_;
   my $acct = lc $::sn{lc $event->{nick}}->{account};
+  ASM::Util->dprint(Dumper($event), 'ctcp');
   if (($event->{type} eq 'cdcc') &&
       (defined($::users->{person}->{$acct})) &&
       (defined($::users->{person}->{$acct}->{flags})) &&
@@ -576,9 +695,7 @@ sub dcc_open
 sub on_ctcp_source
 {
   my ($conn, $event) = @_;
-  if (lc $event->{args}->[0] eq lc $conn->{_nick}) {
-    $conn->ctcp_reply($event->{nick}, 'SOURCE http://svn.linuxrulz.org/repos/antispammeta/trunk/');
-  }
+  $conn->ctcp_reply($event->{nick}, 'SOURCE http://svn.linuxrulz.org/repos/antispammeta/trunk/');
 }
 
 sub on_whoxreply
@@ -631,6 +748,13 @@ sub on_whofuckedup
 {
   my ($conn, $event) = @_;
   ASM::Util->dprint('on_whofuckedup called!', 'sync');
+  if ($event->{args}->[1] eq "STATS") { 
+#most likely this is getting called because we did stats p too often.
+#unfortunately the server doesn't let us know what exactly we called stats for.
+#anyways, we don't need to do anything for this
+  } else { #dunno why it got called, print the data and I'll add a handler for it.
+    ASM::Util->dprint(Dumper($event), 'sync');
+  }
 }
 
 sub on_bannedfromchan {

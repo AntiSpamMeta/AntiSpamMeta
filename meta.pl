@@ -18,10 +18,13 @@ $Data::Dumper::Useqq=1;
 
 %::eline=();
 $::pass = '';
+@::nick_blacklist=();
 @::string_blacklist=();
 $::netsplit = 0;
 $::debug = 0;
 $::cset = '';
+$::pacealerts = 1;
+%::wordlist = ();
 
 ## debug variables. 0 to turn off debugging, else set it to a Term::ANSIColor constant.
 %::debugx = (
@@ -32,14 +35,16 @@ $::cset = '';
   "chanstate" => MAGENTA,
   "restrictions" => BLUE,
   "startup" => YELLOW,
-  "mysql" => 0,
+  "mysql" => CYAN,
   "inspector" => 0,
   "commander" => GREEN,
   "msg" => GREEN,
   "dcc" => RED,
-  "misc" => 0, #RED
+  "misc" => 0, #RED,
   "latency" => RED,
-  "statsp" => 0 #MAGENTA
+  "statsp" => MAGENTA,
+  "ctcp" => 0, #RED,
+  "logger" => 0
 );
 %::dsock = ();
 %::spy = ();
@@ -53,6 +58,13 @@ $SIG{__WARN__} = sub {
   print STDERR 'last line: ' . Dumper($::lastline);
   print STDERR strftime("%F %T", gmtime), RED, ' WARNING: ', RESET, $_[0];
 };
+
+sub alarmdeath
+{
+  die "SIG ALARM!!!\n";
+}
+$SIG{ALRM} = \&alarmdeath;
+alarm 300;
 
 BEGIN {
 my @modules = qw/Util Xml Inspect Event Services Log Command Classes Mysql/;
@@ -75,9 +87,12 @@ sub init {
   $host = ${$::settings->{server}}[rand @{$::settings->{server}}];
   ASM::Util->dprint( "Connecting to $host", "startup");
   $irc->debug($::debug);
-  $::db = ASM::DB->new($::mysql->{db}, $::mysql->{host}, $::mysql->{port}, $::mysql->{user}, $::mysql->{pass}, $::mysql->{table}, $::mysql->{dblog});
+  $::db = ASM::DB->new($::mysql->{db}, $::mysql->{host}, $::mysql->{port},
+                       $::mysql->{user}, $::mysql->{pass}, $::mysql->{table},
+                       $::mysql->{actiontable}, $::mysql->{dblog});
   $conn = $irc->newconn( Server => $host,
                          Port => $::settings->{port} || '6667',
+                         SSL => defined($::settings->{ssl}),
                          Nick => $::settings->{nick},
                          Ircname => $::settings->{realname},
                          Username => $::settings->{username},
@@ -97,6 +112,9 @@ sub init {
   my @strbl = io('string_blacklist.txt')->getlines;
   chomp @strbl;
   @::string_blacklist = @strbl;
+  my @nickbl = io('nick_blacklist.txt')->getlines;
+  chomp @nickbl;
+  @::nick_blacklist = @nickbl;
   %::proxies = ();
   my @proxy = io('proxy.txt')->getlines;
   chomp @proxy;
@@ -104,6 +122,11 @@ sub init {
     if ($line =~ /(\d+\.\d+\.\d+\.\d+):\d+/) {
       $::proxies{$1} = 1;
     }
+  }
+  my @wl=io('wordlist.txt')->getlines;
+  chomp @wl;
+  foreach my $item (@wl) {
+    $::wordlist{lc $item} = 1;
   }
   $irc->start();
 }
