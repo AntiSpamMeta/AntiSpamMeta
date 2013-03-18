@@ -294,7 +294,7 @@ sub on_msg
   my ($conn, $event) = @_;
   $::commander->command($conn, $event);
   ASM::Util->dprint($event->{from} . " - " . $event->{args}->[0], 'msg');
-  if (ASM::Util->notRestricted($event->{nick}, "nomsgs")) {
+  if ((ASM::Util->notRestricted($event->{nick}, "nomsgs")) && ($event->{args}->[0] !~ /^;;/)) {
     $conn->privmsg($::settings->{masterchan}, $event->{from} . ' told me: ' . $event->{args}->[0]);
   }
 }
