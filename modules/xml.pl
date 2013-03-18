@@ -5,12 +5,14 @@ use strict;
 use XML::Simple qw(:strict);
 use IO::All;
 
-$::xs1 = XML::Simple->new( KeyAttr => ['id'], Cache => [ qw/storable memcopy/ ]);
+$::xs1 = XML::Simple->new( KeyAttr => ['id'], Cache => [ qw/memcopy/ ]);
 
 sub readXML {
   my ( $p ) = $::cset;
   my @fchan = ( 'event', keys %::RISKS );
-  $::settings     = $::xs1->XMLin( "$p/settings.xml",     ForceArray => ['host'], 'GroupTags' => { altnicks => 'altnick', server => 'host', autojoins => 'autojoin' });
+  $::settings     = $::xs1->XMLin( "$p/settings.xml",     ForceArray => ['host'],
+                                   'GroupTags' => { altnicks => 'altnick', server => 'host',
+                                                   autojoins => 'autojoin' });
   $::channels     = $::xs1->XMLin( "$p/channels.xml",     ForceArray => \@fchan );
   $::users        = $::xs1->XMLin( "$p/users.xml",        ForceArray => 'person');
   $::commands     = $::xs1->XMLin( "$p/commands.xml",     ForceArray => [qw/command/]);
@@ -21,16 +23,11 @@ sub readXML {
 }
 
 sub writeXML {
-  $::xs1->XMLout($::settings,     RootName => 'settings', KeyAttr => ['id'],
-                 GroupTags => { altnicks => 'altnick', server => 'host', autojoins => 'autojoin' },
-                 ValueAttr => { debug => 'content',      nick => 'content',    port => 'content',
-                             realname => 'content',  username => 'content',     dir => 'content',
-                                 zone => 'content',   filefmt => 'content', timefmt => 'content',
-                           masterchan => 'content', debugchan => 'content'}) > io("$::cset/settings.xml");
+  writeSettings();
   writeChannels();
   writeUsers();
   writeRestrictions();
-  $::xs1->XMLout($::commands,     RootName => 'commands', KeyAttr => ['id']) > io("$::cset/commands.xml");
+#  $::xs1->XMLout($::commands,     RootName => 'commands', KeyAttr => ['id']) > io("$::cset/commands.xml");
 }
 
 sub writeChannels {
