@@ -1,4 +1,23 @@
 <commands>
+  <command cmd="^;;addwebuser (\S+)" flag="s">
+  <![CDATA[
+    my $pass = $1;
+    if ($event->{to}->[0] =~ /^#/) {
+      $conn->privmsg($event->replyto, "This command must be used in PM. Try again WITH A DIFFERENT PASSWORD!");
+      return;
+    }
+    use Apache::Htpasswd; use Apache::Htgroup;
+    my $o_Htpasswd = new Apache::Htpasswd({passwdFile => $::settings->{web}->{userfile}, UseMD5 => 1});
+    my $o_Htgroup = new Apache::Htgroup($::settings->{web}->{groupfile});
+    my $user = lc $::sn{lc $event->{nick}}->{account};
+    $o_Htpasswd->htDelete($user);
+    $o_Htpasswd->htpasswd($user, $pass);
+    $o_Htpasswd->writeInfo($user, strftime("%F %T", gmtime));
+    $o_Htgroup->adduser($user, 'actionlogs');
+    $o_Htgroup->save();
+    $conn->privmsg($event->replyto, "Added $user to the list of authorized web users.")
+  ]]>
+  </command>
   <command cmd="^;makemelunch">
   <![CDATA[
     $conn->me($event->replyto, "makes " . $event->{nick} . " a sandwich");
@@ -12,7 +31,6 @@
       $conn->privmsg($event->replyto, "This is not a teredo-tunnelled IP.");
       return;
     }
-    print Dumper(\@splitip);
     my $server = join('.', unpack('C4', pack('N', hex($splitip[2] . $splitip[3]))));
     my $host = join('.', unpack('C4', pack('N', (hex($splitip[6] . $splitip[7])^hex('ffffffff')))));
     my $port = hex($splitip[5]) ^ hex('ffff');
@@ -133,6 +151,12 @@
     my $ip = ASM::Util->getNickIP($nick);
     my $matchedip = 0;
     $matchedip = $dbh->do("SELECT * from $::db->{ACTIONTABLE} WHERE ip = " . $dbh->quote($ip) . ';') if defined($ip);
+    $mnicks =~ s/0E0/0/;
+    $musers =~ s/0E0/0/;
+    $mhosts =~ s/0E0/0/;
+    $maccts =~ s/0E0/0/;
+    $mgecos =~ s/0E0/0/;
+    $matchedip =~ s/0E0/0/;
     $conn->privmsg($event->replyto, "I found $mnicks matches by nick, $musers user matches, $mhosts by hostname, " .
                                  "$maccts by NickServ account, $mgecos by gecos field, and $matchedip by real IP.");
   ]]>
@@ -142,9 +166,19 @@
     my $nick = lc $1;
     my $skip = 0;
     $skip = $2 if (defined($2) and ($2 ne ""));
+    foreach my $xcommand ( @{$::commands->{command}} )
+    { 
+      next unless $xcommand->{cmd} eq '^;investigate (\S+) *$';
+      if (";investigate $nick" =~ /$xcommand->{cmd}/) {
+        eval $xcommand->{content};
+        warn $@ if $@;
+        last;
+      }
+    }
     unless (defined($::sn{$nick})) {
-      $conn->privmsg($event->replyto, "I don't see $nick in my state tracking database, so I can't run any queries on their info, sorry :(" .
-        " You can try https://antispammeta.net/cgi-bin/secret/investigate.pl?nick=$nick instead!");
+#      $conn->privmsg($event->replyto, "I don't see $nick in my state tracking database, so I can't run any queries on their info, sorry :(" .
+#        " You can try https://antispammeta.net/cgi-bin/secret/investigate.pl?nick=$nick instead!");
+# This message gets sent when ;investigate gets called above.
       return;
     }
     my $person = $::sn{$nick};
@@ -159,33 +193,37 @@
     if (defined($ip)) {
       $query = $query . ' or ip = ' . $dbh->quote($ip);
     }
-    $query = $query . " order by time desc limit $skip,5;";
-    print Dumper($query);
+    $query = $query . " order by time desc limit $skip,10;";
+    ASM::Util->dprint($query, 'mysql');
     my $query_handle = $dbh->prepare($query);
     $query_handle->execute();
-    my @data = @{$query_handle->fetchall_arrayref()};
-#    reverse @data;
-#$data will be an array of arrays,
-    my ($xindex, $xtime, $xaction, $xreason, $xchannel, $xnick, $xuser, $xhost, $xip, $xgecos, $xaccount, $xbynick, $xbyuser, $xbyhost, $xbygecos, $xbyaccount ) = 
-       (   0,      1,       2,        3,         4,       5,      6,      7,     8,     9,       10,        11,       12,        13,       14,   15);
-    $conn->privmsg($event->replyto, "PM'ing you the list of results");
-    foreach my $line (@data) {
-      my $reason = '';
-      $reason = $line->[$xreason] if defined($line->[$xreason]);
-      $conn->privmsg($event->nick, '#' . $line->[$xindex] . ': ' . $line->[$xtime] . ' ' .
-       $line->[$xnick] . '!' . $line->[$xuser] . '@' . $line->[$xhost] . ' (' . $line->[$xgecos] . ') ' . 
-       $line->[$xaction] . ' (' . $reason . ')' .
-       ' on ' . $line->[$xchannel] . ' by ' . $line->[$xbynick]); # . "\n";
-    }
     my $dq = '';
     if (defined($ip)) {
       $dq = '&realip=' . join '.', unpack 'C4', pack 'N', $ip;
     }
-    $conn->privmsg($event->nick, "Only 5 results are shown at a time. For more, do ;investigate2 $nick " . ($skip+5) .
-      '   or better yet, check out https://antispammeta.net/cgi-bin/secret/investigate.pl?nick=' . uri_escape($nick) .
-      '&user=' . uri_escape($person->{user}) . '&host=' . uri_escape($person->{host}) . '&account=' . uri_escape($person->{account}) .
-      '&gecos=' . uri_escape($person->{gecos}) . $dq );
-#    print Dumper($data);
+    my @data = @{$query_handle->fetchall_arrayref()};
+    if (@data) {
+      $conn->privmsg($event->replyto, 'Sending you the results ( https://antispammeta.net/cgi-bin/secret/investigate.pl?nick=' . uri_escape($nick) .
+        '&user=' . uri_escape($person->{user}) . '&host=' . uri_escape($person->{host}) . '&account=' . uri_escape($person->{account}) .
+        '&gecos=' . uri_escape($person->{gecos}) . "$dq )");
+    } else {
+      $conn->privmsg($event->replyto, 'No results to send!');
+    }
+#    reverse @data;
+#$data will be an array of arrays,
+    my ($xindex, $xtime, $xaction, $xreason, $xchannel, $xnick, $xuser, $xhost, $xip, $xgecos, $xaccount, $xbynick, $xbyuser, $xbyhost, $xbygecos, $xbyaccount ) = 
+       (   0,      1,       2,        3,         4,       5,      6,      7,     8,     9,       10,        11,       12,        13,       14,   15);
+    foreach my $line (@data) {
+      my $reason = ''; my $channel = '';
+      $reason = ' (' . $line->[$xreason] . ')' if defined($line->[$xreason]);
+      $channel = ' on' . $line->[$xchannel] if defined($line->[$xchannel]);
+      $conn->privmsg($event->nick, '#' . $line->[$xindex] . ': ' . $line->[$xtime] . ' ' .
+       $line->[$xnick] . '!' . $line->[$xuser] . '@' . $line->[$xhost] . ' (' . $line->[$xgecos] . ') ' . 
+       $line->[$xaction] . $reason . $channel . ' by ' . $line->[$xbynick]); # . "\n";
+    }
+    if (@data) {
+      $conn->privmsg($event->nick, "Only 10 results are shown at a time. For more, do ;investigate2 $nick " . ($skip+10) . '.');
+    }
   ]]>
   </command>
   <command cmd="^;userx add (\S+) (\S+)$" flag="a">

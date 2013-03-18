@@ -37,4 +37,8 @@
   <lookupexpire>2419200</lookupexpire>
   <masterchan>#antispammeta</masterchan>
   <debugchan>#antispammeta-debug</debugchan>
+  <web>          
+    <userfile>/var/www/.htpasswd</userfile>
+    <groupfile>/var/www/.htgroup</groupfile>
+  </web>
 </settings>
