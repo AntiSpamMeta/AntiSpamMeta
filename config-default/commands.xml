@@ -216,7 +216,7 @@
     foreach my $line (@data) {
       my $reason = ''; my $channel = '';
       $reason = ' (' . $line->[$xreason] . ')' if defined($line->[$xreason]);
-      $channel = ' on' . $line->[$xchannel] if defined($line->[$xchannel]);
+      $channel = ' on ' . $line->[$xchannel] if defined($line->[$xchannel]);
       $conn->privmsg($event->nick, '#' . $line->[$xindex] . ': ' . $line->[$xtime] . ' ' .
        $line->[$xnick] . '!' . $line->[$xuser] . '@' . $line->[$xhost] . ' (' . $line->[$xgecos] . ') ' . 
        $line->[$xaction] . $reason . $channel . ' by ' . $line->[$xbynick]); # . "\n";
@@ -228,7 +228,7 @@
   </command>
   <command cmd="^;userx add (\S+) (\S+)$" flag="a">
   <![CDATA[
-    my $acct = lc $1;
+    my $nick = lc $1;
     my $flags = $2;
     my %hasflagshash = ();
     foreach my $item (split(//, $::users->{person}->{lc $::sn{lc $event->{nick}}->{account}}->{flags})) {
@@ -244,9 +244,13 @@
       $conn->privmsg($event->replyto, "The d flag may not be assigned over IRC. Edit the configuration manually.");
       return;
     }
-    $::users->{person}->{$acct} = { 'flags' => $flags };
+    if ( (defined($::sn{$nick}->{account})) && ( lc $::sn{$nick}->{account} ne $nick ) ) {
+      $conn->privmsg($event->replyto, "I'm assuming you mean " . $nick . "'s nickserv account, " . lc $::sn{$nick}->{account} . '.');
+      $nick = lc $::sn{$nick}->{account};
+    }
+    $::users->{person}->{$nick} = { 'flags' => $flags };
     ASM::XML->writeUsers();
-    $conn->privmsg($event->replyto, "Flags for NickServ account $acct set to $flags");
+    $conn->privmsg($event->replyto, "Flags for NickServ account $nick set to $flags");
   ]]>
   </command>
   <command cmd="^;user add (\S+) ?(\S*)$" flag="a">
@@ -257,6 +261,10 @@
   <command cmd="^;userx? flags (\S+) ?$">
   <![CDATA[
     my $nick = lc $1;
+    if ( (defined($::sn{$nick}->{account})) && ( lc $::sn{$nick}->{account} ne $nick ) ) {
+      $conn->privmsg($event->replyto, "I'm assuming you mean " . $nick . "'s nickserv account, " . lc $::sn{$nick}->{account} . '.');
+      $nick = lc $::sn{$nick}->{account};
+    }
     if (defined($::users->{person}->{$nick}->{flags})) {
       $conn->privmsg($event->replyto, "Flags for $nick: $::users->{person}->{$nick}->{flags}");
     } else {
@@ -282,6 +290,10 @@
       $conn->privmsg($event->replyto, "The d flag may not be assigned over IRC. Edit the configuration manually.");
       return;
     }
+    if ( (defined($::sn{$nick}->{account})) && ( lc $::sn{$nick}->{account} ne $nick ) ) {
+      $conn->privmsg($event->replyto, "I'm assuming you mean " . $nick . "'s nickserv account, " . lc $::sn{$nick}->{account} . '.');
+      $nick = lc $::sn{$nick}->{account};
+    }
     $::users->{person}->{$nick}->{flags} = $flags;
     ASM::XML->writeUsers();
     $conn->privmsg($event->replyto, "Flags for $nick set to $flags");
@@ -292,7 +304,8 @@
     my $nick = lc $1;
     delete($::users->{person}->{$nick});
     ASM::XML->writeUsers();
-    $conn->privmsg($event->replyto, "Byebye $nick");
+    $conn->privmsg($event->replyto, "Removed $nick from authorized users." .
+      "MAKE SURE YOU PROVIDED a nickserv account to this command, rather than the nick the accountholder");
   ]]>
   </command>
   <command cmd="^;target (\S+) (\S+) ?(\S*)$" flag="a">
@@ -494,8 +507,15 @@
     ASM::XML->writeRestrictions();
   ]]>
   </command>
-  <command cmd="^\!ops ?(#\S+)? ?(.*)" nohush="nohush">
+  <command cmd="^\s*\!ops ?(#\S+)? ?(.*)" nohush="nohush">
   <![CDATA[
+    my $tgt = lc $event->{to}->[0];
+    $tgt = lc $1 if (defined($1));
+    my $msg = $1;
+    $msg = $2 if defined($2);
+    if (lc $event->{nick} eq 'psi-jack') {
+      $conn->privmsg('psi-jack', "I can't do that, Dave. My master 'ow' doesn't like you. How about a nice game of chess?");
+    }
     if (ASM::Util->notRestricted(lc $event->{nick}, "noops")) {
       my $tgt = lc $event->{to}->[0];
       $tgt = lc $1 if (defined($1));
@@ -525,10 +545,10 @@
         $::ignored{$tgt} = $::RISKS{'opalert'};
         $conn->schedule(30, sub { delete($::ignored{$tgt})});
         my $hilite=ASM::Util->commaAndify(ASM::Util->getAlert($tgt, 'opalert', 'hilights'));
-        my $txtz = "[\x02$tgt\x02] - $event->{nick} wants op attention ($msg)";
+        my $txtz = "[\x02$tgt\x02] - $event->{nick} wants op attention";
         if ((time-$::sc{$tgt}{users}{lc $event->{nick}}{jointime}) > 90) {
 #          return; #they've been on the channel for less than 90 seconds, probably nuisance botspam
-          $txtz = $txtz . " " . $hilite;
+          $txtz = $txtz . " ($msg) " . $hilite;
         }
         my @tgts = ASM::Util->getAlert($tgt, 'opalert', 'msgs');
         ASM::Util->sendLongMsg($conn, \@tgts, $txtz);
@@ -548,6 +568,12 @@
             $conn->privmsg($event->{nick}, "I've already recently notified $tgt ops.");
           }
         }
+      }
+    }
+    else {
+      my @tgts = ASM::Util->getAlert($tgt, 'opalert', 'msgs');
+      foreach my $chan (@tgts) {
+        $conn->privmsg($chan, $event->{nick} . " tried to use the ops trigger but is restricted from doing so.");
       }
     }
   ]]>
