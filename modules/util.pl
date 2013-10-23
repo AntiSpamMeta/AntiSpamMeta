@@ -179,9 +179,8 @@ sub dprint {
   if ($::debugx{$type} eq 0) {
     return;
   }
-  print STDERR strftime("%F %T ", gmtime);
-  print STDERR GREEN, 'DEBUG', RESET, '(', $::debugx{$type}, $type, RESET, ') ';
-  print STDERR $text, "\n";
+  say STDERR strftime("%F %T ", gmtime),
+                 GREEN, 'DEBUG', RESET, '(', $::debugx{$type}, $type, RESET, ') ', $text;
 }
 
 
@@ -207,7 +206,7 @@ sub getHostIP
 {
   my ($module, $host) = @_;
   if ( ($host =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/) or
-       ($host =~ /^gateway\/web\/freenode\/ip\.(\d+)\.(\d+)\.(\d+)\.(\d+)$/) ) {
+       ($host =~ /^gateway\/web\/.*\/ip\.(\d+)\.(\d+)\.(\d+)\.(\d+)$/) ) {
     #yay, easy IP!   
     return dottedQuadToInt(undef, "$1.$2.$3.$4");
   } elsif (index($host, '/') != -1) {

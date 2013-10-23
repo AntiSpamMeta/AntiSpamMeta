@@ -3,6 +3,7 @@ package ASM::DB;
 use warnings;
 use strict;
 use DBI;
+use Data::Dumper;
 
 sub new {
   my $module = shift;
@@ -190,6 +191,65 @@ sub logg
   my $realtable = $table;
   $realtable = 'joins' if $realtable eq 'join'; #mysql doesn't like a table named join
   my $string = 'INSERT INTO `' . $realtable . '` (';
+## begin saner code for this function
+  if ($table eq 'quit') {
+    $string = 'INSERT INTO `quit` (nick, user, host, geco, ip, account, content1) VALUES (' .
+           $dbh->quote($event->{nick}) . ',' . $dbh->quote($event->{user}) . ',' .
+           $dbh->quote($event->{host}) . ',' . $dbh->quote($::sn{lc $event->{nick}}->{gecos}) . ',';
+    my $ip = ASM::Util->getNickIP(lc $event->{nick});
+    if (defined($ip)) { $ip = $dbh->quote($ip); } else { $ip = 'NULL'; }
+    my $account = $::sn{lc $event->{nick}}->{account};
+    if (($account eq '0') or ($account eq '*')) {
+      $account = 'NULL';
+    } else {
+      $account = $dbh->quote($account);
+    }
+    $string = $string . $ip . ',' . $account . ',' . $dbh->quote($event->{args}->[0]) . ');';
+    $dbh->do($string);
+    ASM::Util->dprint($string, 'mysql');
+    return;
+  } elsif ($table eq 'part') {
+    $string = 'INSERT INTO `part` (channel, nick, user, host, geco, ip, account, content1) VALUES (' .
+              $dbh->quote($event->{to}->[0]) . ',' .
+              $dbh->quote($event->{nick}) . ',' . $dbh->quote($event->{user}) . ',' .
+              $dbh->quote($event->{host}) . ',' . $dbh->quote($::sn{lc $event->{nick}}->{gecos}) . ',';
+    my $ip = ASM::Util->getNickIP(lc $event->{nick});
+    if (defined($ip)) { $ip = $dbh->quote($ip); } else { $ip = 'NULL'; }
+    my $account = $::sn{lc $event->{nick}}->{account};
+    if (($account eq '0') or ($account eq '*')) {
+      $account = 'NULL';
+    } else {
+      $account = $dbh->quote($account);
+    }
+    $string = $string . $ip . ',' . $account . ',' . $dbh->quote($event->{args}->[0]) . ');';
+    $dbh->do($string);
+    ASM::Util->dprint($string, 'mysql');
+    return;
+  } elsif ($table eq 'kick') {
+    $string = 'INSERT INTO `kick` (channel, nick, user, host, geco, ip, account, ' . 
+                      'victim_nick, victim_user, victim_host, victim_geco, victim_ip, victim_account, content1) VALUES (' .
+              $dbh->quote($event->{args}->[0]) . ',' .
+              $dbh->quote($event->{nick}) . ',' . $dbh->quote($event->{user}) . ',' .
+              $dbh->quote($event->{host}) . ',' . $dbh->quote($::sn{lc $event->{nick}}->{gecos}) . ',';
+    my $ip = ASM::Util->getNickIP(lc $event->{nick});
+    if (defined($ip)) { $ip = $dbh->quote($ip); } else { $ip = 'NULL'; }
+    my $account = $::sn{lc $event->{nick}}->{account};
+    if (($account eq '0') or ($account eq '*')) { $account = 'NULL'; } else { $account = $dbh->quote($account); }
+    $string = $string . $ip . ',' . $account;
+    $string = $string . ', ' . $dbh->quote($event->{to}->[0]);
+    $string = $string . ', ' . $dbh->quote($::sn{lc $event->{to}->[0]}->{user});
+    $string = $string . ', ' . $dbh->quote($::sn{lc $event->{to}->[0]}->{host});
+    $string = $string . ', ' . $dbh->quote($::sn{lc $event->{to}->[0]}->{gecos});
+    my $vic_ip = ASM::Util->getNickIP(lc $event->{to}->[0]);
+    if (defined($vic_ip)) { $vic_ip = $dbh->quote($vic_ip); } else { $vic_ip = 'NULL'; }
+    my $vic_account = $::sn{lc $event->{to}->[0]}->{account};
+    if (($vic_account eq '0') or ($vic_account eq '*')) { $vic_account = 'NULL'; } else { $vic_account = $dbh->quote($vic_account); }
+    $string = $string . ', ' . $vic_ip . ',' . $vic_account . ',' . $dbh->quote($event->{args}->[1]) . ');';
+    $dbh->do($string);
+    ASM::Util->dprint($string, 'mysql');
+    return;
+  }
+## end saner code for this function
   if (($table ne 'nick') && ($table ne 'quit')) {
     $string = $string . 'channel, ';
   }

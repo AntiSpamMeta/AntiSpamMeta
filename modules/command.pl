@@ -27,18 +27,29 @@ sub command
 #  return 0 unless (ASM::Util->speak($event->{to}->[0]));
   foreach my $command ( @{$::commands->{command}} )
   {
-    unless (ASM::Util->speak($event->{to}->[0])) {
+    my $fail = 0;
+    unless ( (ASM::Util->speak($event->{to}->[0])) or (!ASM::Util->notRestricted($nick, "nocommands")) ) {
       next unless (defined($command->{nohush}) && ($command->{nohush} eq "nohush"));
     }
     if (defined($command->{flag})) { #If the command is restricted,
-      next unless defined($::users->{person}->{$acct}); #make sure the requester has an account
-      next unless defined($::users->{person}->{$acct}->{flags}); #make sure the requester has flags defined
-      next unless (grep {$_ eq $command->{flag}} split('', $::users->{person}->{$acct}->{flags})); #make sure the requester has the needed flags
+      if (!defined($::users->{person}->{$acct})) { #make sure the requester has an account
+        $fail = 1;
+      }
+      elsif (!defined($::users->{person}->{$acct}->{flags})) { #make sure the requester has flags defined
+        $fail = 1;
+      }
+      elsif (!(grep {$_ eq $command->{flag}} split('', $::users->{person}->{$acct}->{flags}))) { #make sure the requester has the needed flags
+        $fail = 1;
+      }
     }
     if ($cmd=~/$command->{cmd}/) {
       ASM::Util->dprint("$event->{from} told me: $cmd", "commander");
-      eval $command->{content};
-      warn $@ if $@;
+      if ($fail == 1) {
+        $conn->privmsg($nick, "You don't have permission to use that command, or you're not signed into nickserv.");
+      } else {
+        eval $command->{content};
+        warn $@ if $@;
+      }
       last;
     }
   }

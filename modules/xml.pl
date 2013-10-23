@@ -31,19 +31,23 @@ sub writeXML {
 }
 
 sub writeChannels {
+  $::settingschanged=1;
   $::xs1->XMLout($::channels, RootName => 'channels', KeyAttr => ['id'], NumericEscape => 2) > io("$::cset/channels.xml");
 }
 
 sub writeUsers {
+  $::settingschanged=1;
   $::xs1->XMLout($::users,    RootName => 'people',   KeyAttr => ['id']) > io("$::cset/users.xml");
 }
 
 sub writeSettings {
+  $::settingschanged=1;
   $::xs1->XMLout($::settings, RootName => 'settings', 
                 GroupTags => { altnicks => 'altnick', server => 'host', autojoins => 'autojoin' }, NoAttr => 1) > io("$::cset/settings.xml");
 }
 
 sub writeRestrictions {
+  $::settingschanged=1;
   $::xs1->XMLout($::restrictions, RootName => 'restrictions', KeyAttr => ['id'],
                        GroupTags => { hosts => "host", nicks => "nick", accounts => "account"}) > io("$::cset/restrictions.xml");
 }

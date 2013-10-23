@@ -41,9 +41,8 @@ sub sqlIncident
   open(FH, '>', $self->{CONFIG}->{actiondir} . $index . '.txt');
   foreach my $chan (@chans) {
     if (defined($self->{backlog}->{$chan})) {
-      print FH "$chan\n";
-      print FH join('', @{$self->{backlog}->{$chan}});
-      print FH "\n";
+      say FH "$chan";
+      say FH join('', @{$self->{backlog}->{$chan}});
     }
   }
   close(FH);
@@ -95,13 +94,14 @@ sub logg
     } else {
       print "COULDN'T PRINT TO $path - $line";
     }
+    my $spy;
     if (defined($::spy{$chan})) {
-      my $spy = $::spy{$chan};
-      print $spy $chan .": " . $nostamp . "\n";
+      $spy = $::spy{$chan};
+    } elsif (defined($::spy{lc $event->{nick}})) {
+      $spy = $::spy{lc $event->{nick}};
     }
-    if (defined($::spy{lc $event->{nick}})) {
-      my $spy = $::spy{lc $event->{nick}};
-      print $spy $chan .": " . $nostamp . "\n";
+    if (defined($spy)) {
+      say $spy "$chan: $nostamp";
     }
 #    $_ >> io($path);
   }

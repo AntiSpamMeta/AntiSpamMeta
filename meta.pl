@@ -13,6 +13,8 @@ use IO::All;
 use Getopt::Long;
 use POSIX qw(strftime);
 use Term::ANSIColor qw(:constants);
+use File::Monitor;
+use feature qw(say);
 
 $Data::Dumper::Useqq=1;
 
@@ -24,6 +26,7 @@ $::netsplit = 0;
 $::debug = 0;
 $::cset = '';
 $::pacealerts = 1;
+$::settingschanged = 0;
 %::wordlist = ();
 
 ## debug variables. 0 to turn off debugging, else set it to a Term::ANSIColor constant.
@@ -35,7 +38,7 @@ $::pacealerts = 1;
   "chanstate" => MAGENTA,
   "restrictions" => BLUE,
   "startup" => YELLOW,
-  "mysql" => CYAN,
+  "mysql" => 0, #CYAN,
   "inspector" => 0,
   "commander" => GREEN,
   "msg" => GREEN,
@@ -128,6 +131,12 @@ sub init {
   foreach my $item (@wl) {
     $::wordlist{lc $item} = 1;
   }
+  $::fm = File::Monitor->new();
+  foreach my $file ("channels", "commands", "dnsbl", "mysql", "restrictions", "rules", "settings", "users") {
+    $::fm->watch("./" . $::cset . '/' . $file . ".xml");
+  }
+  $::fm->watch("string_blacklist.txt");
+  $::fm->scan();
   $irc->start();
 }
 

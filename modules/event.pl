@@ -106,9 +106,9 @@ sub on_endofstats
   if ($event->{args}->[1] eq 'p') {
     $clearstatsp=1;
     my $tmp = Dumper(\%statsp); chomp $tmp;
-    if ( join(",", sort(keys %oldstatsp)) ne join(",", sort(keys %statsp)) ) {
+    if ( join(',', sort(keys %oldstatsp)) ne join(',', sort(keys %statsp)) ) {
       open(FH, '>>', 'statsplog.txt');
-      print FH strftime("%F %T ", gmtime) . join(",", sort(keys %statsp)) . "\n";
+      say FH strftime('%F %T ', gmtime) . join(',', sort(keys %statsp));
       close(FH);
       ASM::Util->dprint(join(",", keys %statsp), 'statsp');
     }
@@ -127,6 +127,24 @@ sub on_pong
   $conn->schedule( 30, sub { $conn->sl("PING :" . time); } );
   ASM::Util->dprint('Pong? ... Ping!', 'pingpong');
   my $lag = time - $event->{args}->[0];
+  my @changes = $::fm->scan();
+  if (@changes) {
+    if ($::settingschanged) {
+      $::settingschanged = 0;
+    } else {
+      $conn->privmsg($::settings->{masterchan}, "Config files changed, auto rehash triggered. Check console for possible errors.");
+      ASM::XML->readXML();
+      my @strbl = io('string_blacklist.txt')->getlines;
+      chomp @strbl;
+      @::string_blacklist = @strbl;
+#    my @eline=io('exempt.txt')->getlines;
+#    chomp @eline;
+#    %::eline = ();
+#    foreach my $item (@eline) {
+#        $::eline{lc $item} = 1;
+#    }
+    }
+  }
   if ($lag > 1) {
     ASM::Util->dprint("Latency: $lag", 'latency');
   }
@@ -173,7 +191,7 @@ sub on_dchat
       my $chan = lc $1;
       my $out = $event->{to}[0];
       my @time = ($::settings->{log}->{zone} eq 'local') ? localtime : gmtime;
-      print $out "Retriving " . "$::settings->{log}->{dir}${chan}/${chan}" . strftime($::settings->{log}->{filefmt}, @time) . "\n";
+      say $out 'Retrieving ' . "$::settings->{log}->{dir}${chan}/${chan}" . strftime($::settings->{log}->{filefmt}, @time);
       open(FHX, "$::settings->{log}->{dir}${chan}/${chan}" . strftime($::settings->{log}->{filefmt}, @time));
       while (<FHX>) {
         print $out $_;
@@ -201,7 +219,7 @@ sub on_account
 
 sub on_connect {
   my ($conn, $event) = @_; # need to check for no services
-  $conn->sl("MODE $event->{args}->[0] +Q");
+  $conn->sl("MODE $event->{args}->[0] +Q-i");
   if (lc $event->{args}->[0] ne lc $::settings->{nick}) {
     ASM::Util->dprint('Attempting to regain my main nick', 'startup');
     $conn->privmsg( 'NickServ', "regain $::settings->{nick} $::settings->{pass}" );
@@ -295,7 +313,8 @@ sub on_msg
   $::commander->command($conn, $event);
   ASM::Util->dprint($event->{from} . " - " . $event->{args}->[0], 'msg');
   if ((ASM::Util->notRestricted($event->{nick}, "nomsgs")) && ($event->{args}->[0] !~ /^;;/)) {
-    $conn->privmsg($::settings->{masterchan}, $event->{from} . ' told me: ' . $event->{args}->[0]);
+# disabled by DL 130513 due to spammer abuse
+#    $conn->privmsg($::settings->{masterchan}, $event->{from} . ' told me: ' . $event->{args}->[0]);
   }
 }
 

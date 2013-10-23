@@ -1,6 +1,7 @@
 package ASM::Inspect;
 use warnings;
 use strict;
+use feature qw(say);
 
 use Data::Dumper;
 #use List::Util qw(first);
@@ -61,7 +62,7 @@ sub inspect {
     foreach $id ( keys %dct ) {
       return unless (ASM::Util->notRestricted($nick, "notrigger"));
       if (defined($::eline{$nick}) || defined($::eline{lc $event->{user}}) || defined($::eline{lc $event->{host}})) {
-        print "Deprecated eline found for $nick / $event->{user} / $event->{host} !\n";
+        say "Deprecated eline found for $nick / $event->{user} / $event->{host} !";
         return;
       }
       $xresult = $dct{$id}{xresult};
