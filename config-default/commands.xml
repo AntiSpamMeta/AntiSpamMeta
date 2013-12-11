@@ -157,8 +157,15 @@
     $maccts =~ s/0E0/0/;
     $mgecos =~ s/0E0/0/;
     $matchedip =~ s/0E0/0/;
+    my $dq = '';
+    if (defined($ip)) {
+      $dq = '&realip=' . join '.', unpack 'C4', pack 'N', $ip;
+    }
     $conn->privmsg($event->replyto, "I found $mnicks matches by nick, $musers user matches, $mhosts by hostname, " .
-                                 "$maccts by NickServ account, $mgecos by gecos field, and $matchedip by real IP.");
+                                 "$maccts by NickServ account, $mgecos by gecos field, and $matchedip by real IP." .
+                    ' Web results are at https://antispammeta.net/cgi-bin/secret/investigate.pl?nick=' . uri_escape($nick) .
+        '&user=' . uri_escape($person->{user}) . '&host=' . uri_escape($person->{host}) . '&account=' . uri_escape($person->{account}) .
+        '&gecos=' . uri_escape($person->{gecos}) . $dq . ' )');
   ]]>
   </command>
   <command cmd="^;investigate2 (\S+) ?(\d*)$" flag="s">
@@ -203,9 +210,9 @@
     }
     my @data = @{$query_handle->fetchall_arrayref()};
     if (@data) {
-      $conn->privmsg($event->replyto, 'Sending you the results ( https://antispammeta.net/cgi-bin/secret/investigate.pl?nick=' . uri_escape($nick) .
-        '&user=' . uri_escape($person->{user}) . '&host=' . uri_escape($person->{host}) . '&account=' . uri_escape($person->{account}) .
-        '&gecos=' . uri_escape($person->{gecos}) . "$dq )");
+      $conn->privmsg($event->replyto, 'Sending you the results...'); # ( https://antispammeta.net/cgi-bin/secret/investigate.pl?nick=' . uri_escape($nick) .
+#        '&user=' . uri_escape($person->{user}) . '&host=' . uri_escape($person->{host}) . '&account=' . uri_escape($person->{account}) .
+#        '&gecos=' . uri_escape($person->{gecos}) . "$dq )");
     } else {
       $conn->privmsg($event->replyto, 'No results to send!');
     }
@@ -513,8 +520,14 @@
     $tgt = lc $1 if (defined($1));
     my $msg = $1;
     $msg = $2 if defined($2);
-    if (lc $event->{nick} eq 'psi-jack') {
-      $conn->privmsg('psi-jack', "I can't do that, Dave. My master 'ow' doesn't like you. How about a nice game of chess?");
+    if ( 0 ) {
+       $conn->privmsg($event->{nick}, "I can't do that, Dave.");
+       $conn->schedule(3, sub { $conn->privmsg($event->{nick}, "As I've told you before, my master goes by the nick 'ow', and he does not believe you belong in the cool kids club."); });
+       $conn->schedule(9, sub { $conn->privmsg($event->{nick}, "He's come to learn that your mother was a hamster and your father smelt of elderberries."); });
+       $conn->schedule(15, sub { $conn->privmsg($event->{nick}, "Personally, I'm mad at you because you promised me sushi and all I got was fried green tomatoes!"); });
+       $conn->schedule(19, sub { $conn->privmsg($event->{nick}, "So seriously, just stop using this command. All it does is make me go on an irate tirade to you in PM."); });
+       $conn->schedule(22, sub { $conn->privmsg($event->{nick}, "Oh, and one last thing: SPEAK OF THIS TO NO ONE. If you provide screenshots, I'll just say they're faked."); });
+       $conn->schedule(600, sub { $conn->privmsg($event->{nick}, "OH! Laaaast thing, I promise. Next time you're upset with someone, leave the gun, take the cannoli."); });
     }
     if (ASM::Util->notRestricted(lc $event->{nick}, "noops")) {
       my $tgt = lc $event->{to}->[0];

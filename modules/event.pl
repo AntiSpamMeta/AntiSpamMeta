@@ -469,7 +469,8 @@ sub on_nick {
 sub on_kick {
   my ($conn, $event) = @_;
   if (lc $event->{to}->[0] eq lc $::settings->{nick}) {
-    $conn->join($event->{args}->[0]);
+    $conn->privmsg($::settings->{masterchan}, "I've been kicked from " . $event->{args}->[0] . ": " . $event->{args}->[1]);
+#    $conn->join($event->{args}->[0]);
   }
   my $nick = lc $event->{to}->[0];
   my $chan = lc $event->{args}->[0];
@@ -679,7 +680,7 @@ sub checkRegged
     my $tgt = $chan;
     my $risk = "debug";
     my $hilite=ASM::Util->commaAndify(ASM::Util->getAlert($tgt, $risk, 'hilights'));
-    my $txtz  ="\x03" . $::RCOLOR{$::RISKS{$risk}} . "\u$risk\x03 risk threat [\x02$chan\x02] - channel appears to still be +r after 45 minutes; $hilite";
+    my $txtz  ="\x03" . $::RCOLOR{$::RISKS{$risk}} . "\u$risk\x03 risk threat [\x02$chan\x02] - channel appears to still be +r after 45 minutes; ping $hilite";
     my @tgts = ASM::Util->getAlert($tgt, $risk, 'msgs');
     ASM::Util->sendLongMsg($conn, \@tgts, $txtz)
   }

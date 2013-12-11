@@ -28,7 +28,7 @@ sub command
   foreach my $command ( @{$::commands->{command}} )
   {
     my $fail = 0;
-    unless ( (ASM::Util->speak($event->{to}->[0])) or (!ASM::Util->notRestricted($nick, "nocommands")) ) {
+    unless ( (ASM::Util->speak($event->{to}->[0])) ) {
       next unless (defined($command->{nohush}) && ($command->{nohush} eq "nohush"));
     }
     if (defined($command->{flag})) { #If the command is restricted,
@@ -44,6 +44,9 @@ sub command
     }
     if ($cmd=~/$command->{cmd}/) {
       ASM::Util->dprint("$event->{from} told me: $cmd", "commander");
+      if (!ASM::Util->notRestricted($nick, "nocommands")) {
+        $fail = 1 unless (defined($command->{nohush}) && ($command->{nohush} eq "nohush"));
+      }
       if ($fail == 1) {
         $conn->privmsg($nick, "You don't have permission to use that command, or you're not signed into nickserv.");
       } else {
