@@ -743,7 +743,7 @@ sub dcc_open
 sub on_ctcp_source
 {
   my ($conn, $event) = @_;
-  $conn->ctcp_reply($event->{nick}, 'SOURCE http://svn.linuxrulz.org/repos/antispammeta/trunk/');
+  $conn->ctcp_reply($event->{nick}, 'SOURCE https://gitlab.devlabs.linuxassist.net/asm/antispammeta/');
 }
 
 sub on_whoxreply

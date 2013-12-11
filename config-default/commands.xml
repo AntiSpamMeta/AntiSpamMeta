@@ -86,7 +86,7 @@
   </command>
   <command cmd="^;source$">
   <![CDATA[
-    $conn->privmsg($event->replyto, "source is at http://svn.linuxrulz.org/repos/antispammeta");
+    $conn->privmsg($event->replyto, "source is at https://gitlab.devlabs.linuxassist.net/asm/antispammeta/");
   ]]>
   </command>
   <command cmd="^;sql (main|log) (.*)" flag="d">
