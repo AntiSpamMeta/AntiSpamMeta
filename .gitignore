@@ -1,2 +1,5 @@
 /config
+/config-main
+/config-backup
+*.stor
 *~
