@@ -15,6 +15,7 @@ use POSIX qw(strftime);
 use Term::ANSIColor qw(:constants);
 use File::Monitor;
 use feature qw(say);
+use HTTP::Async;
 
 $Data::Dumper::Useqq=1;
 
@@ -28,12 +29,13 @@ $::cset = '';
 $::pacealerts = 1;
 $::settingschanged = 0;
 %::wordlist = ();
+%::httpRequests = ();
 
 ## debug variables. 0 to turn off debugging, else set it to a Term::ANSIColor constant.
 %::debugx = (
   "dnsbl" => 0,
   "pingpong" => 0, #BLUE,
-  "services" => YELLOW,
+  "snotice" => YELLOW,
   "sync" => CYAN,
   "chanstate" => MAGENTA,
   "restrictions" => BLUE,
@@ -87,6 +89,7 @@ sub init {
   mkdir($::settings->{log}->{dir});
   $::log = ASM::Log->new($::settings->{log});
   $::pass = $::settings->{pass} if $::pass eq '';
+  $::async = HTTP::Async->new();
   $host = ${$::settings->{server}}[rand @{$::settings->{server}}];
   ASM::Util->dprint( "Connecting to $host", "startup");
   $irc->debug($::debug);
@@ -132,7 +135,7 @@ sub init {
     $::wordlist{lc $item} = 1;
   }
   $::fm = File::Monitor->new();
-  foreach my $file ("channels", "commands", "dnsbl", "mysql", "restrictions", "rules", "settings", "users") {
+  foreach my $file ("channels", "commands", "dnsbl", "mysql", "restrictions", "rules", "settings", "users", "blacklist") {
     $::fm->watch("./" . $::cset . '/' . $file . ".xml");
   }
   $::fm->watch("string_blacklist.txt");

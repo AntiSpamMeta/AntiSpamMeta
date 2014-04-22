@@ -17,7 +17,7 @@ sub new
 }
 
 sub inspect {
-  our ($self, $conn, $event) = @_;
+  our ($self, $conn, $event, $response) = @_;
   my (%aonx, %dct, $rev, $chan, $id);
   %aonx=(); %dct=(); $chan=""; $id="";
   my (@dnsbl, @uniq);
@@ -43,7 +43,14 @@ sub inspect {
     foreach $id (keys %aonx) {
       next unless ( grep { $event->{type} eq $_ } split(/[,:; ]+/, $aonx{$id}{type}) );
       next if ($aonx{$id}{class} eq 'dnsbl') && ($event->{host} =~ /(fastwebnet\.it|fastres\.net)$/); #this is a bad hack
-      $xresult = $::classes->check($aonx{$id}{class}, $aonx{$id}, $id, $event, $chan, $rev); # this is another bad hack done for dnsbl-related stuff
+      if (defined($response)) {
+	print Dumper($response);
+        if ($aonx{$id}{class} ne 'urlcrunch') { next; } #don't run our regular checks if this is being called from a URL checking function
+        else { $xresult = $::classes->check($aonx{$id}{class}, $aonx{$id}, $id, $event, $chan, $response); }
+      }
+      else {
+        $xresult = $::classes->check($aonx{$id}{class}, $aonx{$id}, $id, $event, $chan, $rev); # this is another bad hack done for dnsbl-related stuff
+      }
       next unless (defined($xresult)) && ($xresult ne 0);
       ASM::Util->dprint(Dumper($xresult), 'inspector');
       $dct{$id} = $aonx{$id};
@@ -81,10 +88,10 @@ sub inspect {
          ) {
         my @tgts = ASM::Util->getAlert($chan, $dct{$id}{risk}, 'msgs');
         ASM::Util->sendLongMsg($conn, \@tgts, $txtz);
+        $conn->schedule(45, sub { delete($::ignored{$chan})}) unless defined($::ignored{$chan});
         $::ignored{$chan} = $::RISKS{$dct{$id}{risk}};
-        $conn->schedule(45, sub { delete($::ignored{$chan})});
       }
-      $::log->incident($chan, "$chan: $dct{$id}{risk} risk: $event->{nick} - $nicereason\n");
+#      $::log->incident($chan, "$chan: $dct{$id}{risk} risk: $event->{nick} - $nicereason\n");
       delete $dct{$id}{xresult};
     }
   }

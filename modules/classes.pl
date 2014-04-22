@@ -14,6 +14,7 @@ sub new
   my $self = {};
   my $tbl = {
     "strbl" => \&strbl,
+    "strblnew" => \&strblnew,
     "dnsbl" => \&dnsbl,
     "floodqueue" => \&floodqueue,
     "floodqueue2" => \&floodqueue2,
@@ -34,7 +35,8 @@ sub new
     "joinmsgquit" => \&joinmsgquit,
     "garbagemeter" => \&garbagemeter,
     "cyclebotnet" => \&cyclebotnet,
-    "banevade" => \&banevade
+    "banevade" => \&banevade,
+    "urlcrunch" => \&urlcrunch
   };
   $self->{ftbl} = $tbl;
   bless($self);
@@ -74,6 +76,20 @@ sub joinmsgquit
   return 0 if ((time - $::sc{$chan}{users}{lc $event->{nick}}{jointime}) > $time);
   return 0 if ((time - $::sc{$chan}{users}{lc $event->{nick}}{msgtime}) > $time);
   return 1;
+}
+
+sub urlcrunch
+{
+  my ($chk, $id, $event, $chan, $response) = @_;
+  return 0 unless defined($response);
+  return 0 unless ref($response);
+  return 0 unless defined($response->{_previous});
+  return 0 unless defined($response->{_previous}->{_headers});
+  return 0 unless defined($response->{_previous}->{_headers}->{location});
+  if ($response->{_previous}->{_headers}->{location} =~ /$chk->{content}/i) {
+    return 1;
+  }
+  return 0;
 }
 
 sub check
@@ -367,6 +383,23 @@ sub strbl {
   return 0;
 }
 
+sub strblnew {
+  my ($chk, $xid, $event, $chan) = @_;
+  my $match = lc $event->{args}->[0];
+  foreach my $id (keys %{$::blacklist->{string}}) {
+    my $line = lc $::blacklist->{string}->{$id}->{content};
+    my $idx = index $match, $line;
+    if ( $idx != -1 ) {
+      my $setby = $::blacklist->{string}->{$id}->{setby};
+      $setby = substr($setby, 0, 1) . "\x02\x02" . substr($setby, 1);
+      return defined($::blacklist->{string}->{$id}->{reason}) ?
+        "id $id added by $setby because $::blacklist->{string}->{$id}->{reason}" :
+        "id $id added by $setby for no reason";
+    }
+  }
+  return 0;
+}
+
 sub nick {
   my ($chk, $id, $event, $chan) = @_;
   if ( lc $event->{nick} eq lc $chk->{content} ) {
@@ -405,6 +438,11 @@ sub nuhg {
   my $match = $event->{from} . '!' . $::sn{lc $event->{nick}}->{gecos};
   return 1 if ($match =~ /$chk->{content}/);
   return 0;
+}
+
+sub invite {
+  my ( $chk, $id, $event, $chan) = @_;
+  return 1;
 }
 
 my $sfc = 0;

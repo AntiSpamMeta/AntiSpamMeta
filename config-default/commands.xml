@@ -68,11 +68,23 @@
       $upstr = $upstr . int($up/1) . 's';
       $up = $up % 1;
     }
+    my ($tx, $rx);
+    if ($conn->{_tx}/1024 > 1024) {
+      $tx = sprintf("%.2fMB", $conn->{_tx}/(1024*1024));
+    } else {
+      $tx = sprintf("%.2fKB", $conn->{_tx}/1024);
+    }
+    if ($conn->{_rx}/1024 > 1024) {
+      $rx = sprintf("%.2fMB", $conn->{_rx}/(1024*1024));
+    } else {
+      $rx = sprintf("%.2fKB", $conn->{_rx}/1024);
+    }
     $conn->privmsg($event->replyto, "This bot has been running for " . $upstr .
      ", is tracking " . (scalar (keys %::sn)) . " nicks" .
      " across " . (scalar (keys %::sc)) . " tracked channels." .
      " It is using " . $size . "KB of RAM" . 
-     " and has used " . $cputime . " of CPU time.");
+     ", has used $cputime of CPU time" .
+     ", has sent $tx of data, and received $rx of data.");
   ]]>
   </command>
   <command cmd="^;mship (\S+)$" flag="s">
@@ -462,6 +474,11 @@
     $conn->quit($1);
   ]]>
   </command>
+  <command cmd="^;exit ?(.*)" flag="a">
+  <![CDATA[
+    $conn->quit($1);
+  ]]>
+  </command>
   <command cmd="^;ev (.*)" flag="d">
   <![CDATA[
     eval $1; warn $@ if $@;
@@ -561,7 +578,7 @@
         my $txtz = "[\x02$tgt\x02] - $event->{nick} wants op attention";
         if ((time-$::sc{$tgt}{users}{lc $event->{nick}}{jointime}) > 90) {
 #          return; #they've been on the channel for less than 90 seconds, probably nuisance botspam
-          $txtz = $txtz . " ($msg) " . $hilite;
+          $txtz = "$txtz ($msg) $hilite !att-$tgt-opalert";
         }
         my @tgts = ASM::Util->getAlert($tgt, 'opalert', 'msgs');
         ASM::Util->sendLongMsg($conn, \@tgts, $txtz);
@@ -586,7 +603,7 @@
     else {
       my @tgts = ASM::Util->getAlert($tgt, 'opalert', 'msgs');
       foreach my $chan (@tgts) {
-        $conn->privmsg($chan, $event->{nick} . " tried to use the ops trigger but is restricted from doing so.");
+        $conn->privmsg($chan, $event->{nick} . " tried to use the ops trigger for $tgt but is restricted from doing so.");
       }
     }
   ]]>
@@ -594,9 +611,23 @@
   <command cmd="^;blacklist (.*)" flag="o">
   <![CDATA[
     my $str = lc $1;
-    push(@::string_blacklist, $str);
-    "$str\n" >> io 'string_blacklist.txt';
-    $conn->privmsg($event->replyto, "$str blacklisted");
+#    push(@::string_blacklist, $str);
+#    "$str\n" >> io 'string_blacklist.txt';
+    use String::CRC32;
+    my $id = sprintf("%08x", crc32($str));
+    $::blacklist->{string}->{$id} = { "content" => $str, "setby" => $event->nick };
+    ASM::XML->writeBlacklist();
+    $conn->privmsg($event->replyto, "$str blacklisted with id $id, please use ;blreason $id reasonGoesHere to set a reason");
+  ]]>
+  </command>
+  <command cmd="^;unblacklist ([0-9a-f]+)$" flag="o">
+  <![CDATA[
+    my $id = $1;
+    if (defined($::blacklist->{string}->{$id})) {
+      delete $::blacklist->{string}->{$id};
+      $conn->privmsg($event->replyto, "blacklist id $id removed");
+      ASM::XML->writeBlacklist();
+    } else { $conn->privmsg($event->replyto, "invalid id"); }
   ]]>
   </command>
   <command cmd="^;plugin (\S+) (\S+) (.*)" flag="p">
@@ -616,6 +647,29 @@
       $conn->privmsg(\@tgts, substr($txtz, 0, $splitpart));
       $conn->privmsg(\@tgts, substr($txtz, $splitpart));
     }
+  ]]>
+  </command>
+  <command cmd="^;sync (\S+)" flag="a">
+  <![CDATA[
+    my $chan = $1;
+    $conn->sl("MODE $chan bq");
+    $conn->sl("MODE $chan");
+    $conn->sl("WHO $chan %tcnuhra,314");
+  ]]>
+  </command>
+  <command cmd="^;ping$">
+  <![CDATA[
+    $conn->privmsg($event->replyto, "pong");
+  ]]>
+  </command>
+  <command cmd="^;blreason ([0-9a-f]+) (.*)" flag="o">
+  <![CDATA[
+    my $id = $1; my $reason = $2;
+    if (defined($::blacklist->{string}->{$id})) {
+      $::blacklist->{string}->{$id}->{reason} = $reason;
+      $conn->privmsg($event->replyto, "Reason set");
+      ASM::XML->writeBlacklist();
+    } else { $conn->privmsg($event->replyto, "ID is invalid"); }
   ]]>
   </command>
 </commands>

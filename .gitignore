@@ -1,5 +1,7 @@
 /config
 /config-main
 /config-backup
+/actionlogs
+HTTP_ACCESS*
 *.stor
 *~

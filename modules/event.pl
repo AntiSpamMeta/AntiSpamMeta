@@ -7,6 +7,7 @@ use Text::LevenshteinXS qw(distance);
 use IO::All;
 use POSIX qw(strftime);
 use Regexp::Wildcards;
+use HTTP::Request;
 
 sub cs {
   my ($chan) = @_;
@@ -71,6 +72,8 @@ sub new
   $conn->add_handler('statsdebug', \&on_statsdebug);
   $conn->add_handler('endofstats', \&on_endofstats);
   $conn->add_handler('channelurlis', \&on_channelurlis);
+  $conn->add_handler('480', \&on_jointhrottled);
+  $conn->add_handler('invite', \&blah); # This doesn't need to be fancy; I just need it to go through inspect
   bless($self);
   return $self;
 }
@@ -78,6 +81,16 @@ sub new
 my $clearstatsp = 1;
 my %statsp = ();
 my %oldstatsp = ();
+
+sub on_jointhrottled
+{
+  my ($conn, $event) = @_;
+  my $chan = $event->{args}->[1];
+  ASM::Util->dprint("$event->{nick}: $chan: $event->{args}->[2]", 'snotice');
+  if ($event->{args}->[2] =~ /throttle exceeded, try again later/) {
+    $conn->schedule(5, sub { $conn->join($chan); });
+  }
+}
 
 sub on_statsdebug
 {
@@ -222,7 +235,7 @@ sub on_connect {
   $conn->sl("MODE $event->{args}->[0] +Q-i");
   if (lc $event->{args}->[0] ne lc $::settings->{nick}) {
     ASM::Util->dprint('Attempting to regain my main nick', 'startup');
-    $conn->privmsg( 'NickServ', "regain $::settings->{nick} $::settings->{pass}" );
+    $conn->privmsg( 'NickServ@services.', "regain $::settings->{nick} $::settings->{pass}" );
   }
   $conn->sl('CAP REQ :extended-join multi-prefix account-notify'); #god help you if you try to use this bot off freenode
 }
@@ -325,9 +338,37 @@ sub on_public
   $::sc{lc $event->{to}->[0]}{users}{lc $event->{nick}}{msgtime} = time;
   $::log->logg( $event );
   $::db->logg( $event );
+#  if ($event->{args}->[0] =~ /(https?:\/\/bitly.com\/\w+)|(https?:\/\/bit.ly\/\w+)|(https?:\/\/j.mp\/\w+)/i) {
+#    my $reqid = $::async->add( HTTP::Request->new( GET => $1 ) );
+#    $::httpRequests{$reqid} = $event;
+#    my ($response, $id) = $::async->wait_for_next_response( 1 );
+#    if (defined($response)) {
+#      on_httpResponse($conn, $id, $response);
+#    }
+#    else { $conn->schedule( 1, sub { checkHTTP($conn); } ); }
+#  }
   $::inspector->inspect( $conn, $event );
   $::commander->command( $conn, $event );
 }
+
+sub checkHTTP
+{
+    my ($conn) = @_;
+    my ($response, $id) = $::async->next_response();
+    if (defined ($response)) {
+      on_httpResponse($conn, $id, $response);
+    }
+    $conn->schedule( 1, sub { checkHTTP($conn); } );
+}
+
+sub on_httpResponse
+{
+  my ($conn, $id, $response) = @_;
+  my $event = $::httpRequests{$id};
+  delete $::httpRequests{$id};
+  $::inspector->inspect( $conn, $event, $response );
+}
+#  if ($response->{_previous}->{_headers}->{location} =~ /^https?:\/\/bitly.com\/a\/warning/)
 
 sub on_notice
 {
@@ -778,11 +819,23 @@ sub on_whoxover
     my $size = `ps -p $$ h -o size`;
     my $cputime = `ps -p $$ h -o time`;
     chomp $size; chomp $cputime;
+    my ($tx, $rx);
+    if ($conn->{_tx}/1024 > 1024) {
+      $tx = sprintf("%.2fMB", $conn->{_tx}/(1024*1024));
+    } else {
+      $tx = sprintf("%.2fKB", $conn->{_tx}/1024);
+    }
+    if ($conn->{_rx}/1024 > 1024) {
+      $rx = sprintf("%.2fMB", $conn->{_rx}/(1024*1024));
+    } else {
+      $rx = sprintf("%.2fKB", $conn->{_rx}/1024);
+    }
     $conn->privmsg($::settings->{masterchan}, "Finished syncing after " . (time - $::starttime) . " seconds. " .
      "I'm tracking " . (scalar (keys %::sn)) . " nicks" .
      " across " . (scalar (keys %::sc)) . " tracked channels." .
      " I'm using " . $size . "KB of RAM" . 
-     " and have used " . $cputime . " of CPU time.");
+     ", have used " . $cputime . " of CPU time" .
+     ", have sent $tx of data, and received $rx of data.");
     my %x = ();
     foreach my $c (@{$::settings->{autojoins}}) { $x{$c} = 1; }
     foreach my $cx (keys %::sc) { delete $x{$cx}; }

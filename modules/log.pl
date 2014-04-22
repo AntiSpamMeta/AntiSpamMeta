@@ -63,6 +63,10 @@ sub logg
     if (substr($chan, 0, 1) eq '@') {
       $chan = substr($chan, 1);
     }
+    if ($chan eq '*') {
+      ASM::Util->dprint("$event->{nick}: $event->{args}->[0]", 'snotice');
+      next;
+    }
     my $path = ">>$cfg->{dir}${chan}/${chan}" . strftime($cfg->{filefmt}, @time);
     $_ = '';
     $_ =    "<$event->{nick}> $event->{args}->[0]"                      if $event->{type} eq 'public';

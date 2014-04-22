@@ -5,6 +5,7 @@ use warnings;
 use strict;
 use Term::ANSIColor qw (:constants);
 use Socket qw( inet_aton inet_ntoa );
+use Data::Dumper;
 
 %::RISKS =
 (
@@ -225,13 +226,13 @@ sub getHostIP
 
 sub getNickIP
 {
-  my ($module, $nick) = @_;
+  my ($module, $nick, $host) = @_;
   $nick = lc $nick;
   return unless defined($::sn{$nick});
   if (defined($::sn{$nick}{ip})) {
     return $::sn{$nick}{ip};
   }
-  my $host = $::sn{$nick}{host};
+  $host = $::sn{$nick}{host} if (!defined($host));
   my $ip = getHostIP(undef, $host);
   if (defined($ip)) {
     $::sn{$nick}{ip} = $ip;

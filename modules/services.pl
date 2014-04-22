@@ -17,10 +17,10 @@ sub doServices {
   my $i = 1;
   if ($event->{from} eq 'NickServ!NickServ@services.')
   {
-    ASM::Util->dprint("NickServ: $event->{args}->[0]", 'services');
+    ASM::Util->dprint("NickServ: $event->{args}->[0]", 'snotice');
     if ( $event->{args}->[0] =~ /^This nickname is registered/ )
     {
-      $conn->privmsg( 'NickServ', "identify $::settings->{nick} $::settings->{pass}" );
+      $conn->privmsg( 'NickServ@services.', "identify $::settings->{nick} $::settings->{pass}" );
     }
     elsif ( $event->{args}->[0] =~ /^You are now identified/ )
     {
@@ -41,12 +41,12 @@ sub doServices {
     }
     elsif ($event->{args}->[0] =~ /has been (killed|released)/ )
     {
-      ASM::Util->dprint('Got kill/release successful from NickServ!', 'services');
+#      ASM::Util->dprint('Got kill/release successful from NickServ!', 'snotice');
       $conn->nick( $::settings->{nick} );
     }
     elsif ($event->{args}->[0] =~ /has been regained/ )
     {
-      ASM::Util->dprint('Got regain successful from nickserv!', 'services');
+#      ASM::Util->dprint('Got regain successful from nickserv!', 'snotice');
     }
     elsif ($event->{args}->[0] =~ /Password Incorrect/ )
     {
@@ -58,7 +58,7 @@ sub doServices {
     if ( $event->{args}->[0] =~ /^\[#/ ) {
       return;
     }
-    ASM::Util->dprint('ChanServ: '. Dumper($event->{args}->[0]), 'services');
+    ASM::Util->dprint("ChanServ: $event->{args}->[0]", 'snotice');
     if ( $event->{args}->[0] =~ /^All.*bans matching.*have been cleared on(.*)/)
     {
       $conn->join($1);

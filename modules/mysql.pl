@@ -196,10 +196,10 @@ sub logg
     $string = 'INSERT INTO `quit` (nick, user, host, geco, ip, account, content1) VALUES (' .
            $dbh->quote($event->{nick}) . ',' . $dbh->quote($event->{user}) . ',' .
            $dbh->quote($event->{host}) . ',' . $dbh->quote($::sn{lc $event->{nick}}->{gecos}) . ',';
-    my $ip = ASM::Util->getNickIP(lc $event->{nick});
+    my $ip = ASM::Util->getNickIP(lc $event->{nick}, $event->{host});
     if (defined($ip)) { $ip = $dbh->quote($ip); } else { $ip = 'NULL'; }
     my $account = $::sn{lc $event->{nick}}->{account};
-    if (($account eq '0') or ($account eq '*')) {
+    if (!defined($account) or ($account eq '0') or ($account eq '*')) {
       $account = 'NULL';
     } else {
       $account = $dbh->quote($account);
@@ -213,10 +213,10 @@ sub logg
               $dbh->quote($event->{to}->[0]) . ',' .
               $dbh->quote($event->{nick}) . ',' . $dbh->quote($event->{user}) . ',' .
               $dbh->quote($event->{host}) . ',' . $dbh->quote($::sn{lc $event->{nick}}->{gecos}) . ',';
-    my $ip = ASM::Util->getNickIP(lc $event->{nick});
+    my $ip = ASM::Util->getNickIP(lc $event->{nick}, $event->{host});
     if (defined($ip)) { $ip = $dbh->quote($ip); } else { $ip = 'NULL'; }
     my $account = $::sn{lc $event->{nick}}->{account};
-    if (($account eq '0') or ($account eq '*')) {
+    if (!defined($account) or ($account eq '0') or ($account eq '*')) {
       $account = 'NULL';
     } else {
       $account = $dbh->quote($account);

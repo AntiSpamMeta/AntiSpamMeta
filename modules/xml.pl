@@ -20,6 +20,7 @@ sub readXML {
   $::dnsbl        = $::xs1->XMLin( "$p/dnsbl.xml",        ForceArray => []);
   $::rules        = $::xs1->XMLin( "$p/rules.xml",        ForceArray => []);
   $::restrictions = $::xs1->XMLin( "$p/restrictions.xml", ForceArray => ['host', 'nick', 'account']);
+  $::blacklist    = $::xs1->XMLin( "$p/blacklist.xml",    ForceArray => 'string');
 }
 
 sub writeXML {
@@ -27,6 +28,7 @@ sub writeXML {
   writeChannels();
   writeUsers();
   writeRestrictions();
+  writeBlacklist();
 #  $::xs1->XMLout($::commands,     RootName => 'commands', KeyAttr => ['id']) > io("$::cset/commands.xml");
 }
 
@@ -50,6 +52,11 @@ sub writeRestrictions {
   $::settingschanged=1;
   $::xs1->XMLout($::restrictions, RootName => 'restrictions', KeyAttr => ['id'],
                        GroupTags => { hosts => "host", nicks => "nick", accounts => "account"}) > io("$::cset/restrictions.xml");
+}
+
+sub writeBlacklist {
+  $::settingschanged=1;
+  $::xs1->XMLout($::blacklist, RootName => 'blacklist', KeyAttr => ['id']) > io("$::cset/blacklist.xml");
 }
 
 return 1;
