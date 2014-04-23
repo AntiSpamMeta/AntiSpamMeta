@@ -18,11 +18,6 @@
     $conn->privmsg($event->replyto, "Added $user to the list of authorized web users.")
   ]]>
   </command>
-  <command cmd="^;makemelunch">
-  <![CDATA[
-    $conn->me($event->replyto, "makes " . $event->{nick} . " a sandwich");
-  ]]>
-  </command>
   <command cmd="^;teredo (\S+)">
   <![CDATA[
     my $arg1 = $1;
@@ -476,16 +471,6 @@
 	$::eline{lc $item} = 1;
     }
     $conn->privmsg($event->replyto, 'config files were re-read');
-  ]]>
-  </command>
-  <command cmd="^;say (.*)" flag="t">
-  <![CDATA[
-    $conn->privmsg($event->replyto, $1);
-  ]]>
-  </command>
-  <command cmd="^;do (.*)" flag="t">
-  <![CDATA[
-    $conn->me($event->replyto, $1);
   ]]>
   </command>
   <command cmd="^;restrict (nick|account|host) (\S+) (\+|-)([a-z]+)$" flag="a">
