@@ -488,7 +488,7 @@
     $conn->me($event->replyto, $1);
   ]]>
   </command>
-  <command cmd="^;restrict (nick|account|host) (\S+) (\+|-)([a-z]+)$" flag="o">
+  <command cmd="^;restrict (nick|account|host) (\S+) (\+|-)([a-z]+)$" flag="a">
   <![CDATA[
     my ($type, $who, $mode, $restriction) = ($1, lc $2, $3, $4);
     if ($mode eq '-') {
