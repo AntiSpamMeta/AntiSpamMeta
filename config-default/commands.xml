@@ -552,7 +552,7 @@
       $tgt = lc $1 if (defined($1));
       my $msg = $1;
       $msg = $2 if defined($2);
-      unless (defined($::sc{$tgt}{users}{lc $event->{nick}})) {
+      unless (lc $tgt ~~ $::sn{lc $event->{nick}}->{mship}) {
         return; #they're not on the channel they're calling !ops for
       }
       unless (defined($::ignored{$tgt}) && ($::ignored{$tgt} >= $::RISKS{'opalert'})) {
