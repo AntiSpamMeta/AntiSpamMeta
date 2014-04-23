@@ -126,8 +126,7 @@
   </command>
   <command cmd="^;help$">
   <![CDATA[
-    $conn->privmsg($event->replyto, "command list is at http://antispammeta.net/syntax.txt ; see also http://meta.wikimedia.org/wiki/User:WHeimbigner/AntiSpamMeta (not as up to date but contains some additonal info)");
-    $conn->privmsg($event->replyto, "You can also get faster help by bugging ow, DLa\x02\x02nge, tom\x02\x02aw, or mari\x02\x02enz");
+    $conn->privmsg($event->replyto, "Please refer to http://antispammeta.net and irc.freenode.net #antispammeta");
   ]]>
   </command>
   <command cmd="^;db$">
