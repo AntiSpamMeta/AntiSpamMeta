@@ -16,7 +16,8 @@ sub readXML {
   $::channels     = $::xs1->XMLin( "$p/channels.xml",     ForceArray => \@fchan );
   $::users        = $::xs1->XMLin( "$p/users.xml",        ForceArray => 'person');
   $::commands     = $::xs1->XMLin( "$p/commands.xml",     ForceArray => [qw/command/]);
-  $::mysql        = $::xs1->XMLin( "$p/mysql.xml",        ForceArray => []);
+  $::mysql        = $::xs1->XMLin( "$p/mysql.xml",        ForceArray => ['ident', 'geco'],
+                                   'GroupTags' => { ignoredidents => 'ident', ignoredgecos => 'geco' });
   $::dnsbl        = $::xs1->XMLin( "$p/dnsbl.xml",        ForceArray => []);
   $::rules        = $::xs1->XMLin( "$p/rules.xml",        ForceArray => []);
   $::restrictions = $::xs1->XMLin( "$p/restrictions.xml", ForceArray => ['host', 'nick', 'account']);
@@ -29,7 +30,13 @@ sub writeXML {
   writeUsers();
   writeRestrictions();
   writeBlacklist();
+  writeMysql();
 #  $::xs1->XMLout($::commands,     RootName => 'commands', KeyAttr => ['id']) > io("$::cset/commands.xml");
+}
+
+sub writeMysql {
+  $::settingschanged=1;
+  $::xs1->XMLout($::mysql,    RootName => 'mysql',    KeyAttr => ['id']) > io("$::cset/mysql.xml");
 }
 
 sub writeChannels {

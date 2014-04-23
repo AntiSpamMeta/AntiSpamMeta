@@ -135,10 +135,10 @@
     $conn->privmsg($event->replyto, "db is at http://antispammeta.net/query.html");
   ]]>
   </command>
-  <command cmd="^;query (\S+) (\S+)$">
+  <command cmd="^;query (\S+) ?(\S+)?$">
   <![CDATA[
-    my $channel = $1;
-    my @nuh = split(/(\!|\@)/, $2);
+    my $channel = defined($2) ? $1 : '%';
+    my @nuh = split(/(\!|\@)/, defined($2) ? $2 : $1);
     my $result = $::db->query($channel, $nuh[0], $nuh[2], $nuh[4]);
     $conn->privmsg($event->replyto, "$result results found.");
   ]]>
@@ -155,10 +155,12 @@
     my $dbh = $::db->{DBH};
 
     my $mnicks = $dbh->do("SELECT * from $::db->{ACTIONTABLE} WHERE nick like " .    $dbh->quote($nick) . ';');
-    my $musers = $dbh->do("SELECT * from $::db->{ACTIONTABLE} WHERE user like " .    $dbh->quote($person->{user}) . ';');
+    my $musers = (lc $person->{user} ~~ $::mysql->{ignoredidents}) ? "didn't check" :
+                 $dbh->do("SELECT * from $::db->{ACTIONTABLE} WHERE user like " .    $dbh->quote($person->{user}) . ';');
     my $mhosts = $dbh->do("SELECT * from $::db->{ACTIONTABLE} WHERE host like " .    $dbh->quote($person->{host}) . ';');
     my $maccts = $dbh->do("SELECT * from $::db->{ACTIONTABLE} WHERE account like " . $dbh->quote($person->{account}) . ';');
-    my $mgecos = $dbh->do("SELECT * from $::db->{ACTIONTABLE} WHERE gecos like " .   $dbh->quote($person->{gecos}) . ';');
+    my $mgecos = (lc $person->{gecos} ~~ $::mysql->{ignoredgecos}) ? "didn't check" :
+                 $dbh->do("SELECT * from $::db->{ACTIONTABLE} WHERE gecos like " .   $dbh->quote($person->{gecos}) . ';');
 
     my $ip = ASM::Util->getNickIP($nick);
     my $matchedip = 0;
@@ -176,8 +178,9 @@
     $conn->privmsg($event->replyto, "I found $mnicks matches by nick, $musers user matches, $mhosts by hostname, " .
                                  "$maccts by NickServ account, $mgecos by gecos field, and $matchedip by real IP." .
                     ' Web results are at https://antispammeta.net/cgi-bin/secret/investigate.pl?nick=' . uri_escape($nick) .
-        '&user=' . uri_escape($person->{user}) . '&host=' . uri_escape($person->{host}) . '&account=' . uri_escape($person->{account}) .
-        '&gecos=' . uri_escape($person->{gecos}) . $dq . ' )');
+        ((lc $person->{user} ~~ $::mysql->{ignoredidents}) ? '' : '&user=' . uri_escape($person->{user})) .
+        '&host=' . uri_escape($person->{host}) . '&account=' . uri_escape($person->{account}) .
+        ((lc $person->{gecos} ~~ $::mysql->{ignoredgecos}) ? '' : '&gecos=' . uri_escape($person->{gecos})) . $dq . ' )');
   ]]>
   </command>
   <command cmd="^;investigate2 (\S+) ?(\d*)$" flag="s">
@@ -204,10 +207,10 @@
     my $dbh = $::db->{DBH};
 
     my $query = "SELECT * from $::db->{ACTIONTABLE} WHERE nick like " . $dbh->quote($nick) .
-                                                     ' or user like ' . $dbh->quote($person->{user}) . 
+    ((lc $person->{user} ~~ $::mysql->{ignoredidents}) ? '' : ' or user like ' . $dbh->quote($person->{user})) . 
                                                      ' or host like ' . $dbh->quote($person->{host}) .
                                                   ' or account like ' . $dbh->quote($person->{account}) .
-                                                    ' or gecos like ' . $dbh->quote($person->{gecos});
+    ((lc $person->{gecos} ~~ $::mysql->{ignoredgecos}) ? '' : ' or gecos like ' . $dbh->quote($person->{gecos}));
     my $ip = ASM::Util->getNickIP($nick);
     if (defined($ip)) {
       $query = $query . ' or ip = ' . $dbh->quote($ip);
@@ -222,9 +225,7 @@
     }
     my @data = @{$query_handle->fetchall_arrayref()};
     if (@data) {
-      $conn->privmsg($event->replyto, 'Sending you the results...'); # ( https://antispammeta.net/cgi-bin/secret/investigate.pl?nick=' . uri_escape($nick) .
-#        '&user=' . uri_escape($person->{user}) . '&host=' . uri_escape($person->{host}) . '&account=' . uri_escape($person->{account}) .
-#        '&gecos=' . uri_escape($person->{gecos}) . "$dq )");
+      $conn->privmsg($event->replyto, 'Sending you the results...');
     } else {
       $conn->privmsg($event->replyto, 'No results to send!');
     }
