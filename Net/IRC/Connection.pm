@@ -21,6 +21,7 @@ use IO::Socket;
 use IO::Socket::INET;
 use Symbol;
 use Carp;
+use Data::Dumper;
 
 # all this junk below just to conditionally load a module
 # sometimes even perl is braindead...
@@ -78,6 +79,8 @@ sub new {
     _pacing     =>  0,       # no pacing by default
     _ssl	=>  0,       # no ssl by default
     _format     => { 'default' => "[%f:%t]  %m  <%d>", },
+    _rx         =>  0,
+    _tx         =>  0,
   };
   
   bless $self, $proto;
@@ -477,10 +480,6 @@ sub handler {
   print STDERR "Trying to handle event '$ev'.\n" if $self->{_debug};
   
   my $handler = undef;
-  #FIXME WHY IS THIS NECESSARY
-  if (!defined($ev)) {
-    return $self->_default($event, @_);
-  }
   if (exists $self->{_handler}->{$ev}) {
     $handler = $self->{_handler}->{$ev};
   } elsif (exists $_udef{$ev}) {
@@ -847,6 +846,7 @@ sub parse {
       and
       (length($self->{_frag}) + length($line)) > 0)  {
     # grab any remnant from the last go and split into lines
+    $self->{_rx} += length($line);
     my $chunk = $self->{_frag} . $line;
     @lines = split /\012/, $chunk;
     
@@ -870,12 +870,9 @@ sub parse {
    
    print STDERR "<<< $line\n" if $self->{_debug};
    
+   $::lastline = $line; #this is so __WARN__ can print the last line received on IRC.
    # Like the RFC says: "respond as quickly as possible..."
-   if ($line =~ /^:(\S+) PONG (.*)/i) {
-     $self->parent->setcansend(1);
-     next;
-     #return;
-   } elsif ($line =~ /^PING/) {
+   if ($line =~ /^PING/) {
      $ev = (Net::IRC::Event->new( "ping",
                                   $self->server,
                                   $self->nick,
@@ -916,7 +913,13 @@ sub parse {
      $type = lc $type;
      # This should be fairly intuitive... (cperl-mode sucks, though)
      
-     if (defined $line and index($line, "\001") >= 0) {
+     # The order of this was changed by AfterDeath because a \x01 in a geco fucked shit up
+     if ($type eq "join" or $type eq "part" or
+              $type eq "mode" or $type eq "topic" or
+              $type eq "kick") {
+       $itype = "channel";
+     } elsif (defined $line and index($line, "\001") == 0) { #originally >=0. Hopefully this will fuck less shit up.
+#       print Dumper($from, $type, \@stuff, $line);
        $itype = "ctcp";
        unless ($type eq "notice") {
          $type = (($stuff[0] =~ tr/\#\&//) ? "public" : "msg");
@@ -925,16 +928,12 @@ sub parse {
        $itype = $type = (($stuff[0] =~ tr/\#\&//) ? "public" : "msg");
      } elsif ($type eq "notice") {
        $itype = "notice";
-     } elsif ($type eq "join" or $type eq "part" or
-              $type eq "mode" or $type eq "topic" or
-              $type eq "kick") {
-       $itype = "channel";
      } elsif ($type eq "nick") {
        $itype = "nick";
      } else {
        $itype = "other";
      }
-     
+
      # This goes through the list of ignored addresses for this message
      # type and drops out of the sub if it's from an ignored hostmask.
      
@@ -1000,12 +999,24 @@ sub parse {
                                   '',
                                   $type,
                                   $line);  
-     } elsif ($type eq "account") {
+     } elsif ($type eq "account") { #these next 3 event hooks added by AfterDeath
        $ev = Net::IRC::Event->new($type,
                                   $from,
                                   '',
                                   $type,
                                   @stuff);
+     } elsif ($type eq "cap") {
+       $ev = Net::IRC::Event->new($type,
+                                  $from,
+                                  '',
+                                  $type,
+                                  @stuff);
+     } elsif ($type eq "pong") {
+       $ev = Net::IRC::Event->new($type,
+                                  $from,
+                                  $self->{nick},
+                                  'server',
+                                  $stuff[1]);
      } else {
        carp "Unknown event type: $type";
      }
@@ -1055,7 +1066,7 @@ sub parse {
      $ev = 'done';
      $self->disconnect( 'error', ($line =~ /(.*)/) );
      
-   } 
+   }
    
    if ($ev) {
      
@@ -1397,6 +1408,7 @@ sub sl_real {
     $self->handler("sockerror");
     return;
   }
+  $self->{_tx} += (length($line) + 2);
   return $rv;
 }
 
@@ -1598,10 +1610,6 @@ sub _default {
     croak "You EEEEEDIOT!!! Not enough args to _default()!";
   }
   
-  #FIXME WHY IS THIS NECESSARY
-  if (!defined($event->type)) {
-    return 1;
-  }
   # Reply to PING from server as quickly as possible.
   if ($event->type eq "ping") {
     $self->sl("PONG " . (CORE::join ' ', $event->args));
@@ -1612,8 +1620,6 @@ sub _default {
     unless (keys %{$self->parent->{_connhash}} > 0) {
       die "No active connections left, exiting...\n";
     }
-  } elsif ($event->type eq "pong") {
-    $self->setcansend(1);
   }
   
   return 1;

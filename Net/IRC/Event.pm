@@ -189,6 +189,16 @@ sub userhost {
     return $self->{'userhost'};
 }
 
+#added by AfterDeath. Use this to reply to channel messages in channel, but private messages to the nick that sent it.
+sub replyto {
+    my $self = shift;
+    if ($self->{to}->[0] =~ /^#/) {
+      return $self->{to}->[0];
+    } else {
+      return $self->{nick};
+    }
+}
+
 # Simple sub for translating server numerics to their appropriate names.
 # Takes one arg:  the number to be translated.
 sub trans {
@@ -266,6 +276,7 @@ sub trans {
 	   259 => "adminemail",
 	   261 => "tracelog",
 	   262 => "endoftrace",  # 1997-11-24 -- archon
+           263 => "rpl_tryagain",
 	   265 => "n_local",     # 1997-10-16 -- tkil
 	   266 => "n_global",    # 1997-10-16 -- tkil
 	   271 => "silelist",		# Undernet Extension, Kajetan@Hinner.com, 17/10/98
@@ -305,6 +316,7 @@ sub trans {
 	   322 => "list",
 	   323 => "listend",
 	   324 => "channelmodeis",
+           328 => "channelurlis",
 	   329 => "channelcreate",  # 1997-11-24 -- archon
 	   331 => "notopic",
 	   332 => "topic",
@@ -353,6 +365,7 @@ sub trans {
 	   393 => "users",
 	   394 => "endofusers",
 	   395 => "nousers",
+           396 => "hosthidden",
 
 	   401 => "nosuchnick",
 	   402 => "nosuchserver",
@@ -451,6 +464,10 @@ sub trans {
            641 => "rpl_dumprpl",        # UnrealIrcd, Hendrik Frenzel
            642 => "rpl_eodump",         # UnrealIrcd, Hendrik Frenzel
 
+           716 => "rpl_ignored",
+
+           728 => "quietlist",
+           729 => "quietlistend",
            999 => "numericerror",           # Bahamut IRCD
            'pong' => "pong",
 	  );

@@ -22,7 +22,7 @@ use Net::IRC::Connection;
 use Net::IRC::EventQueue;
 use IO::Select;
 use Carp;
-use Data::Dumper;
+
 
 # grab the drop-in replacement for time() from Time::HiRes, if it's available
 BEGIN {
@@ -33,8 +33,7 @@ BEGIN {
 use strict;
 use vars qw($VERSION);
 
-$VERSION = "0.76";
-print $VERSION . "\n";
+$VERSION = "0.80";
 
 sub new {
   my $proto = shift;
@@ -49,8 +48,6 @@ sub new {
     '_read'             => IO::Select->new(),
     '_timeout'          => 1,
     '_write'            => IO::Select->new(),
-    '_cansend'          => 1,
-    '_sb'		=> 0,
   };
   
   bless $self, $proto;
@@ -66,20 +63,6 @@ sub outputqueue {
 sub schedulequeue {
   my $self = shift;
   return $self->{_schedulequeue};
-}
-
-sub cansend {
-  my $self = shift;
-  return $self->{_cansend};
-}
-
-sub setcansend {
-  my $self = shift;
-  my $bool = shift;
-  if ($bool == 1) {
-    $self->{_sb} = 0;
-  }
-  return $self->{_cansend}=$bool;
 }
 
 # Front end to addfh(), below. Sets it to read by default.
@@ -142,22 +125,12 @@ sub do_one_loop {
 
   $time = time();             # no use calling time() all the time.
 
-  if ( (!$self->outputqueue->is_empty) && ($self->cansend) ) {
+  if(!$self->outputqueue->is_empty) {
     my $outputevent = undef;
-#    my $sentbytes = 0;
     while(defined($outputevent = $self->outputqueue->head)
-          && $self->cansend) {
-      my $ltosend = length($outputevent->content->{args}->[1]);
-      if ($ltosend + $self->{_sb} > 1480 ) {
-#        $sock->send("PING :s\r\n");
-        $outputevent->content->{coderef}->(($outputevent->content->{args}->[0], "PING :s"));
-        $self->setcansend(0);
-      }
-      else {
-        $outputevent = $self->outputqueue->dequeue();
-        $outputevent->content->{coderef}->(@{$outputevent->content->{args}});
-        $self->{_sb} += 2 + $ltosend;
-      }
+          && $outputevent->time <= $time) {
+      $outputevent = $self->outputqueue->dequeue();
+      $outputevent->content->{coderef}->(@{$outputevent->content->{args}});
     }
     $nexttimer = $self->outputqueue->head->time if !$self->outputqueue->is_empty();
   }
@@ -305,7 +278,17 @@ __END__
 
 =head1 NAME
 
-Net::IRC - Perl interface to the Internet Relay Chat protocol
+Net::IRC - DEAD SINCE 2004 Perl interface to the Internet Relay Chat protocol
+
+=head1 USE THESE INSTEAD
+
+This module has been abandoned and is no longer developed. This release serves
+only to warn current and future users about this and to direct them to supported
+and actively-developed libraries for connecting Perl to IRC. Most new users will
+want to use L<Bot::BasicBot>, whereas more advanced users will appreciate the
+flexibility offered by L<POE::Component::IRC>. We understand that porting code
+to a new framework can be difficult. Please stop by #perl on irc.freenode.net
+and we'll be happy to help you out with bringing your bots into the modern era.
 
 =head1 SYNOPSIS
 
@@ -319,6 +302,11 @@ Net::IRC - Perl interface to the Internet Relay Chat protocol
     $irc->start;
 
 =head1 DESCRIPTION
+
+This module has been abandoned and deprecated since 2004. The original authors
+have moved onto L<POE::Component::IRC> and more modern techniques. This
+distribution is not maintained and only uploaded to present successively louder
+"don't use this" warnings to those unaware.
 
 Welcome to Net::IRC, a work in progress. First intended to be a quick tool
 for writing an IRC script in Perl, Net::IRC has grown into a comprehensive
