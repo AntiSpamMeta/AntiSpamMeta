@@ -35,14 +35,6 @@
     my $host = join('.', unpack('C4', pack('N', (hex($splitip[6] . $splitip[7])^hex('ffffffff')))));
     my $port = hex($splitip[5]) ^ hex('ffff');
     $conn->privmsg($event->replyto, "Source is $host:$port; teredo server in use is $server.");
-#hex('41379e76') ^ hex('ffffffff'); print join ('.', unpack('C4', pack('N', $ip))) . "\n"
-#join '.', unpack "C*", pack "H*", $ip;
-    #2001:0:4137:9e76:3094:127d:51a2:6952
-    #2001:0 - teredo marker
-    #4137:9e76 - teredo server
-    #3094 - teredo flags
-    #127d - xor 0xff - UDP port in use
-    #51a2:6952 - xor 0xff - source IP
   ]]>
   </command>
   <command cmd="^;status$">
@@ -197,9 +189,6 @@
       }
     }
     unless (defined($::sn{$nick})) {
-#      $conn->privmsg($event->replyto, "I don't see $nick in my state tracking database, so I can't run any queries on their info, sorry :(" .
-#        " You can try https://antispammeta.net/cgi-bin/secret/investigate.pl?nick=$nick instead!");
-# This message gets sent when ;investigate gets called above.
       return;
     }
     my $person = $::sn{$nick};
@@ -272,12 +261,7 @@
     $conn->privmsg($event->replyto, "Flags for NickServ account $nick set to $flags");
   ]]>
   </command>
-  <command cmd="^;user add (\S+) ?(\S*)$" flag="a">
-  <![CDATA[
-    $conn->privmsg($event->replyto, "This command has been deprecated");
-  ]]>
-  </command>
-  <command cmd="^;userx? flags (\S+) ?$">
+  <command cmd="^;userx flags (\S+) ?$">
   <![CDATA[
     my $nick = lc $1;
     if ( (defined($::sn{$nick}->{account})) && ( lc $::sn{$nick}->{account} ne $nick ) ) {
@@ -291,7 +275,7 @@
     }
   ]]>
   </command>
-  <command cmd="^;userx? flags (\S+) (\S+)$" flag="a">
+  <command cmd="^;userx flags (\S+) (\S+)$" flag="a">
   <![CDATA[
     my $nick = lc $1;
     my $flags = $2;
@@ -318,7 +302,7 @@
     $conn->privmsg($event->replyto, "Flags for $nick set to $flags");
   ]]>
   </command>
-  <command cmd="^;userx? del (\S+)$" flag="a">
+  <command cmd="^;userx del (\S+)$" flag="a">
   <![CDATA[
     my $nick = lc $1;
     delete($::users->{person}->{$nick});
@@ -337,7 +321,7 @@
       $conn->privmsg($event->replyto, "Error: $chan is linked to $link - use $link instead.");
       return;
     }
-    if ($level eq '') { $level = 'low'; }
+    if ($level eq '') { $level = 'debug'; }
     unless (defined($::channels->{channel}->{$chan}->{msgs})) {
       $::channels->{channel}->{$chan}->{msgs} = {};
     }
@@ -474,11 +458,6 @@
     $conn->quit($1);
   ]]>
   </command>
-  <command cmd="^;exit ?(.*)" flag="a">
-  <![CDATA[
-    $conn->quit($1);
-  ]]>
-  </command>
   <command cmd="^;ev (.*)" flag="d">
   <![CDATA[
     eval $1; warn $@ if $@;
@@ -509,11 +488,6 @@
     $conn->me($event->replyto, $1);
   ]]>
   </command>
-  <command cmd="^;exempt (.*)" flag="o">
-  <![CDATA[
-    $conn->privmsg($event->replyto, "This command is now deprecated. Use ;restrict nick/account/host lineToRestrict +notrigger instead, i.e. ;restrict account eir +notrigger");
-  ]]>
-  </command>
   <command cmd="^;restrict (nick|account|host) (\S+) (\+|-)([a-z]+)$" flag="o">
   <![CDATA[
     my ($type, $who, $mode, $restriction) = ($1, lc $2, $3, $4);
@@ -537,15 +511,6 @@
     $tgt = lc $1 if (defined($1));
     my $msg = $1;
     $msg = $2 if defined($2);
-    if ( 0 ) {
-       $conn->privmsg($event->{nick}, "I can't do that, Dave.");
-       $conn->schedule(3, sub { $conn->privmsg($event->{nick}, "As I've told you before, my master goes by the nick 'ow', and he does not believe you belong in the cool kids club."); });
-       $conn->schedule(9, sub { $conn->privmsg($event->{nick}, "He's come to learn that your mother was a hamster and your father smelt of elderberries."); });
-       $conn->schedule(15, sub { $conn->privmsg($event->{nick}, "Personally, I'm mad at you because you promised me sushi and all I got was fried green tomatoes!"); });
-       $conn->schedule(19, sub { $conn->privmsg($event->{nick}, "So seriously, just stop using this command. All it does is make me go on an irate tirade to you in PM."); });
-       $conn->schedule(22, sub { $conn->privmsg($event->{nick}, "Oh, and one last thing: SPEAK OF THIS TO NO ONE. If you provide screenshots, I'll just say they're faked."); });
-       $conn->schedule(600, sub { $conn->privmsg($event->{nick}, "OH! Laaaast thing, I promise. Next time you're upset with someone, leave the gun, take the cannoli."); });
-    }
     if (ASM::Util->notRestricted(lc $event->{nick}, "noops")) {
       my $tgt = lc $event->{to}->[0];
       $tgt = lc $1 if (defined($1));
@@ -611,8 +576,6 @@
   <command cmd="^;blacklist (.*)" flag="o">
   <![CDATA[
     my $str = lc $1;
-#    push(@::string_blacklist, $str);
-#    "$str\n" >> io 'string_blacklist.txt';
     use String::CRC32;
     my $id = sprintf("%08x", crc32($str));
     $::blacklist->{string}->{$id} = { "content" => $str, "setby" => $event->nick };
@@ -640,13 +603,7 @@
     $txtz = $txtz . ASM::Util->commaAndify(ASM::Util->getAlert(lc $chan, $risk, 'hilights')) if (ASM::Util->getAlert(lc $chan, $risk, 'hilights'));
     $txtz = $txtz . ' !att-' . $chan . '-' . $risk;
     my @tgts = ASM::Util->getAlert($chan, $risk, 'msgs');
-    if (length($txtz) <= 380) {
-      $conn->privmsg(\@tgts, $txtz);
-    } else {
-      my $splitpart = rindex($txtz, " ", 380);
-      $conn->privmsg(\@tgts, substr($txtz, 0, $splitpart));
-      $conn->privmsg(\@tgts, substr($txtz, $splitpart));
-    }
+    ASM::Util->sendLongMsg(\@tgts, $txtz);
   ]]>
   </command>
   <command cmd="^;sync (\S+)" flag="a">
