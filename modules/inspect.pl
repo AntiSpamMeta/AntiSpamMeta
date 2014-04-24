@@ -67,10 +67,6 @@ sub inspect {
   foreach $chan (@{$event->{to}}) {
     foreach $id ( keys %dct ) {
       return unless (ASM::Util->notRestricted($nick, "notrigger"));
-      if (defined($::eline{$nick}) || defined($::eline{lc $event->{user}}) || defined($::eline{lc $event->{host}})) {
-        say "Deprecated eline found for $nick / $event->{user} / $event->{host} !";
-        return;
-      }
       $xresult = $dct{$id}{xresult};
       my $nicereason = interpolate($dct{$id}{reason});
       $::db->record($chan, $event->{nick}, $event->{user}, $event->{host}, $::sn{lc $event->{nick}}->{gecos}, $dct{$id}{risk}, $id, $nicereason);

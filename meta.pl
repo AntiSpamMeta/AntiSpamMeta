@@ -19,7 +19,6 @@ use HTTP::Async;
 
 $Data::Dumper::Useqq=1;
 
-%::eline=();
 $::pass = '';
 @::nick_blacklist=();
 @::string_blacklist=();
@@ -110,11 +109,6 @@ sub init {
   $::commander = ASM::Commander->new();
   ASM::Event->new($conn, $::inspector);
   $::classes = ASM::Classes->new();
-  my @eline=io('exempt.txt')->getlines;
-  chomp @eline;
-  foreach my $item (@eline) {
-    $::eline{lc $item} = 1;
-  }
   my @strbl = io('string_blacklist.txt')->getlines;
   chomp @strbl;
   @::string_blacklist = @strbl;

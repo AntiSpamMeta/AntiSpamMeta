@@ -150,12 +150,6 @@ sub on_pong
       my @strbl = io('string_blacklist.txt')->getlines;
       chomp @strbl;
       @::string_blacklist = @strbl;
-#    my @eline=io('exempt.txt')->getlines;
-#    chomp @eline;
-#    %::eline = ();
-#    foreach my $item (@eline) {
-#        $::eline{lc $item} = 1;
-#    }
     }
   }
   if ($lag > 1) {
