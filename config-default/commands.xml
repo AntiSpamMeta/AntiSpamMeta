@@ -557,7 +557,7 @@
     my $str = lc $1;
     use String::CRC32;
     my $id = sprintf("%08x", crc32($str));
-    $::blacklist->{string}->{$id} = { "content" => $str, "setby" => $event->nick };
+    $::blacklist->{string}->{$id} = { "content" => $str, "setby" => $event->nick, "settime" => strftime('%F', gmtime) };
     ASM::XML->writeBlacklist();
     $conn->privmsg($event->replyto, "$str blacklisted with id $id, please use ;blreason $id reasonGoesHere to set a reason");
   ]]>
