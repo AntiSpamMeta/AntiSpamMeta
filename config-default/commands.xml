@@ -552,7 +552,7 @@
     }
   ]]>
   </command>
-  <command cmd="^;blacklist (.*)" flag="o">
+  <command cmd="^;blacklist (.*)" flag="s">
   <![CDATA[
     my $str = lc $1;
     use String::CRC32;
@@ -562,7 +562,7 @@
     $conn->privmsg($event->replyto, "$str blacklisted with id $id, please use ;blreason $id reasonGoesHere to set a reason");
   ]]>
   </command>
-  <command cmd="^;unblacklist ([0-9a-f]+)$" flag="o">
+  <command cmd="^;unblacklist ([0-9a-f]+)$" flag="s">
   <![CDATA[
     my $id = $1;
     if (defined($::blacklist->{string}->{$id})) {
@@ -598,7 +598,7 @@
     $conn->privmsg($event->replyto, "pong");
   ]]>
   </command>
-  <command cmd="^;blreason ([0-9a-f]+) (.*)" flag="o">
+  <command cmd="^;blreason ([0-9a-f]+) (.*)" flag="s">
   <![CDATA[
     my $id = $1; my $reason = $2;
     if (defined($::blacklist->{string}->{$id})) {
