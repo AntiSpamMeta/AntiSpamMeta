@@ -271,7 +271,7 @@ sub nickspam {
   if ( length $event->{args}->[0] >= int($cut[0]) ) {
     my %users = %{$::sc{lc $chan}->{users}};
     my %x = map { $_=>$_ } keys %users;
-    my @uniq = grep( $x{$_}, split( /[ ,]+/ , lc $event->{args}->[0]) );
+    my @uniq = grep( $x{$_}, split( /[^a-zA-Z0-9_\\|`[\]{}^-]+/ , lc $event->{args}->[0]) );
     return 1 if ( @uniq >= int($cut[1]) );
   }
   return 0;

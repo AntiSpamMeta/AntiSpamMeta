@@ -1,4 +1,20 @@
 <commands>
+  <command cmd=";wallop" flag="d">
+  <![CDATA[
+    my @chans = ();
+    foreach my $chan (keys %{$::channels->{channel}}) {
+      if (defined($::channels->{channel}->{$chan}->{msgs})) {
+        foreach my $risk (keys %{$::channels->{channel}->{$chan}->{msgs}}) {
+          push @chans, @{$::channels->{channel}->{$chan}->{msgs}->{$risk}};
+        }
+      }
+    }
+    my %uniq = ();
+    foreach my $chan (@chans) { $uniq{$chan} = 1; }
+    @chans = keys(%uniq);
+    print Dumper(\@chans);
+  ]]>
+  </command>
   <command cmd="^;;addwebuser (\S+)" flag="s">
   <![CDATA[
     my $pass = $1;
@@ -169,7 +185,7 @@
         ((lc $person->{gecos} ~~ $::mysql->{ignoredgecos}) ? '' : '&gecos=' . uri_escape($person->{gecos})) . $dq . ' )');
   ]]>
   </command>
-  <command cmd="^;investigate2 (\S+) ?(\d*)$" flag="s">
+  <command cmd="^;investigate2 (\S+) ?(\d*) *$" flag="s">
   <![CDATA[
     my $nick = lc $1;
     my $skip = 0;
@@ -263,10 +279,11 @@
       $conn->privmsg($event->replyto, "I'm assuming you mean " . $nick . "'s nickserv account, " . lc $::sn{$nick}->{account} . '.');
       $nick = lc $::sn{$nick}->{account};
     }
+    my $sayNick = substr($nick, 0, 1) . "\x02\x02" . substr($nick, 1);
     if (defined($::users->{person}->{$nick}->{flags})) {
-      $conn->privmsg($event->replyto, "Flags for $nick: $::users->{person}->{$nick}->{flags}");
+      $conn->privmsg($event->replyto, "Flags for $sayNick: $::users->{person}->{$nick}->{flags}");
     } else {
-      $conn->privmsg($event->replyto, "$nick has no flags");
+      $conn->privmsg($event->replyto, "$sayNick has no flags");
     }
   ]]>
   </command>
@@ -581,8 +598,8 @@
             "\x02($event->{nick} plugin)\x02 - ${reason}; ping ";
     $txtz = $txtz . ASM::Util->commaAndify(ASM::Util->getAlert(lc $chan, $risk, 'hilights')) if (ASM::Util->getAlert(lc $chan, $risk, 'hilights'));
     $txtz = $txtz . ' !att-' . $chan . '-' . $risk;
-    my @tgts = ASM::Util->getAlert($chan, $risk, 'msgs');
-    ASM::Util->sendLongMsg(\@tgts, $txtz);
+    my @tgts = ASM::Util->getAlert(lc $chan, $risk, 'msgs');
+    ASM::Util->sendLongMsg($conn, \@tgts, $txtz);
   ]]>
   </command>
   <command cmd="^;sync (\S+)" flag="a">
