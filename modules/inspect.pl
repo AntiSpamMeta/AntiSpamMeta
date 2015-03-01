@@ -6,6 +6,7 @@ use feature qw(say);
 use Data::Dumper;
 #use List::Util qw(first);
 use String::Interpolate qw(interpolate);
+use Carp qw(cluck);
 
 %::ignored = ();
 sub new
@@ -31,7 +32,9 @@ sub inspect {
       $rev = sprintf("%d.%d.%d.%d.", hex($4), hex($3), hex($2), hex($1));
     }
   }
-  else {
+  if ( (!defined($rev)) && ($event->{type} eq 'join') ) {
+# Only doing DNS lookups for join events will mean that DNSBL will break if we try to do it on something other than joins,
+# But it also means we cut back on the DNS lookups by a metric shitton
     $iaddr = gethostbyname($event->{host}) if ($event->{host} !~ /\//);
     $rev = join('.', reverse(unpack('C4', $iaddr))).'.' if (defined $iaddr);
   }
