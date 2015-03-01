@@ -102,12 +102,17 @@
      ", has sent $tx of data, and received $rx of data.");
   ]]>
   </command>
-  <command cmd="^;mship (\S+)$" flag="s">
+  <command cmd="^;mship (\S+)" flag="s">
   <![CDATA[
-    if (defined($::sn{lc $1}->{mship})) {
-      $conn->privmsg($event->replyto, $1 . " is on: " . ASM::Util->commaAndify(sort @{$::sn{lc $1}->{mship}}));
+    my $nick = $1;
+    if (defined($::sn{lc $nick}->{mship})) {
+      if ($event->{to}->[0] =~ /^#/) {
+        $conn->privmsg($event->replyto, $nick . " is on: " . ASM::Util->commaAndify(sort(grep { not grep { /^s$/ } @{$::sc{$_}{modes}} } @{$::sn{lc $nick}->{mship}})));
+      } else {
+        $conn->privmsg($event->replyto, $nick . " is on: " . ASM::Util->commaAndify(sort @{$::sn{lc $nick}->{mship}}));
+      }
     } else {
-      $conn->privmsg($event->replyto, "I don't see $1.");
+      $conn->privmsg($event->replyto, "I don't see $nick.");
     }
   ]]>
   </command>
