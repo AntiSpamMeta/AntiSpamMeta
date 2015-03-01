@@ -149,6 +149,20 @@
     }
   ]]>
   </command>
+  <command cmd="^;silence (\S+) ?(yes|no)?$" flag="a">
+  <![CDATA[
+    my $chan = lc $1;
+    if (defined($2)) {
+      my $switch = lc $2;
+      $::channels->{channel}->{$chan}->{silence} = $switch;
+      ASM::XML->writeChannels();
+      $conn->privmsg($event->replyto, "Silence flag for $chan set to $switch");
+    } else {
+      my $switch = $::channels->{channel}->{$chan}->{silence};
+      $conn->privmsg($event->replyto, "Silence flag for $chan is currently set to $switch");
+    }
+  ]]>
+  </command>
   <command cmd="^;help$">
   <![CDATA[
     $conn->privmsg($event->replyto, "Please refer to http://antispammeta.net and irc.freenode.net #antispammeta");
