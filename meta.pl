@@ -16,6 +16,7 @@ use Term::ANSIColor qw(:constants);
 use File::Monitor;
 use feature qw(say);
 use HTTP::Async;
+use Carp;
 
 $Data::Dumper::Useqq=1;
 
@@ -32,7 +33,7 @@ $::settingschanged = 0;
 
 ## debug variables. 0 to turn off debugging, else set it to a Term::ANSIColor constant.
 %::debugx = (
-  "dnsbl" => 0,
+  "dnsbl" => 0, # BLUE,
   "pingpong" => 0, #BLUE,
   "snotice" => YELLOW,
   "sync" => CYAN,
@@ -65,7 +66,8 @@ $SIG{__WARN__} = sub {
 
 sub alarmdeath
 {
-  die "SIG ALARM!!!\n";
+  $Data::Dumper::Useqq=1;
+  confess "SIG ALARM!!! last line: " . Dumper($::lastline);
 }
 $SIG{ALRM} = \&alarmdeath;
 alarm 300;
