@@ -1,12 +1,12 @@
 <dnsbl>
-  <query id="rbl.efnetrbl.org">
+  <query id="rbl.efnetrbl.org.">
     <response id="127.0.0.1">Open proxy</response>
     <response id="127.0.0.2">Trojan spreader</response>
     <response id="127.0.0.3">Trojan infected client</response>
     <response id="127.0.0.4">TOR exit server</response>
     <response id="127.0.0.5">Drones / Flooding</response>
   </query>
-  <query id="dnsbl.dronebl.org">
+  <query id="dnsbl.dronebl.org.">
     <response id="127.0.0.1">Testing data</response>
     <response id="127.0.0.2">Sample</response>
     <response id="127.0.0.3">IRC Drone</response>
@@ -22,19 +22,12 @@
 <!--    <response id="127.0.0.17">Automatically determined botnet IPs (experimental)</response> -->
     <response id="127.0.0.255">Unknown</response>
   </query>
-  <query id="dnsbl.proxybl.org">
+  <query id="dnsbl.proxybl.org.">
     <response id="127.0.0.2">Open Proxy</response>
   </query>
-  <query id="dnsbl.sorbs.net">
+  <query id="dnsbl.sorbs.net.">
     <response id="127.0.0.2">HTTP Proxy</response>
     <response id="127.0.0.3">SOCKS Proxy</response>
     <response id="127.0.0.4">Misc. proxy</response>
-  </query>
-  <query id="dnsbl.njabl.org">
-    <response id="127.0.0.9">Open proxy</response>
-  </query>
-  <query id="dnsbl.ahbl.org">
-    <response id="127.0.0.3">Open proxy cat 1</response>
-    <response id="127.0.0.19">Open proxy cat 2</response>
   </query>
 </dnsbl>
