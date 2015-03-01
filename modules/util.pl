@@ -6,6 +6,7 @@ use strict;
 use Term::ANSIColor qw (:constants);
 use Socket qw( inet_aton inet_ntoa );
 use Data::Dumper;
+use Carp qw(cluck);
 
 %::RISKS =
 (
@@ -112,6 +113,7 @@ sub speak
 
 #this item is a stub, dur
 sub hostip {
+  #cluck "Calling gethostbyname in hostip";
   return gethostbyname($_[0]);
 }
 
@@ -219,6 +221,7 @@ sub getHostIP
     my $host = join('.', unpack('C4', pack('N', (hex($splitip[6] . $splitip[7])^hex('ffffffff')))));
     return dottedQuadToInt(undef, $host);
   }
+  #cluck "Calling gethostbyname in getHostIP";
   my @resolve = gethostbyname($host);
   return unless @resolve;
   return dottedQuadToInt(undef, join('.', unpack('C4', $resolve[4])));
