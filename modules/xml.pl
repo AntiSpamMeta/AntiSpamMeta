@@ -63,7 +63,7 @@ sub writeRestrictions {
 
 sub writeBlacklist {
   $::settingschanged=1;
-  $::xs1->XMLout($::blacklist, RootName => 'blacklist', KeyAttr => ['id']) > io("$::cset/blacklist.xml");
+  $::xs1->XMLout($::blacklist, RootName => 'blacklist', KeyAttr => ['id'], NumericEscape => 2) > io("$::cset/blacklist.xml");
 }
 
 return 1;
