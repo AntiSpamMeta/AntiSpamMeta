@@ -125,18 +125,23 @@
     $::db->raw($conn, $event->{to}->[0], $dbh, $2);
   ]]>
   </command>
-  <command cmd="^;monitor (\S+) (yes|no)$" flag="a">
+  <command cmd="^;monitor (\S+) ?(yes|no)?$" flag="a">
   <![CDATA[
     my $chan = lc $1;
-    my $switch = lc $2;
     my $link = ASM::Util->getLink(lc $chan);
     if ( lc $link ne lc $chan ) {
       $conn->privmsg($event->replyto, "Error: $chan is linked to $link - use $link instead.");
       return;
     }
-    $::channels->{channel}->{$chan}->{monitor} = $switch;
-    ASM::XML->writeChannels();
-    $conn->privmsg($event->replyto, "Monitor flag for $chan set to $switch");
+    if (defined($2)) {
+      my $switch = lc $2;
+      $::channels->{channel}->{$chan}->{monitor} = $switch;
+      ASM::XML->writeChannels();
+      $conn->privmsg($event->replyto, "Monitor flag for $chan set to $switch");
+    } else {
+      my $switch = $::channels->{channel}->{$chan}->{monitor};
+      $conn->privmsg($event->replyto, "Monitor flag for $chan is currently set to $switch");
+    }
   ]]>
   </command>
   <command cmd="^;help$">
