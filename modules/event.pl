@@ -332,7 +332,7 @@ sub on_public
   $::sc{lc $event->{to}->[0]}{users}{lc $event->{nick}}{msgtime} = time;
   $::log->logg( $event );
   $::db->logg( $event );
-  if ($event->{args}->[0] =~ /(https?:\/\/bitly.com\/\w+|https?:\/\/bit.ly\/\w+|https?:\/\/j.mp\/\w+)/i) {
+  if ($event->{args}->[0] =~ /(https?:\/\/bitly.com\/\w+|https?:\/\/bit.ly\/\w+|https?:\/\/j.mp\/\w+|https?:\/\/tinyurl.com\/\w+)/i) {
     my $reqid = $::async->add( HTTP::Request->new( GET => $1 ) );
     $::httpRequests{$reqid} = $event;
     my ($response, $id) = $::async->wait_for_next_response( 1 );
