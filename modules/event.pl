@@ -727,7 +727,8 @@ sub on_banlist
   my ($conn, $event) = @_;
   my ($me, $chan, $ban, $banner, $bantime) = @{$event->{args}};
   $::sc{lc $chan}{bans}{$ban} = { bannedBy => $banner, bannedOn => $bantime };
-  if ($ban =~ /^\*\!\*\@(.*)$/) {
+  if ($ban =~ /^\*\!\*\@((([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9]))$/) {
+    # ASM::Util->dprint("banlist hostname $ban $1", 'sync');
     my $ip = ASM::Util->getHostIP($1);
     $::sc{lc $chan}{ipbans}{$ip} = { bannedBy => $banner, bannedOn => $bantime } if defined($ip);
   }
@@ -738,7 +739,8 @@ sub on_quietlist
   my ($conn, $event) = @_;
   my ($me, $chan, $mode, $ban, $banner, $bantime) = @{$event->{args}};
   $::sc{lc $chan}{quiets}{$ban} = { bannedBy => $banner, bannedOn => $bantime };
-  if ($ban =~ /^\*\!\*\@(.*)$/) {
+  if ($ban =~ /^\*\!\*\@((([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9]))$/) {
+    # ASM::Util->dprint("quietlist hostname $ban $1", 'sync');
     my $ip = ASM::Util->getHostIP($1);
     $::sc{lc $chan}{ipquiets}{$ip} = { bannedBy => $banner, bannedOn => $bantime } if defined($ip);
   }
