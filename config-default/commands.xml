@@ -632,7 +632,12 @@
     $conn->sl("WHO $chan %tcnuhra,314");
   ]]>
   </command>
-  <command cmd="^;ping$">
+  <command cmd="^;ping\s+(\S.*)$" flag="s">
+  <![CDATA[
+    $conn->privmsg($event->replyto, "pong $1");
+  ]]>
+  </command>
+  <command cmd="^;ping\s*$">
   <![CDATA[
     $conn->privmsg($event->replyto, "pong");
   ]]>
