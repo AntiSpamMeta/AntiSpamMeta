@@ -86,10 +86,10 @@ sub inspect {
          ) {
         my @tgts = ASM::Util->getAlert($chan, $dct{$id}{risk}, 'msgs');
         ASM::Util->sendLongMsg($conn, \@tgts, $txtz);
-        $conn->schedule(45, sub { delete($::ignored{$chan})}) unless defined($::ignored{$chan});
+        $conn->schedule(45, sub { delete($::ignored{$chan}) if $::ignored{$chan} == $::RISKS{$dct{$id}{risk}} });
         $::ignored{$chan} = $::RISKS{$dct{$id}{risk}};
       }
-#      $::log->incident($chan, "$chan: $dct{$id}{risk} risk: $event->{nick} - $nicereason\n");
+      $::log->incident($chan, "$chan: $dct{$id}{risk} risk: $event->{nick} - $nicereason\n");
       delete $dct{$id}{xresult};
     }
   }
