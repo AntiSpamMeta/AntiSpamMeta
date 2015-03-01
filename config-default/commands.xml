@@ -179,11 +179,11 @@
     my $dbh = $::db->{DBH};
 
     my $mnicks = $dbh->do("SELECT * from $::db->{ACTIONTABLE} WHERE nick like " .    $dbh->quote($nick) . ';');
-    my $musers = (lc $person->{user} ~~ $::mysql->{ignoredidents}) ? "didn't check" :
+    my $musers = (lc $person->{user} ~~ $::mysql->{ignoredidents}) ? "didn't check ($person->{user})" :
                  $dbh->do("SELECT * from $::db->{ACTIONTABLE} WHERE user like " .    $dbh->quote($person->{user}) . ';');
     my $mhosts = $dbh->do("SELECT * from $::db->{ACTIONTABLE} WHERE host like " .    $dbh->quote($person->{host}) . ';');
     my $maccts = $dbh->do("SELECT * from $::db->{ACTIONTABLE} WHERE account like " . $dbh->quote($person->{account}) . ';');
-    my $mgecos = (lc $person->{gecos} ~~ $::mysql->{ignoredgecos}) ? "didn't check" :
+    my $mgecos = (lc $person->{gecos} ~~ $::mysql->{ignoredgecos}) ? "didn't check ($person->{gecos})" :
                  $dbh->do("SELECT * from $::db->{ACTIONTABLE} WHERE gecos like " .   $dbh->quote($person->{gecos}) . ';');
 
     my $ip = ASM::Util->getNickIP($nick);
