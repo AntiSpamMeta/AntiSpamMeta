@@ -652,4 +652,22 @@
     } else { $conn->privmsg($event->replyto, "ID is invalid"); }
   ]]>
   </command>
+  <command cmd="^;bllookup ([0-9a-f]+)$" flag="s">
+  <![CDATA[
+    my $id = $1;
+    if (defined($::blacklist->{string}->{$id})) {
+      my $content = $::blacklist->{string}->{$id}->{content};
+      my $setby = $::blacklist->{string}->{$id}->{setby};
+      my $settime = $::blacklist->{string}->{$id}->{settime};
+      my $reason = $::blacklist->{string}->{$id}->{reason};
+      $reason = 'none ever provided' unless defined($reason);
+      $conn->privmsg($event->nick, "'$content' blacklisted by $setby on $settime with reason $reason");
+      if ($event->{to}->[0] =~ /^#/) {
+        $conn->privmsg($event->replyto, "Info on blacklist ID $id sent via PM");
+      }
+    } else {
+      $conn->privmsg($event->replyto, "ID is invalid");
+    }
+  ]]>
+  </command>
 </commands>
