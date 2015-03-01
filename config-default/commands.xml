@@ -144,7 +144,7 @@
       ASM::XML->writeChannels();
       $conn->privmsg($event->replyto, "Monitor flag for $chan set to $switch");
     } else {
-      my $switch = $::channels->{channel}->{$chan}->{monitor};
+      my $switch = $::channels->{channel}->{$chan}->{monitor} // 'yes';
       $conn->privmsg($event->replyto, "Monitor flag for $chan is currently set to $switch");
     }
   ]]>
@@ -158,7 +158,7 @@
       ASM::XML->writeChannels();
       $conn->privmsg($event->replyto, "Silence flag for $chan set to $switch");
     } else {
-      my $switch = $::channels->{channel}->{$chan}->{silence};
+      my $switch = $::channels->{channel}->{$chan}->{silence} // 'no';
       $conn->privmsg($event->replyto, "Silence flag for $chan is currently set to $switch");
     }
   ]]>
