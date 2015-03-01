@@ -34,6 +34,18 @@
     $conn->privmsg($event->replyto, "Added $user to the list of authorized web users.")
   ]]>
   </command>
+  <command cmd="^;delwebuser (\S+)" flag="a">
+  <![CDATA[
+    my $user = $1;
+    use Apache::Htpasswd; use Apache::Htgroup;
+    my $o_Htpasswd = new Apache::Htpasswd({passwdFile => $::settings->{web}->{userfile}, UseMD5 => 1});
+    my $o_Htgroup = new Apache::Htgroup($::settings->{web}->{groupfile});
+    $o_Htpasswd->htDelete($user);
+    $o_Htgroup->deleteuser($user, 'actionlogs');
+    $o_Htgroup->save();
+    $conn->privmsg($event->replyto, "Removed $user from the list of authorized web users.")
+  ]]>
+  </command>
   <command cmd="^;teredo (\S+)">
   <![CDATA[
     my $arg1 = $1;
