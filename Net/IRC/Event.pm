@@ -192,7 +192,7 @@ sub userhost {
 #added by AfterDeath. Use this to reply to channel messages in channel, but private messages to the nick that sent it.
 sub replyto {
     my $self = shift;
-    if ($self->{to}->[0] =~ /^#/) {
+    if ($self->{to}->[0] =~ /^[+@#&%]/) {
       return $self->{to}->[0];
     } else {
       return $self->{nick};
