@@ -60,9 +60,7 @@ sub logg
   {
     $chan = lc $chan;
     next if ($chan eq '$$*');
-    if (substr($chan, 0, 1) eq '@') {
-      $chan = substr($chan, 1);
-    }
+    $chan =~ s/^[@+]//;
     if ($chan eq '*') {
       ASM::Util->dprint("$event->{nick}: $event->{args}->[0]", 'snotice');
       next;

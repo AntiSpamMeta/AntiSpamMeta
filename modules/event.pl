@@ -12,6 +12,7 @@ use HTTP::Request;
 sub cs {
   my ($chan) = @_;
   $chan = lc $chan;
+  $chan =~ s/^[@+]//;
   return $::channels->{channel}->{$chan} if ( defined($::channels->{channel}->{$chan}) );
   return $::channels->{channel}->{default};
 }
@@ -329,7 +330,9 @@ sub on_public
 {
   my ($conn, $event) = @_;
 #  alarm 200;
-  $::sc{lc $event->{to}->[0]}{users}{lc $event->{nick}}{msgtime} = time;
+  my $chan = lc $event->{to}[0];
+  $chan =~ s/^[+@]//;
+  $::sc{$chan}{users}{lc $event->{nick}}{msgtime} = time;
   $::log->logg( $event );
   $::db->logg( $event );
   if ($event->{args}->[0] =~ /(https?:\/\/bitly.com\/\w+|https?:\/\/bit.ly\/\w+|https?:\/\/j.mp\/\w+|https?:\/\/tinyurl.com\/\w+)/i) {

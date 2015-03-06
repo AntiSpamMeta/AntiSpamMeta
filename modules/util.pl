@@ -70,6 +70,7 @@ sub maxlen {
 sub cs {
   my ($module, $chan) = @_;
   $chan = lc $chan;
+  $chan =~ s/^[@+]//;
   return $::channels->{channel}->{default} unless defined($::channels->{channel}->{$chan});
   if ( defined($::channels->{channel}->{$chan}->{link}) ) {
     return $::channels->{channel}->{ $::channels->{channel}->{$chan}->{link} };
@@ -81,6 +82,7 @@ sub getLink
 {
   my ($module, $chan) = @_;
   $chan = lc $chan;
+  $chan =~ s/^[@+]//;
   my $link = $::channels->{channel}->{$chan}->{link};
   if ( defined($link) ) {
     return $link;
@@ -92,6 +94,7 @@ sub speak
 {
   my ($module, $chan) = @_;
   $chan = lc $chan;
+  $chan =~ s/^[@+]//;
   if ( defined($::channels->{channel}->{$chan}->{silence}) ) {
     if ($::channels->{channel}->{$chan}->{silence} eq "no") {
       return 1;
@@ -134,6 +137,7 @@ sub getAlert {
   my @disable = ();
   my @x = ();
   $c = lc $c;
+  $c =~ s/^[@+]//;
   foreach my $prisk ( keys %::RISKS) {
     if ( $::RISKS{$risk} >= $::RISKS{$prisk} ) {
       push( @x, @{$::channels->{channel}->{master}->{$t}->{$prisk}} ) if defined $::channels->{channel}->{master}->{$t}->{$prisk};
