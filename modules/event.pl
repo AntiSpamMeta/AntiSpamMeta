@@ -332,7 +332,6 @@ sub on_public
 #  alarm 200;
   my $chan = lc $event->{to}[0];
   $chan =~ s/^[+@]//;
-  $::sc{$chan}{users}{lc $event->{nick}}{msgtime} = time;
   $::log->logg( $event );
   $::db->logg( $event );
   if ($event->{args}->[0] =~ /(https?:\/\/bitly.com\/\w+|https?:\/\/bit.ly\/\w+|https?:\/\/j.mp\/\w+|https?:\/\/tinyurl.com\/\w+)/i) {
@@ -346,6 +345,7 @@ sub on_public
   }
   $::inspector->inspect( $conn, $event );
   $::commander->command( $conn, $event );
+  $::sc{$chan}{users}{lc $event->{nick}}{msgtime} = time;
 }
 
 sub checkHTTP

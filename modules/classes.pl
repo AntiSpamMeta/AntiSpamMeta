@@ -312,6 +312,12 @@ sub splitflood {
     $text=$event->{args}->[0];
   }
   return unless defined($text);
+  # a bit ugly but this should avoid alerting on spammy bot commands
+  # give them the benefit of the doubt if they talked before ... but not too recently
+  # if we didn't see them join, assume they did talk at some point
+  my $msgtime = $::sc{$chan}{users}{lc $event->{nick}}{msgtime} // 0;
+  $msgtime ||= 1 if !$::sc{$chan}{users}{lc $event->{nick}}{jointime};
+  return if $text =~ /^[^\w\s]+\w+\s*$/ && $msgtime && ($msgtime + 2 * $cf{$id}{timeout}) < time;
 #  return unless length($text) >= 10;
   if (defined($bs{$id}{$text}) && (time <= $bs{$id}{$text} + 600)) {
     return 1;
