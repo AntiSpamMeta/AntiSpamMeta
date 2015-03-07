@@ -52,9 +52,8 @@ sub record
 {
   my $self = shift;
   my ($channel, $nick, $user, $host, $gecos, $level, $id, $reason) = @_;
-  if (! defined($gecos)) {
-    $gecos = "NOT_DEFINED";
-  }
+  $gecos //= "NOT_DEFINED";
+
   my $dbh = $self->{DBH};
   $dbh->do("INSERT INTO $self->{TABLE} (channel, nick, user, host, gecos, level, id, reason) VALUES (" .
              $dbh->quote($channel) . ", " . $dbh->quote($nick) . ", " . $dbh->quote($user) .
@@ -112,20 +111,20 @@ sub actionlog
   return unless defined($action);
 #  $bynick = lc $bynick if defined $bynick; #we will lowercase the NUHGA info later.
   if ( (defined($bynick)) && (defined($::sn{lc $bynick})) ) { #we have the nick taking the action available, fill in missing NUHGA info
-    $byuser = $::sn{lc $bynick}{user} unless defined($byuser);
-    $byhost = $::sn{lc $bynick}{host} unless defined($byhost);
-    $bygecos = $::sn{lc $bynick}{gecos} unless defined($bygecos);
-    $byaccount = $::sn{lc $bynick}{account} unless defined($byaccount);
+    $byuser //= $::sn{lc $bynick}{user};
+    $byhost //= $::sn{lc $bynick}{host};
+    $bygecos //= $::sn{lc $bynick}{gecos};
+    $byaccount //= $::sn{lc $bynick}{account};
     if (($byaccount eq '0') or ($byaccount eq '*')) {
       $byaccount = undef;
     }
   }
 #  $nick = lc $nick if defined $nick;
   if ( (defined($nick)) && (defined($::sn{lc $nick})) ) { #this should always be true, else something has gone FUBAR
-    $user = $::sn{lc $nick}{user} unless defined($user);
-    $host = $::sn{lc $nick}{host} unless defined($host);
-    $gecos = $::sn{lc $nick}{gecos} unless defined($gecos);
-    $account = $::sn{lc $nick}{account} unless defined($account);
+    $user //= $::sn{lc $nick}{user};
+    $host //= $::sn{lc $nick}{host};
+    $gecos //= $::sn{lc $nick}{gecos};
+    $account //= $::sn{lc $nick}{account};
     if (($account eq '0') or ($account eq '*')) {
       $account = undef;
     }

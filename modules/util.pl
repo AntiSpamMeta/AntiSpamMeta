@@ -239,7 +239,7 @@ sub getNickIP
   if (defined($::sn{$nick}{ip})) {
     return $::sn{$nick}{ip};
   }
-  $host = $::sn{$nick}{host} if (!defined($host));
+  $host //= $::sn{$nick}{host};
   my $ip = getHostIP(undef, $host);
   if (defined($ip)) {
     $::sn{$nick}{ip} = $ip;
