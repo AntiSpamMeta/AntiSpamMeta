@@ -474,16 +474,19 @@
   </command>
   <command cmd="^;join (\S+)" flag="a">
   <![CDATA[
-    my $chan = $1;
+    my $chan = lc $1;
+    use List::Util qw(none);
     unless (defined($::channels->{channel}->{$chan})) {
       $::channels->{channel}->{$chan} = { };
       ASM::XML->writeChannels();
     }
     $conn->join($chan);
     my @autojoins = @{$::settings->{autojoins}};
-    @autojoins = (@autojoins, $chan);
-    $::settings->{autojoins} = \@autojoins;
-    ASM::XML->writeSettings();
+    if (none { $chan eq lc $_ } @autojoins) {
+      @autojoins = (@autojoins, $chan);
+      $::settings->{autojoins} = \@autojoins;
+      ASM::XML->writeSettings();
+    }
   ]]>
   </command>
   <command cmd="^;part (\S+)" flag="a">
