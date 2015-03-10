@@ -475,14 +475,13 @@
   <command cmd="^;join (\S+)" flag="a">
   <![CDATA[
     my $chan = lc $1;
-    use List::Util qw(none);
     unless (defined($::channels->{channel}->{$chan})) {
       $::channels->{channel}->{$chan} = { };
       ASM::XML->writeChannels();
     }
     $conn->join($chan);
     my @autojoins = @{$::settings->{autojoins}};
-    if (none { $chan eq lc $_ } @autojoins) {
+    if (!grep { $chan eq lc $_ } @autojoins) {
       @autojoins = (@autojoins, $chan);
       $::settings->{autojoins} = \@autojoins;
       ASM::XML->writeSettings();
