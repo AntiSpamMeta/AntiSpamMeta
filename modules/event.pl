@@ -496,6 +496,12 @@ sub on_nick {
       push ( @channels, $chan );
     }
   }
+
+  # unfortunately Net::IRC sucks at IRC so we have to implement this ourselves
+  if ($oldnick eq lc $conn->{_nick}) {
+    $conn->{_nick} = $event->{args}[0];
+  }
+ 
   $::sn{$newnick} = $::sn{$oldnick} if ($oldnick ne $newnick);
   $::db->logg( $event );
   delete( $::sn{$oldnick}) if ($oldnick ne $newnick);
