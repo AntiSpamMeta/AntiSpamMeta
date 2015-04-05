@@ -72,7 +72,7 @@ sub inspect {
   my $evhost = $event->{host};
   foreach $chan (@{$event->{to}}) {
     foreach $id ( keys %dct ) {
-      return unless (ASM::Util->notRestricted($nick, "notrigger"));
+      return unless (ASM::Util->notRestricted($nick, "notrigger") && ASM::Util->notRestricted($nick, "no$id"));
       $xresult = $dct{$id}{xresult};
       my $nicereason = interpolate($dct{$id}{reason});
       $::db->record($chan, $event->{nick}, $event->{user}, $event->{host}, $::sn{lc $event->{nick}}->{gecos}, $dct{$id}{risk}, $id, $nicereason);
