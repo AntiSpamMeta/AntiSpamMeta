@@ -43,7 +43,7 @@ sub inspect {
   foreach $chan ( @{$event->{to}} ) {
     # don't do anything for channels we haven't synced yet
     # because we can't yet respect stuff like notrigger for these
-    next unless $::synced{$chan};
+    next unless $::synced{lc $chan};
     next unless $chan =~ /^#/;
     next if ((defined($::channels->{channel}->{$chan}->{monitor})) and ($::channels->{channel}->{$chan}->{monitor} eq "no"));
     foreach $id (keys %aonx) {

@@ -815,7 +815,7 @@ sub on_whoxover
 {
   my ($conn, $event) = @_;
   my $chan = pop @::syncqueue;
-  $::synced{$event->{args}->[1]} = 1;
+  $::synced{lc $event->{args}->[1]} = 1;
   if (defined($chan) ){
     $conn->sl('who ' . $chan . ' %tcnuhra,314');
     $conn->sl('mode ' . $chan);
