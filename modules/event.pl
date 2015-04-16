@@ -613,7 +613,7 @@ sub whoGotHit
     my $regex = $cvt->convert($div[0]);
     foreach my $nick (keys %::sn) { 
       next unless defined($::sn{$nick}{user});
-      if (lc ($nick.'!'.$::sn{$nick}{user}.'@'.$::sn{$nick}{host}) =~ lc $regex) {
+      if (lc ($nick.'!'.$::sn{$nick}{user}.'@'.$::sn{$nick}{host}) =~ /^$regex$/i) {
         push @affected, $nick if defined($::sc{$chan}{users}{$nick});
       }
     }
@@ -622,7 +622,7 @@ sub whoGotHit
     my $regex = $cvt->convert($div[0]);
     foreach my $nick (keys %::sn) {
       next unless defined($::sn{$nick}{account});
-      if (lc ($::sn{$nick}{account}) =~ lc $regex) {
+      if (lc ($::sn{$nick}{account}) =~ /^$regex$/i) {
         push @affected, $nick if defined($::sc{$chan}{users}{$nick});
       }
     }
