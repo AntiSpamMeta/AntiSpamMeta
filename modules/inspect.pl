@@ -93,7 +93,6 @@ sub inspect {
         $::ignored{$chan} = $::RISKS{$dct{$id}{risk}};
       }
       $::log->incident($chan, "$chan: $dct{$id}{risk} risk: $event->{nick} - $nicereason\n");
-      delete $dct{$id}{xresult};
     }
   }
 }
