@@ -726,7 +726,7 @@ sub checkRegged
     my $tgt = $chan;
     my $risk = "debug";
     my $hilite=ASM::Util->commaAndify(ASM::Util->getAlert($tgt, $risk, 'hilights'));
-    my $txtz  ="\x03" . $::RCOLOR{$::RISKS{$risk}} . "\u$risk\x03 risk threat [\x02$chan\x02] - channel appears to still be +r after 45 minutes; ping $hilite";
+    my $txtz  ="\x03" . $::RCOLOR{$::RISKS{$risk}} . "\u$risk\x03 risk threat [\x02$chan\x02] - channel appears to still be +r after 45 minutes; ping $hilite !att-$chan-$risk";
     my @tgts = ASM::Util->getAlert($tgt, $risk, 'msgs');
     ASM::Util->sendLongMsg($conn, \@tgts, $txtz)
   }
