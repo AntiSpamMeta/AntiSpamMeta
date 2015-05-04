@@ -720,7 +720,9 @@ sub on_mode
 sub checkRegged
 {
   my ($conn, $chan) = @_;
-  if (grep {/^r/} @{$::sc{$chan}{modes}}) {
+  if (grep {/^r/} @{$::sc{$chan}{modes}}
+        and not ((defined($::channels->{channel}{$chan}{monitor})) and ($::channels->{channel}{$chan}{monitor} eq "no")) )
+  {
     my $tgt = $chan;
     my $risk = "debug";
     my $hilite=ASM::Util->commaAndify(ASM::Util->getAlert($tgt, $risk, 'hilights'));
