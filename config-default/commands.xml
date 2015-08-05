@@ -356,7 +356,7 @@
     delete($::users->{person}->{$nick});
     ASM::XML->writeUsers();
     $conn->privmsg($event->replyto, "Removed $nick from authorized users." .
-      "MAKE SURE YOU PROVIDED a nickserv account to this command, rather than the nick the accountholder");
+      " MAKE SURE YOU PROVIDED a nickserv account to this command, rather than the nick the accountholder");
   ]]>
   </command>
   <command cmd="^;target (\S+) (\S+) ?(\S*)$" flag="a">
@@ -522,7 +522,7 @@
     $conn->privmsg($event->replyto, 'config files were re-read');
   ]]>
   </command>
-  <command cmd="^;restrict (nick|account|host) (\S+) (\+|-)([a-z]+)$" flag="a">
+  <command cmd="^;restrict (nick|account|host) (\S+) (\+|-)([a-z0-9_-]+)$" flag="a">
   <![CDATA[
     my ($type, $who, $mode, $restriction) = ($1, lc $2, $3, $4);
     if ($mode eq '-') {
@@ -689,6 +689,11 @@
     } else {
       $conn->privmsg($event->replyto, "ID is invalid");
     }
+  ]]>
+  </command>
+  <command cmd="^;falsematch\b" flag="s">
+  <![CDATA[
+    $conn->privmsg($event->replyto, 'To whitelist false matches for the impersonation check, have someone with the a flag run ";restrict nick LegitimateNickGoesHere +nonickbl_impersonate". Contact ilbelkyr if this issue reoccurs.');
   ]]>
   </command>
 </commands>

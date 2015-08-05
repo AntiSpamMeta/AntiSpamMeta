@@ -45,7 +45,7 @@ sub command
     if ($cmd=~/$command->{cmd}/) {
       ASM::Util->dprint("$event->{from} told me: $cmd", "commander");
       if (!ASM::Util->notRestricted($nick, "nocommands")) {
-        $fail = 1 unless (defined($command->{nohush}) && ($command->{nohush} eq "nohush"));
+        $fail = 1;
       }
       if ($fail == 1) {
         $conn->privmsg($nick, "You don't have permission to use that command, or you're not signed into nickserv.");

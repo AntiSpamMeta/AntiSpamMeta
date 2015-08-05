@@ -227,7 +227,7 @@ sub on_account
 
 sub on_connect {
   my ($conn, $event) = @_; # need to check for no services
-  $conn->sl("MODE $event->{args}->[0] +Q-i");
+  $conn->sl("MODE $event->{args}->[0] +Q");
   if (lc $event->{args}->[0] ne lc $::settings->{nick}) {
     ASM::Util->dprint('Attempting to regain my main nick', 'startup');
     $conn->privmsg( 'NickServ@services.', "regain $::settings->{nick} $::settings->{pass}" );
