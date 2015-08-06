@@ -48,7 +48,6 @@ sub inspect {
     next if ((defined($::channels->{channel}->{$chan}->{monitor})) and ($::channels->{channel}->{$chan}->{monitor} eq "no"));
     foreach $id (keys %aonx) {
       next unless ( grep { $event->{type} eq $_ } split(/[,:; ]+/, $aonx{$id}{type}) );
-      next if ($aonx{$id}{class} eq 'dnsbl') && ($event->{host} =~ /(fastwebnet\.it|fastres\.net)$/); #this is a bad hack
       if (defined($response)) {
         if ($aonx{$id}{class} ne 'urlcrunch') { next; } #don't run our regular checks if this is being called from a URL checking function
         else { $xresult = $::classes->check($aonx{$id}{class}, $aonx{$id}, $id, $event, $chan, $response); }

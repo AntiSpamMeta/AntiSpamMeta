@@ -198,7 +198,7 @@ sub dnsbl
     my $strip;
     if (@dnsbl) {
       $strip = sprintf("%s.%s.%s.%s", @dnsbl);
-      ASM::Util->dprint("found host (rev $rev) in $chk->{content} - $strip", 'dnsbl') unless ($strip eq '216.234.246.150');
+      ASM::Util->dprint("found host (rev $rev) in $chk->{content} - $strip", 'dnsbl');
     }
     if ((@dnsbl) && (defined($::dnsbl->{query}->{$chk->{content}}->{response}->{$strip}))) {
       $::lastlookup=$::dnsbl->{query}->{$chk->{content}}->{response}->{$strip}->{content};
