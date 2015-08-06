@@ -269,30 +269,29 @@ sub getNickIP
 sub notRestricted {
   my ($module, $nick, $restriction) = @_;
   $nick = lc $nick;
-  my $host = $::sn{$nick}{host};
+  my $host = lc $::sn{$nick}{host};
   my $account = lc $::sn{$nick}{account};
-  my $ret = 1;
-  if (defined($::restrictions->{nicks}->{nick}->{$nick})) {
-    if (defined($::restrictions->{nicks}->{nick}->{$nick}->{$restriction})) {
-      $ret= 0;
+  foreach my $regex (keys %{$::restrictions->{nicks}->{nick}}) {
+    if ($nick =~ /^$regex$/i && defined($::restrictions->{nicks}->{nick}->{$regex}->{$restriction})) {
+      dprint("blah", "Restriction $restriction found for $nick (nick $regex)", "restrictions");
+      return 0;
     }
   }
   if ((defined($host)) && (defined($account))) {
-    if (defined($::restrictions->{accounts}->{account}->{$account})) {
-      if (defined($::restrictions->{accounts}->{account}->{$account}->{$restriction})) {
-        $ret= 0;
+    foreach my $regex (keys %{$::restrictions->{accounts}->{account}}) {
+      if ($account =~ /^$regex$/i && defined($::restrictions->{accounts}->{account}->{$regex}->{$restriction})) {
+        dprint("blah", "Restriction $restriction found for $nick (account $regex)", "restrictions");
+        return 0;
       }
     }
-    if (defined($::restrictions->{hosts}->{host}->{$host})) {
-      if (defined($::restrictions->{hosts}->{host}->{$host}->{$restriction})) {
-        $ret= 0;
+    foreach my $regex (keys %{$::restrictions->{hosts}->{host}}) {
+      if ($host =~ /^$regex$/i && defined($::restrictions->{hosts}->{host}->{$regex}->{$restriction})) {
+        dprint("blah", "Restriction $restriction found for $nick (host $regex)", "restrictions");
+        return 0;
       }
     }
   }
-  if ($ret == 0) {
-    dprint("blah", "Restriction $restriction found for $nick", "restrictions");;
-  }
-  return $ret;
+  return 1;
 }
 
 return 1;
