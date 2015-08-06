@@ -159,7 +159,7 @@ sub on_pong
   if (($pongcount % 3) == 0) { #easiest way to do something roughly every 90 seconds
     $conn->sl('STATS p');
   }
-  if ((time - $::starttime) < 60 ) {
+  if ((time - $::starttime) < 240 ) {
     return; #we don't worry about lag if we've just started up and are still syncing etc.
   }
   if (($lag > 2) && ($lag < 5)) {
@@ -171,12 +171,12 @@ sub on_pong
       $conn->quit("Automatic restart triggered due to persistent lag. Freenode staff: If this is happening too frequently, please " .
                   "set a nickserv freeze on my account, and once my connection is stable, unfreeze the account and /kill me to tri" .
                   "gger a reconnect.");
-    } elsif ($lagcycles >=2) {
+    } else {
       $conn->privmsg( $::settings->{masterchan}, "Warning: I'm currently lagging by $lag seconds. This marks heavy lag cycle " .
                       "$lagcycles - automatic restart will be triggered after 3 lag cycles." );
     }
   }
-  if (($lag <= 2) && ($lagcycles > 0)) {
+  if (($lag <= 5) && ($lagcycles > 0)) {
     $lagcycles--;
 #    $conn->privmsg( $::settings->{masterchan}, "Warning: Heavy lag cycle count has been reduced to $lagcycles" );
     ASM::Util->dprint('$lag = ' . $lag . '; $lagcycles = ' . $lagcycles, 'latency');
