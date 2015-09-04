@@ -275,7 +275,7 @@ sub on_join {
   $::sn{$nick}->{user} = $event->{user};
   $::sn{$nick}->{host} = $event->{host};
   $::sn{$nick}->{account} = lc $event->{args}->[0];
-  $::db->logg($event);
+  $::db->logg($event) if defined $::db;
   $::log->logg( $event );
   $::inspector->inspect( $conn, $event ) unless $::netsplit;
 }
@@ -286,8 +286,8 @@ sub on_part
   my $nick = lc $event->{nick};
   my $chan = lc $event->{to}->[0];
   $::log->logg( $event );
-  $::db->logg( $event );
-  if ($event->{args}->[0] =~ /^requested by/) {
+  $::db->logg( $event ) if defined $::db;
+  if (defined $::db and $event->{args}->[0] =~ /^requested by/) {
     my $idx = $::db->actionlog( $event);
     $::log->sqlIncident($chan, $idx) if $idx;
   }
@@ -333,7 +333,7 @@ sub on_public
   my $chan = lc $event->{to}[0];
   $chan =~ s/^[+@]//;
   $::log->logg( $event );
-  $::db->logg( $event );
+  $::db->logg( $event ) if defined $::db;
   if ($event->{args}->[0] =~ /(https?:\/\/bitly.com\/\w+|https?:\/\/bit.ly\/\w+|https?:\/\/j.mp\/\w+|https?:\/\/tinyurl.com\/\w+)/i) {
     my $reqid = $::async->add( HTTP::Request->new( GET => $1 ) );
     $::httpRequests{$reqid} = $event;
@@ -372,7 +372,7 @@ sub on_notice
   my ($conn, $event) = @_;
   return if ( $event->{to}->[0] eq '$*' ); # if this is a global notice FUCK THAT SHIT
   $::log->logg( $event );
-  $::db->logg( $event );
+  $::db->logg( $event ) if defined $::db;
   $::inspector->inspect( $conn, $event );
   $::services->doServices($conn, $event);
 }
@@ -401,9 +401,11 @@ sub on_quit
     push ( @channels, lc $_ ) if delete $::sc{lc $_}{users}{lc $event->{nick}};
   }
   $event->{to} = \@channels;
-  my $idx = $::db->actionlog($event);
-  $::log->sqlIncident( join(',', @channels), $idx ) if $idx;
-  $::db->logg( $event );
+  if (defined $::db) {
+      my $idx = $::db->actionlog($event);
+      $::log->sqlIncident( join(',', @channels), $idx ) if $idx;
+      $::db->logg( $event );
+  }
   $::log->logg( $event );
 
   if (($::netsplit == 0) && ($event->{args}->[0] eq "*.net *.split") && (lc $event->{nick} ne 'chanserv')) { #special, netsplit situation
@@ -472,7 +474,7 @@ sub irc_topic {
       $::sc{$chan}{topic}{by} = $event->{from};
     }
     $::log->logg($event);
-    $::db->logg( $event );
+    $::db->logg( $event ) if defined $::db;
     $::inspector->inspect($conn, $event);
   }
 }
@@ -503,7 +505,7 @@ sub on_nick {
   }
  
   $::sn{$newnick} = $::sn{$oldnick} if ($oldnick ne $newnick);
-  $::db->logg( $event );
+  $::db->logg( $event ) if defined $::db;
   delete( $::sn{$oldnick}) if ($oldnick ne $newnick);
   $event->{to} = \@channels;
   $::log->logg($event);
@@ -519,9 +521,11 @@ sub on_kick {
   my $nick = lc $event->{to}->[0];
   my $chan = lc $event->{args}->[0];
   $::log->logg( $event );
-  $::db->logg( $event );
-  my $idx = $::db->actionlog($event);
-  $::log->sqlIncident($chan, $idx) if $idx;
+  if (defined $::db) {
+      $::db->logg( $event );
+      my $idx = $::db->actionlog($event);
+      $::log->sqlIncident($chan, $idx) if $idx;
+  }
   if (defined($::sn{$nick}) && defined($::sn{$nick}->{mship})) {
     my @mship = @{$::sn{$nick}->{mship}};
     @mship = grep { lc $_ ne $chan } @mship;
@@ -654,7 +658,7 @@ sub on_mode
         $::sc{$chan}{bans}{$ex[1]} = { bannedBy => $event->{from}, bannedOn => time };
         if (lc $event->{nick} !~ /^(floodbot)/) { #ignore the ubuntu floodbots 'cause they quiet people a lot
           my @affected = whoGotHit($chan, $ex[1]);
-          if ( (@affected) && (scalar @affected <= 4) ) {
+          if ( defined($::db) && (@affected) && (scalar @affected <= 4) ) {
             foreach my $victim (@affected) {
               my $idx = $::db->actionlog($event, 'ban', $victim);
               $::log->sqlIncident( $chan, $idx ) if $idx;
@@ -678,7 +682,7 @@ sub on_mode
         $::sc{$chan}{quiets}{$ex[1]} = { bannedBy => $event->{from}, bannedOn => time };
         if (lc $event->{nick} !~ /^(floodbot)/) {
           my @affected = whoGotHit($chan, $ex[1]);
-          if ( (@affected) && (scalar @affected <= 4) ) {
+          if ( defined($::db) && (@affected) && (scalar @affected <= 4) ) {
             foreach my $victim (@affected) {
               my $idx = $::db->actionlog($event, 'quiet', $victim);
               $::log->sqlIncident( $chan, $idx ) if $idx;

@@ -94,9 +94,11 @@ sub init {
   $host = ${$::settings->{server}}[rand @{$::settings->{server}}];
   ASM::Util->dprint( "Connecting to $host", "startup");
   $irc->debug($::debug);
-  $::db = ASM::DB->new($::mysql->{db}, $::mysql->{host}, $::mysql->{port},
-                       $::mysql->{user}, $::mysql->{pass}, $::mysql->{table},
-                       $::mysql->{actiontable}, $::mysql->{dblog});
+  if (!$::mysql->{disable}) {
+      $::db = ASM::DB->new($::mysql->{db}, $::mysql->{host}, $::mysql->{port},
+                           $::mysql->{user}, $::mysql->{pass}, $::mysql->{table},
+                           $::mysql->{actiontable}, $::mysql->{dblog});
+  }
   $conn = $irc->newconn( Server => $host,
                          Port => $::settings->{port} || '6667',
                          SSL => defined($::settings->{ssl}),

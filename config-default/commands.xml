@@ -123,6 +123,11 @@
   </command>
   <command cmd="^;sql (main|log) (.*)" flag="d">
   <![CDATA[
+    if (!defined $::db) {
+      $conn->privmsg($event->replyto, "I am set to run without a database, fool.");
+      return;
+    }
+
     my $dbh = $::db->{DBH};
     if ($1 eq 'log') {
       $dbh = $::db->{DBH_LOG};
@@ -175,6 +180,7 @@
   </command>
   <command cmd="^;query (\S+) ?(\S+)?$">
   <![CDATA[
+    return unless defined $::db;
     my $channel = defined($2) ? $1 : '%';
     my @nuh = split(/(\!|\@)/, defined($2) ? $2 : $1);
     my $result = $::db->query($channel, $nuh[0], $nuh[2], $nuh[4]);
@@ -183,6 +189,7 @@
   </command>
   <command cmd="^;investigate (\S+) *$">
   <![CDATA[
+    return unless defined $::db;
     my $nick = lc $1;
     unless (defined($::sn{$nick})) {
       $conn->privmsg($event->replyto, "I don't see $nick in my state tracking database, so I can't run any queries on their info, sorry :(" .
@@ -223,6 +230,7 @@
   </command>
   <command cmd="^;investigate2 (\S+) ?(\d*) *$" flag="s">
   <![CDATA[
+    return unless defined $::db;
     my $nick = lc $1;
     my $skip = 0;
     $skip = $2 if (defined($2) and ($2 ne ""));
