@@ -509,6 +509,10 @@ sub on_nick {
   delete( $::sn{$oldnick}) if ($oldnick ne $newnick);
   $event->{to} = \@channels;
   $::log->logg($event);
+  # Well, the nick change actually was done from the old nick ... but
+  # by the time we process it, they already changed nicks. Therefore
+  # we'll pretend it's the *new* nick that generated the event.
+  $event->{nick} = $event->{args}[0];
   $::inspector->inspect($conn, $event);
 }
 
