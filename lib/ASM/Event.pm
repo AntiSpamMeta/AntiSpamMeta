@@ -561,12 +561,12 @@ sub parse_modes
     if (($c eq '-') || ($c eq '+')) {
       $t=$c;
     }
-    else { #eIbq,k,flj,CFLMPQcgimnprstz
+    else { #eIbq,k,flj,CFLMPQScgimnprstz
       if ($t eq '+') {
         if ( grep( /[eIbqkfljov]/,($c) ) ) { #modes that take args WHEN BEING ADDED
           push (@new_modes, [$t.$c, shift @args]);
         }
-        elsif ( grep( /[CFLMPQcgimnprstz]/, ($c) ) ) {
+        elsif ( grep( /[CFLMPQScgimnprstz]/, ($c) ) ) {
           push (@new_modes, [$t.$c]);
         }
         else {
@@ -576,7 +576,7 @@ sub parse_modes
         if ( grep( /[eIbqov]/,($c) ) ) { #modes that take args WHEN BEING REMOVED
           push (@new_modes, [$t.$c, shift @args]);
         }
-        elsif ( grep( /[CFLMPQcgimnprstzkflj]/, ($c) ) ) {
+        elsif ( grep( /[CFLMPQScgimnprstzkflj]/, ($c) ) ) {
           push (@new_modes, [$t.$c]);
         }
         else {
