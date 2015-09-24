@@ -1,12 +1,11 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
 
-use lib '/home/icxcnika/AntiSpamMeta';
-
-#use Devel::Profiler package_filter => sub { return 0 if $_[0] =~ /^XML::Simple/; return 1; };
-
-
-use warnings;
 use strict;
+use warnings;
+
+use FindBin;
+use lib "$FindBin::Bin/lib";;
+
 use Net::IRC;
 use Data::Dumper;
 use IO::All;
@@ -17,6 +16,16 @@ use File::Monitor;
 use feature qw(say);
 use HTTP::Async;
 use Carp;
+
+use ASM::Util;
+use ASM::XML;
+use ASM::Inspect;
+use ASM::Event;
+use ASM::Services;
+use ASM::Log;
+use ASM::Commander;
+use ASM::Classes;
+use ASM::DB;
 
 $Data::Dumper::Useqq=1;
 
@@ -71,11 +80,6 @@ sub alarmdeath
 }
 $SIG{ALRM} = \&alarmdeath;
 alarm 300;
-
-BEGIN {
-my @modules = qw/Util Xml Inspect Event Services Log Command Classes Mysql/;
-require 'modules/' . lc $_ . '.pl' foreach @modules;
-}
 
 sub init {
   my ( $conn, $host );
