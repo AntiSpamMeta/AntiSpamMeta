@@ -431,7 +431,8 @@
   <command cmd="^;hilight (\S+) (\S+) ?(\S*)$" flag="h">
   <![CDATA[
     my $chan = $1;
-    my @nicks = split(/,/,$2);
+    my $nick_str = $2;
+    my @nicks = split(/,/, $nick_str);
     my $level= $3;
     if ($level eq '') { $level = 'info'; }
     $level = lc $level;
@@ -442,6 +443,15 @@
     my $link = ASM::Util->getLink(lc $chan);
     if ( lc $link ne lc $chan ) {
       $conn->privmsg($event->replyto, "Error: $chan is linked to $link - use $link instead.");
+      return;
+    }
+    my $chan_regex = qr/^#|^default$|^master$/;
+    if ( $chan !~ $chan_regex ) {
+      my $msg = "Error: '$chan' doesn't look like a channel to me.";
+      if ( $nick_str =~ $chan_regex ) {
+        $msg .= ' (Maybe you just specified nick and channel in the wrong order?)';
+      }
+      $conn->privmsg($event->replyto, $msg);
       return;
     }
     unless (defined($::channels->{channel}->{$chan}->{hilights})) {
