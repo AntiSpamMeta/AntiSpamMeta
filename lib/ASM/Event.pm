@@ -159,7 +159,7 @@ sub on_pong
   if (($pongcount % 3) == 0) { #easiest way to do something roughly every 90 seconds
     $conn->sl('STATS p');
   }
-  if ((time - $::starttime) < 240 ) {
+  if ( @::syncqueue ) {
     return; #we don't worry about lag if we've just started up and are still syncing etc.
   }
   if (($lag > 2) && ($lag < 5)) {
