@@ -159,8 +159,8 @@ sub on_pong
   if (($pongcount % 3) == 0) { #easiest way to do something roughly every 90 seconds
     $conn->sl('STATS p');
   }
-  if ( @::syncqueue ) {
-    return; #we don't worry about lag if we've just started up and are still syncing etc.
+  if ( @::syncqueue || $::netsplit_ignore_lag ) {
+    return; #we don't worry about lag if we've just started up and are still syncing, or just experienced a netsplit
   }
   if (($lag > 2) && ($lag < 5)) {
     $conn->privmsg( $::settings->{masterchan}, "Warning: I'm currently lagging by $lag seconds.");
@@ -411,7 +411,9 @@ sub on_quit
   if (($::netsplit == 0) && ($event->{args}->[0] eq "*.net *.split") && (lc $event->{nick} ne 'chanserv')) { #special, netsplit situation
     $conn->privmsg($::settings->{masterchan}, "Entering netsplit mode - JOIN and QUIT inspection will be disabled for 60 minutes");
     $::netsplit = 1;
+    $::netsplit_ignore_lag++;
     $conn->schedule(60*60, sub { $::netsplit = 0; $conn->privmsg($::settings->{masterchan}, 'Returning to regular operation'); });
+    $conn->schedule(2*60, sub { $::netsplit_ignore_lag--; });
   }
   $::inspector->inspect( $conn, $event ) unless $::netsplit;
   #ugh. Repurge some shit, hopefully this will fix some stuff where things are going wrong

@@ -33,6 +33,7 @@ $::pass = '';
 @::nick_blacklist=();
 @::string_blacklist=();
 $::netsplit = 0;
+$::netsplit_ignore_lag = 0;
 $::debug = 0;
 $::cset = '';
 $::pacealerts = 1;
