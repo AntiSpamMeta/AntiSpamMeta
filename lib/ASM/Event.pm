@@ -865,12 +865,12 @@ sub on_whoxover
 sub on_whofuckedup
 {
   my ($conn, $event) = @_;
-  ASM::Util->dprint('on_whofuckedup called!', 'sync');
   if ($event->{args}->[1] eq "STATS") { 
 #most likely this is getting called because we did stats p too often.
 #unfortunately the server doesn't let us know what exactly we called stats for.
 #anyways, we don't need to do anything for this
   } else { #dunno why it got called, print the data and I'll add a handler for it.
+    ASM::Util->dprint('on_whofuckedup called!', 'sync');
     ASM::Util->dprint(Dumper($event), 'sync');
   }
 }
