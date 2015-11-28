@@ -156,7 +156,7 @@ sub on_pong
   if ($lag > 1) {
     ASM::Util->dprint("Latency: $lag", 'latency');
   }
-  if (($pongcount % 3) == 0) { #easiest way to do something roughly every 90 seconds
+  if (($pongcount++ % 3) == 0) { #easiest way to do something roughly every 90 seconds
     $conn->sl('STATS p');
   }
   if ( @::syncqueue || $::netsplit_ignore_lag ) {
