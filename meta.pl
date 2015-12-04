@@ -34,6 +34,7 @@ $::pass = '';
 @::string_blacklist=();
 $::netsplit = 0;
 $::netsplit_ignore_lag = 0;
+$::no_autojoins = 0;
 $::debug = 0;
 $::cset = '';
 $::pacealerts = 1;
@@ -110,7 +111,6 @@ sub init {
                          Nick => $::settings->{nick},
                          Ircname => $::settings->{realname},
                          Username => $::settings->{username},
-                         Password => $::settings->{pass},
 			 Pacing => 0 );
   $conn->debug($::debug);
   $::inspector = ASM::Inspect->new();

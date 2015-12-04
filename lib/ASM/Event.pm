@@ -75,6 +75,7 @@ sub new
   $conn->add_handler('channelurlis', \&on_channelurlis);
   $conn->add_handler('480', \&on_jointhrottled);
   $conn->add_handler('invite', \&blah); # This doesn't need to be fancy; I just need it to go through inspect
+  $conn->add_handler('servicesdown', \&on_servicesdown);
   bless($self);
   return $self;
 }
@@ -230,7 +231,9 @@ sub on_connect {
   $conn->sl("MODE $event->{args}->[0] +Q");
   if (lc $event->{args}->[0] ne lc $::settings->{nick}) {
     ASM::Util->dprint('Attempting to regain my main nick', 'startup');
-    $conn->privmsg( 'NickServ@services.', "regain $::settings->{nick} $::settings->{pass}" );
+    $conn->sl("NickServ regain $::settings->{nick} $::settings->{pass}");
+  } else {
+    $conn->sl("NickServ identify $::settings->{nick} $::settings->{pass}");
   }
   $conn->sl('CAP REQ :extended-join multi-prefix account-notify'); #god help you if you try to use this bot off freenode
 }
@@ -861,7 +864,7 @@ sub on_whoxover
     foreach my $c (@{$::settings->{autojoins}}) { $x{$c} = 1; }
     foreach my $cx (keys %::sc) { delete $x{$cx}; }
     if (scalar (keys %x)) {
-      $conn->privmsg($::settings->{masterchan}, "Syncing appears to have failed for " . ASM::Util->commaAndify(keys %x));
+      $conn->privmsg($::settings->{masterchan}, "Syncing appears to have failed for " . ASM::Util->commaAndify(keys %x)) unless $::no_autojoins;
     }
   }
 }
@@ -888,6 +891,16 @@ sub on_bannedfromchan {
 sub on_byechan {
   my ($chan) = @_;
   #TODO do del event stuff
+}
+
+sub on_servicesdown
+{
+  my ($conn, $event) = @_;
+  if ($event->{args}->[1] eq 'NickServ') {
+    $::no_autojoins = 1;
+    $conn->join($::settings->{masterchan}); # always join masterchan, so we can find you
+    $conn->sl("PING :" . time);
+  }
 }
 
 return 1;
