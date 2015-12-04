@@ -408,12 +408,16 @@ sub on_quit
   }
   $::log->logg( $event );
 
-  if (($::netsplit == 0) && ($event->{args}->[0] eq "*.net *.split") && (lc $event->{nick} ne 'chanserv')) { #special, netsplit situation
-    $conn->privmsg($::settings->{masterchan}, "Entering netsplit mode - JOIN and QUIT inspection will be disabled for 60 minutes");
-    $::netsplit = 1;
-    $::netsplit_ignore_lag++;
-    $conn->schedule(60*60, sub { $::netsplit = 0; $conn->privmsg($::settings->{masterchan}, 'Returning to regular operation'); });
-    $conn->schedule(2*60, sub { $::netsplit_ignore_lag--; });
+  if (($event->{args}->[0] eq "*.net *.split") && (lc $event->{nick} ne 'chanserv')) { #special, netsplit situation
+    if ($::netsplit == 0){
+      $conn->privmsg($::settings->{masterchan}, "Entering netsplit mode - JOIN and QUIT inspection will be disabled for 60 minutes");
+      $::netsplit = 1;
+      $conn->schedule(60*60, sub { $::netsplit = 0; $conn->privmsg($::settings->{masterchan}, 'Returning to regular operation'); });
+    }
+    if ($::netsplit_ignore_lag == 0){
+      $::netsplit_ignore_lag = 1;
+      $conn->schedule(2*60, sub { $::netsplit_ignore_lag = 0; });
+    }
   }
   $::inspector->inspect( $conn, $event ) unless $::netsplit;
   #ugh. Repurge some shit, hopefully this will fix some stuff where things are going wrong
