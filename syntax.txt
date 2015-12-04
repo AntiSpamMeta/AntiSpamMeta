@@ -1,0 +1,175 @@
+List of ASM's commands.
+
+!ops <optional:#channel> <optional: message to send>
+  Generates an alert, and includes the message in that alert. So, via channel message or PM,
+  you can do "!ops Hey Ops you need to see this" or "!ops #spammychannel bad stuff goin on"
+  or "!ops" or "!ops #spammychannel". You have to be on the channel in order to call this function,
+  and there are some stopgaps against abuse.
+
+;teredo <IPv6 IP>
+  This will "unmask" an IPv4 connection pretending to be IPv6 - it will report the user's "real" IP.
+  Use if their IP starts with "2001:0:"
+
+;status
+  Reports the bot's memory/cpu/network usage and more.
+
+;source
+  Responds with a URL to the bot's source
+
+;help
+  Refers you to ASM's website
+
+;ping
+  Replies "pong".
+
+*** These are commands used for check to see if a user has a "bad past" ***
+
+;db
+  Returns a link to a page where you can query ASM's alertlog database.
+
+;query <optional:channel> <nick!user@host>
+  nick/user/host takes standard wildcards (e.g. AfterDeat*!*@*).
+  If channel is not specified, checks against all channels.
+  Responds with how many matches there are for this in ASM's alertlog database.
+
+;investigate <nick>
+  <nick> MUST BE A NICK THAT ANTISPAMMETA CAN SEE.
+  Returns with the number of how many "incidents", e.g. quiets/kills/klines/bans/removes/etc
+  against that person that ASM is aware of.
+
+;investigate2 <nick> <optional:skip>					Restricted to flag "s"
+  Like ;investigate, except ASM will PM you the details of the most recent 10 incidents,
+  unless you provide a skip number, in which case it will skip the first X incidents.
+  There are index numbers attached to the lines, which correspond with logfiles that may
+  explain why said person got banned/klined/whatever. These logfiles are stored in a password-
+  protected directory. See AfterDeath/the url provided/;;addwebuser for access.
+
+;mship <nick>								Restricted to flag "s"
+  Reports channels that both ASM and <nick> is on.
+
+;;addwebuser <password>							Restricted to flag "s"
+  THIS COMMAND MUST BE SENT IN PM, WITH TWO SEMICOLONS.
+  This will give you access to the restricted areas of ASM's database, using an http login of
+  [yourIRCnick] and [password].
+  No assurance of privacy is made with regards to your password. Make it secure, so that someone
+  else won't use your login, and make it unique - i.e. not something you use for /ns identify.
+
+
+
+*** These commands are for managing who has access to the bot ***
+
+;userx add <nickserv account> <flags>					Restricted to flag "a"
+  Adds <nickserv account> to ASM's config and gives them the specified flags.
+  BE SURE to use the person's nickserv account, WHICH IS NOT NECESSARILY the nick they're using.
+  /whois them to be sure. You can't give them a flag you don't have yourself, and for extra security,
+  you can't ever give them the 'd' flag - this flag has to be assigned via manual config edit.
+  This means if someone has the 'd' flag, they can't have their flags changed to a new set that
+  still includes 'd' without a manual edit.
+
+;userx flags <nickserv account>
+  Shows what flags that nickserv account has access to.
+
+;userx flags <nickserv account> <flags>					Restricted to flag "a"
+  Sets the flags for that nickserv account - NOT NECESSARILY THE SAME AS THEIR NICK - to the
+  provided set of flags. Once again, you can't give flags you don't already have, and you can't
+  ever give the 'd' flag.
+
+;userx del <nickserv account>						Restricted to flag "a"
+  Removes the nickserv account from ASM's list of authorized users.
+
+
+
+*** These commands are for managing who/where the bot notifies of bad stuff ***
+
+;target <source channel> <target channel or nick> <optional:level>	Restricted to flag "a"
+  Adds target to the list of places notified for source channel, with the optional level.
+  So, to send low-risk alerts and above concerning #spammychannel to #opschannel, you'd do
+  ;target #spammychannel #opschannel info
+  If a level isn't specified, it defaults to "debug".
+
+;detarget <source channel> <target channel>				Restricted to flag "a"
+  Stops sending messages concerning <source channel> to <target channel>.
+
+;showhilights <nick>							Restricted to flag "h"
+  shows all the channels that it's configured to hilight <nick> on, and what level it's for.
+
+;hilight <channel> <nick><optional:,nick2,nick3> <optional:level>	Restricted to flag "h"
+  Adds <nick[s]> to the list of hilights for <channel> for risks of <level> and above.
+  If <level> is unspecified, it defaults to "info".
+
+;dehilight <channel> <nick><optional:,nick2,nick3>      		Restricted to flag "h"
+  Removes the list of nicks from the list of hilights for <channel>.
+
+
+*** Blacklist management commands ***
+
+;blacklist <string>							Restricted to flag "s"
+  Adds <string> to the list of strings ASM will watch out for. No pattern matching or anything
+  like that is done, although it is case insensitive. Please for the love of everything that
+  is holy use common sense with this. Don't blacklist "nigger" or something like that...
+  but definitely blacklist "http://spammyurl.com" etc.
+
+;blreason <id> <reason>                                                 Restricted to flag "s"
+  use the ID returned by ;blacklist to set a reason for why you blacklisted it.
+
+;unblacklist <id>                                                       Restricted to flag "s"
+  fix an oopsie
+
+;bllookup <id>                                                          Restricted to flag "s"
+  Looks up the blacklisted string represented by a given ID and sends details in PM.
+
+
+*** Administrative commands ***
+
+;join <channel>								Restricted to flag "a"
+  Tells the bot to join said channel.
+
+;part <channel>								Restricted to flag "a"
+  Tells the bot to part said channel.
+
+;rehash									Restricted to flag "a"
+  Re-reads the string blacklist files and config files etc etc.
+
+;monitor <chan> (yes|no)						Restricted to flag "a"
+  Sets whether or not the channel is monitored for spam stuffs.
+  This is obviously "yes" by default, but some places turn it off for their #blah-ops channel.
+
+;silence <chan> (yes|no)						Restricted to flag "a"
+  Sets whether or not ASM ignores commands (other than !ops) in the channel.
+  "no" by default; public channels often want this.
+
+;quit <reason>								Restricted to flag "a"
+  Quits IRC using reason as the quit message. ASM is run in a while loop, so it'll probably
+  come right back.
+
+;sync <channel>								Restricted to flag "a"
+  sends data to gather information about <channel>, in case a sync failed and needs to be
+  manually forced.
+
+;restrict (nick|account|host) <nick/acct/host> (+|-)<restriction>	Restricted to flag "a"
+  Adds a restriction for the specified nick or nickserv account or hostname.
+  Useful restrictions are:
+    notrigger  - prevents the target from causing the bot to generate a spam alert.
+    nomsgs     - don't relay private messages from target to the master channel
+    nocommands - prevent target from sending the bot commands.
+
+
+*** Highly restricted debug commands ***
+
+;sql (main|log) <somestring>						Restricted to flag "d"
+  No idea what this does right now.
+
+;sl <line>								Restricted to flag "d"
+  Sends <line> to the IRC server.
+
+;ev <code>								Restricted to flag "d"
+  Evaluates raw perl code - output is sent to STDOUT, not to IRC.
+
+
+*** Plugin interface ***
+
+;plugin <chan> <risk> <reason>						Restricted to flag "p"
+  This is used so another bot can have ASM generate alerts. E.G.
+  <magicbot> ;plugin #spammychannel debug Magic Bad Stuff Detection Algorithm 1  ->
+  <AntiSpamMeta> debug risk threat [#spammychannel] - (magicbot plugin) - Magic Bad Stuff
+      Detection Algorithm 1 - ping lotsofpeople

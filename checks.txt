@@ -1,0 +1,28 @@
+Overall alert system workings:
+There are 6 alert levels. In order of least significant -> most significant, they are:
+
+debug: New rules that are in need of testing. These can be extremely useful, or extremely spammy.
+info: This is not meant to alert about a malicious action, rather to be a "heads up, keep an eye out because..."
+low: These are various rules that may have some false positives. The importance of response time to these varies.
+medium: These are rules that are not likely to be a false positive, and very likely mean the channel should receive immediate attention.
+high: These are rules with a 99% certainty that a user is attempting to be malicious.
+"opalert": The bot will never show an "opalert risk threat", rather, this level indicates who to ping when someone calls !ops
+
+A user set to be pinged for any given level will be pinged for all higher levels.
+For example, if a user is set to be pinged for "low", they'll be pinged for "opalert", but not "info".
+
+In no particular order, the bot: 
+
+* Checks for what it thinks is a botnet cycling in a channel to spam
+* Checks for nicks that join just to spam something and then leave
+* Checks for various kinds of flooding - even distributed over multiple nicks - and has anti-anti-detection measures
+* Checks for ascii-art pasting
+* Checks channel messages against a large array of blacklisted strings
+* Detects several IRC exploits
+* Detects channel-ctcps (mostly deprecated thanks to cmode +C)
+* Detects channel-notices
+* Checks channel messages against a few regexes that are always spammy
+* Detects some phishing attempts
+* Detects some types of attempted ban evasion
+* Detects some malicious shorturls
+

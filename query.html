@@ -1,0 +1,50 @@
+<html>
+  <head>
+    <title>AntiSpamMeta database query page</title>
+  </head>
+  <body>
+    <form action="cgi-bin/query.pl" method="get">
+      Channel: <input type="text" name="channel" value="*" /><br />
+      Nickname: <input type="text" name="nick" value="" />
+      User: <input type="text" name="user" value="" />
+      Hostname/IP: <input type="text" name="host" value="" /><br />
+      Gecos: <input type="text" name="gecos" value="" /><br />
+      <input type="checkbox" name="since" value="1">Since time:</input>
+        <input type="text" name="syear" value="1990" maxlength="4" />-
+        <input type="text" name="smonth" value="07" maxlength="2" />-
+        <input type="text" name="sday" value="28" maxlength="2" />-&nbsp;
+        <input type="text" name="shour" value="00" maxlength="2" />:
+        <input type="text" name="smin" value="00" maxlength="2" />:
+        <input type="text" name="ssec" value="00" maxlength="2" /><br />
+      <input type="checkbox" name="before" value="1">Before time:</input>
+        <input type="text" name="byear" value="2007" maxlength="4" />-
+        <input type="text" name="bmonth" value="06" maxlength="2" />-
+        <input type="text" name="bday" value="20" maxlength="2" />-&nbsp;
+        <input type="text" name="bhour" value="20" maxlength="2" />:
+        <input type="text" name="bmin" value="02" maxlength="2" />:
+        <input type="text" name="bsec" value="58" maxlength="2" /><br />
+      Threat level: <select name="level">
+        <option value="any" selected="selected">any</option>
+        <option value="debug">debug</option>
+        <option value="info">info</option>
+        <option value="low">low</option>
+        <option value="medium">medium</option>
+        <option value="high">high</option>
+      </select>
+      &nbsp;&nbsp;Threat reason:<sup>1</sup> <input type="text" name="reason" value="*" /><br />
+      Sort by: <select name="sort">
+        <option value="time">time</option>
+        <option value="nick">nick</option>
+        <option value="user">user</option>
+        <option value="host">host</option>
+        <option value="level" selected="selected">threat level</option>
+        <option value="id">threat id</option>
+        <option value="reason">threat reason</option>
+      </select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<select name="order">
+        <option value="a" selected="selected">ascending</option>
+        <option value="d">descending</option>
+      </select>
+      <br /><br /><input type="submit" value="Query!" />
+    </form>
+  </body>
+</html>

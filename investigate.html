@@ -1,0 +1,18 @@
+<html>
+  <head>
+    <title>AntiSpamMeta database query page</title>
+  </head>
+  <body>
+  <p>Matching is done based on field1 OR field2 OR field3 etc. Wildcards are supported, 
+except for the realIP field, which must be blank or an IPv4 dotted quad.</p>
+    <form action="/cgi-bin/secret/investigate.pl" method="get">
+      Nickname: <input type="text" name="nick" />
+      User: <input type="text" name="user" value="" />
+      Hostname: <input type="text" name="host" value="" /><br />
+      Gecos: <input type="text" name="gecos" value="" /><br />
+      Account: <input type="text" name="account" value="" /><br />
+      Real IP: <input type="text" name="realip" value="" /><br />
+      <br /><br /><input type="submit" value="Query!" />
+    </form>
+  </body>
+</html>
