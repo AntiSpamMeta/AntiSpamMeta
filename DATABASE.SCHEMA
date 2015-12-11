@@ -1,0 +1,174 @@
+use asm_main;
+
+CREATE TABLE `actionlog` (
+  `index` bigint(20) NOT NULL AUTO_INCREMENT,
+  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `action` varchar(20) NOT NULL,
+  `reason` varchar(512) DEFAULT NULL,
+  `channel` varchar(51) DEFAULT NULL,
+  `nick` varchar(17) NOT NULL,
+  `user` varchar(11) DEFAULT NULL,
+  `host` varchar(64) DEFAULT NULL,
+  `ip` int(10) unsigned DEFAULT NULL,
+  `gecos` varchar(512) DEFAULT NULL,
+  `account` varchar(17) DEFAULT NULL,
+  `bynick` varchar(17) DEFAULT NULL,
+  `byuser` varchar(11) DEFAULT NULL,
+  `byhost` varchar(64) DEFAULT NULL,
+  `bygecos` varchar(512) DEFAULT NULL,
+  `byaccount` varchar(17) DEFAULT NULL,
+  PRIMARY KEY (`index`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+CREATE TABLE `alertlog` (
+  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `channel` text NOT NULL,
+  `nick` text NOT NULL,
+  `user` text NOT NULL,
+  `host` text NOT NULL,
+  `gecos` text NOT NULL,
+  `level` tinytext NOT NULL,
+  `id` tinytext NOT NULL,
+  `reason` text NOT NULL,
+  KEY `channel` (`channel`(51)),
+  KEY `nick` (`nick`(17)),
+  KEY `user` (`user`(11)),
+  KEY `host` (`host`(64)),
+  KEY `gecos` (`gecos`(512)),
+  KEY `level` (`level`(16)),
+  KEY `id` (`id`(32)),
+  KEY `reason` (`reason`(512)),
+  KEY `time` (`time`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+use asm_log;
+CREATE TABLE `action` (
+  `index` bigint(20) NOT NULL AUTO_INCREMENT,
+  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `channel` varchar(30) NOT NULL,
+  `nick` varchar(16) NOT NULL,
+  `user` varchar(10) NOT NULL,
+  `host` varchar(63) NOT NULL,
+  `geco` varchar(255) DEFAULT NULL,
+  `content1` varchar(1000) NOT NULL,
+  KEY `index` (`index`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1
+
+CREATE TABLE `joins` (
+  `index` bigint(20) NOT NULL AUTO_INCREMENT,
+  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `channel` varchar(30) NOT NULL,
+  `nick` varchar(16) NOT NULL,
+  `user` varchar(10) NOT NULL,
+  `host` varchar(63) NOT NULL,
+  `geco` varchar(255) DEFAULT NULL,
+  KEY `index` (`index`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1
+
+CREATE TABLE `kick` (
+  `index` bigint(20) NOT NULL AUTO_INCREMENT,
+  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `channel` varchar(30) NOT NULL,
+  `nick` varchar(16) NOT NULL,
+  `user` varchar(10) NOT NULL,
+  `host` varchar(63) NOT NULL,
+  `geco` varchar(255) DEFAULT NULL,
+  `ip` int(10) unsigned DEFAULT NULL,
+  `account` varchar(17) DEFAULT NULL,
+  `victim_nick` varchar(16) DEFAULT NULL,
+  `content1` varchar(1000) DEFAULT NULL,
+  `victim_user` varchar(10) DEFAULT NULL,
+  `victim_host` varchar(63) DEFAULT NULL,
+  `victim_geco` varchar(255) DEFAULT NULL,
+  `victim_ip` int(10) unsigned DEFAULT NULL,
+  `victim_account` varchar(17) DEFAULT NULL,
+  KEY `index` (`index`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1
+
+CREATE TABLE `mode` (
+  `index` bigint(20) NOT NULL AUTO_INCREMENT,
+  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `channel` varchar(30) NOT NULL,
+  `nick` varchar(16) NOT NULL,
+  `user` varchar(10) NOT NULL,
+  `host` varchar(63) NOT NULL,
+  `geco` varchar(255) DEFAULT NULL,
+  `content1` varchar(2) NOT NULL,
+  `content2` varchar(1000) DEFAULT NULL,
+  KEY `index` (`index`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1
+
+CREATE TABLE `nick` (
+  `index` bigint(20) NOT NULL AUTO_INCREMENT,
+  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `nick` varchar(16) NOT NULL,
+  `user` varchar(10) NOT NULL,
+  `host` varchar(63) NOT NULL,
+  `geco` varchar(255) DEFAULT NULL,
+  `content1` varchar(16) NOT NULL,
+  KEY `index` (`index`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1
+
+CREATE TABLE `notice` (
+  `index` bigint(20) NOT NULL AUTO_INCREMENT,
+  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `channel` varchar(30) NOT NULL,
+  `nick` varchar(16) NOT NULL,
+  `user` varchar(10) NOT NULL,
+  `host` varchar(63) NOT NULL,
+  `geco` varchar(255) DEFAULT NULL,
+  `content1` varchar(1000) NOT NULL,
+  KEY `index` (`index`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1
+
+CREATE TABLE `part` (
+  `index` bigint(20) NOT NULL AUTO_INCREMENT,
+  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `channel` varchar(30) NOT NULL,
+  `nick` varchar(16) NOT NULL,
+  `user` varchar(10) NOT NULL,
+  `host` varchar(63) NOT NULL,
+  `geco` varchar(255) DEFAULT NULL,
+  `ip` int(10) unsigned DEFAULT NULL,
+  `account` varchar(17) DEFAULT NULL,
+  `content1` varchar(1000) NOT NULL,
+  KEY `index` (`index`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1
+
+CREATE TABLE `privmsg` (
+  `index` bigint(20) NOT NULL AUTO_INCREMENT,
+  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `channel` varchar(30) NOT NULL,
+  `nick` varchar(16) NOT NULL,
+  `user` varchar(10) NOT NULL,
+  `host` varchar(63) NOT NULL,
+  `geco` varchar(255) DEFAULT NULL,
+  `content1` varchar(1000) NOT NULL,
+  KEY `index` (`index`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1
+
+CREATE TABLE `quit` (
+  `index` bigint(20) NOT NULL AUTO_INCREMENT,
+  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `nick` varchar(16) NOT NULL,
+  `user` varchar(10) NOT NULL,
+  `host` varchar(63) NOT NULL,
+  `geco` varchar(255) DEFAULT NULL,
+  `ip` int(10) unsigned DEFAULT NULL,
+  `account` varchar(17) DEFAULT NULL,
+  `content1` varchar(1000) NOT NULL,
+  KEY `index` (`index`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1
+
+CREATE TABLE `topic` (
+  `index` bigint(20) NOT NULL AUTO_INCREMENT,
+  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `channel` varchar(30) NOT NULL,
+  `nick` varchar(16) NOT NULL,
+  `user` varchar(10) NOT NULL,
+  `host` varchar(63) NOT NULL,
+  `geco` varchar(255) DEFAULT NULL,
+  `content1` varchar(1000) NOT NULL,
+  KEY `index` (`index`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1
+
