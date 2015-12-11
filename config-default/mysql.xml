@@ -2,6 +2,7 @@
   <user>USER</user>
   <pass>PASS</pass>
   <db>asm_main</db>
+  <dblog>asm_log</dblog>
   <table>alertlog</table>
   <actiontable>actionlog</actiontable>
   <host>localhost</host>

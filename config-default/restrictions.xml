@@ -1,13 +1,8 @@
 <restrictions>
+  <accounts>
+  </accounts>
   <hosts>
-    <host id="services." notrigger="notrigger" noops="noops" nocommands="nocommands" />
-    <host id="freenode/utility-bot/ex-server/idoru" noops="noops" />
   </hosts>
   <nicks>
-    <nick id="eir" nocommands="nocommands" />
   </nicks>
-  <accounts>
-    <account id="toracat" notrigger="notrigger" />
-    <account id="/>" notrigger="notrigger" />
-  </accounts>
 </restrictions>

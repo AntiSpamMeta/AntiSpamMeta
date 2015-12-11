@@ -1,19 +1,59 @@
 <events>
-  <event id="ahbl" class="dnsbl" reason="host $evhost is in dnsbl.ahbl.org ( $xresult )" risk="info" type="join">dnsbl.ahbl.org</event>
+<!--  <event id="garbagemeter" class="garbagemeter" reason="garbage exceeding threshold" risk="debug" type="public">3:6:3:3</event> -->
+  <event id="cyclebotnet" class="cyclebotnet" reason="botnet cyclespam" risk="high" type="part">4:4:30</event>
+  <event id="joinmsgquit" class="joinmsgquit" reason="joined, said something, parted/quit" risk="info" type="quit,part">3</event>
+  <event id="advflood" class="advsplitflood" reason="advanced distributed flooding" risk="high" type="public,part,caction">5:3</event>
+  <event id="asciiflood" class="asciiflood" reason="ascii art algorithm" risk="medium" type="public">20:3:3</event>
+  <event id="anontalk1" class="re" reason="anontalk.com spam" risk="medium" type="public">(?i)w(.?)w\1w\1?.\1?a\1n\1o\1n\1t\1a\1l\1k\1?.\1?c\1o\1m</event>
+  <event id="autoremove" class="re" reason="on chanserv autoremove" risk="info" type="part">^requested by ChanServ</event>
   <event id="blacklist" class="strbl" reason="sending message containing blacklisted content" risk="low" type="public,part,quit,caction">blah</event>
+  <event id="blacklist2" class="strblnew" reason="blacklist $xresult" risk="medium" type="public,part,quit,caction">blah</event>
   <event id="ctcp-dcc" class="re" reason="ctcp-dcc" risk="high" type="cdcc">.*</event>
   <event id="ctcp-ping" class="re" reason="channel-wide CTCP PING" risk="medium" type="cping">.*</event>
   <event id="ctcp-version" class="re" reason="channel-wide CTCP VERSION" risk="medium" type="cversion">.*</event>
-  <event id="debugme" class="re" reason="sending a string designed to trigger a debug test alert, disregard this" risk="debug" type="public">debug antispammeta debug</event>
-  <event id="fakechristel" class="nuhg" reason="christel's nick but not host" risk="medium" type="join">(?i)chr[i1]ste[l1].*</event>
+  <event id="dcc" class="re" override="dcc-medium" reason="using the DC.C SE.ND exploit" risk="high" type="public">^DCC (SEND|S?CHAT) |\bDCC (SEND|S?CHAT) &quot;?[A-Za-z0-9]+&quot;? \d+ \d+ \d+</event>
+  <event id="dcc-medium" class="re" reason="using the DC.C SE.ND exploit" risk="medium" type="public">\bDCC SEND </event>
+  <event id="dcc-part" class="re" reason="using the DC.C SE.ND exploit in a part message" risk="high" type="part">\bDCC SEND </event>
+  <event id="dcc-topic" class="re" reason="setting a bad topic" risk="medium" type="topic">\bDCC SEND </event>
+  <event id="debugme" class="re" reason="sending a string designed to trigger a debug test alert, disregard this" risk="debug" type="public">debugantispambotdebug</event>
+  <event id="appleexploit" class="re" reason="using the apple corefont exploit" risk="high" type="public,caction,part">&#xd8;&#xb3;&#xd9;&#x85;&#xd9;&#x8e;&#xd9;&#x80;</event>
+  <!--<event id="dronebl" class="dnsbl" reason="host $evhost is in dnsbl.dronebl.org ( $xresult )" risk="info" type="join">dnsbl.dronebl.org.</event>-->
+  <!--<event id="efnetbl" class="dnsbl" reason="host $evhost is in rbl.efnetrbl.org ( $xresult )" risk="info" type="join">rbl.efnetrbl.org.</event>-->
+  <event id="fakechristel" class="nuhg" reason="christel's nick but not host" risk="medium" type="join">(?i)chr[i1]ste[l1]_?!.*</event>
   <event id="fakeglobal" class="re" override="notice" reason="fake global notice" risk="high" type="notice">(?i)\[global notice\]</event>
   <event id="floodqueue10-20" class="floodqueue" reason="flooding (10 msgs in 20 seconds)" risk="low" type="public,caction">10:20</event>
+  <event id="gnaa-topic" class="re" reason="setting a GNAA topic" risk="medium" type="topic">(?i)\bgnaa\b</event>
+  <event id="gnaaquit" class="re" reason="quitting with a GNAA message" risk="medium" type="quit">(?i)\bgnaa\b</event>
+  <event id="joinflood" class="floodqueue" reason="join flood (5 joins in 20 seconds)" risk="medium" type="join">5:20</event>
+  <event id="keylogger" class="re" override="keylogger-medium" reason="using the norton start-key-logger exploit" risk="high" type="public">^startkeylogger$|^stopkeylogger$</event>
+  <event id="keylogger-medium" class="re" reason="using the norton start-key-logger exploit" risk="medium" type="public">\bstartkeylogger\b|\bstopkeylogger\b</event>
+  <event id="last_measure_regex" class="re" reason="posting what appears to be a last measure link" risk="high" type="public">(?i)(http://(\S+\.)?on\.nimp\.org|http://(\S+\.)?feenode.net|http://wikipaste\.eu|http://(\S+\.)?bioghost\.com|http://(\S+\.)?on\.zoy\.org|http://(lastmeasure|dirtysanchez|doom3|freeipods|halflife2|halo2|lastmeasure4|lastmeasureunified|softmeasure|traceroute)\.zoy\.org)</event>
+  <event id="levenflood" class="levenflood" override="flood-5to3" reason="levenshtein flood match" risk="low" type="public">contentisuseless</event>
+  <event id="malspreader1" class="nuhg" reason="suspicious NUHG, rule 1" risk="low" type="join">.*!~NUMONE@.*!REAL_NAME</event>
+<!--  <event id="genspammer1" class="nuhg" reason="suspicious NUHG, rule 2" risk="info" type="join">(?i)(.*!.*MURDERC@.*!.*|[A-Z]{2}MURDERCORP!.*|chrisbradley)</event> -->
+  <event id="genspammer2" class="nuhg" reason="suspicious NUHG, rule 3 (~hyd trolling 2012/12, 2013/03)" risk="info" type="join">.*!~hyd@.*!.*</event>
   <event id="massflood" class="splitflood" reason="distributed flooding" risk="high" type="public,caction">4:4</event>
+  <event id="meepsheep1" class="nuhg" reason="common troll (meepsheep)" risk="info" type="join">(?i).*..psh..p.*</event>
   <event id="nickspam" class="nickspam" reason="nickspamming" risk="high" type="public">60:10</event>
   <event id="notice" class="re" reason="sending a notice to the channel" risk="medium" type="notice">.*</event>
   <event id="phishing1" class="re" override="notice" reason="trying to steal passwords (v1)" risk="high" type="notice">identify.*/msg .* identify &lt;password&gt;</event>
   <event id="phishing2" class="re" override="notice" reason="trying to steal passwords (v2)" risk="high" type="notice">^This nickname is registered</event>
+  <event id="redarmyoflol" class="re" reason="parting with 'red army of lol'" risk="low" type="part">RED ARMY OF LOL</event>
+  <event id="sms_spam" class="re" reason="spam link / virus" risk="low" type="public">\.com/sms.exe</event>
+  <!--<event id="sorbsbl" class="dnsbl" reason="host $evhost is in dnsbl.sorbs.net ( $xresult )" risk="info" type="join">dnsbl.sorbs.net.</event>-->
+  <event id="suckmynick" class="re" reason="using a potentially offensive nick" risk="low" type="join">(suck.*dick)</event>
+  <event id="wikifags2" class="re" reason="saying 'sure are a lot of wikifag'..." risk="low" type="public">(?i)^sure are a ?lot of .*fags? in here</event>
+  <event id="xchatbroad" class="re" reason="using an x-chat for windows unicode exploit (broad detection version, may be error prone)" risk="low" type="public,part,quit,caction">THISHASBEENDISABLED[&#240;-&#247;][&#128;-&#191;]{3}</event>
+  <event id="xchatexploit" class="re" override="xchatbroad" reason="using an x-chat for windows unicode exploit" risk="high" type="public,part,quit,caction">&#243;&#160;&#129;&#159;</event>
   <event id="proxylist" class="proxy" reason="IP is blacklisted" risk="info" type="join">lolz</event>
+  <event id="nickbl" class="nickfuzzy" reason="fuzzy matching against nick blacklist (services set)" risk="low" type="join,nick">1:chanserv,nickserv,hostserv,operserv,memoserv</event>
+  <event id="nickbl2" class="nickfuzzy" reason="fuzzy matching against nick blacklist (set 2)" risk="debug" type="join,nick">1:incog,meepsheep,blackman,brthmthr,patroclus_rex</event>
+  <event id="nickbl_impersonate" class="nickfuzzy" reason="fuzzy matching against nick blacklist (impersonation set), see ;falsematch if in error" risk="medium" type="join,nick">2:botchlab,bremmyfag,ilbelkyr,bremsstrahlung,ishanyx</event>
+  <event id="botnickbl" class="nickbl" reason="matches against a possible bot nick" risk="info" type="join,nick">contentisuseless</event>
+  <event id="botpattern1" class="nuhg" reason="matches probable botnet pattern" risk="debug" type="join">DISABLED[A-Za-z]{4}\d+!~[A-Za-z]{4}@.*![A-Za-z]{4}</event>
   <event id="banevade" class="banevade" reason="appears to be ban evading" risk="debug" type="join">contentisuseless</event>
-  <event id="joinfloodquiet" class="floodqueue2" reason="join flood (3 joins in 90 seconds) by quieted user" risk="debug" type="join">5:30</event>
+  <event id="joinfloodquiet" class="floodqueue2" reason="join flood (3 joins in 90 seconds) by quieted user" risk="debug" type="join">3:90</event>
+  <event id="invite" class="invite" reason="invited to a channel" risk="debug" type="invite">blah</event>
+  <event id="urlcrunch" class="urlcrunch" reason="URL that resolves to some place that is bad" risk="medium" type="public">^(https?:\/\/bitly.com\/a\/warning|https?://(?:i.)?imgur.com|https?://(?:www.)?hotxgirls.net)</event>
+  <!--<event id="incredibl" class="dnsbl" reason="host $evhost is in dnsbl.incredibl.org ( $xresult )" risk="info" type="join">dnsbl.incredibl.org.</event>-->
 </events>
