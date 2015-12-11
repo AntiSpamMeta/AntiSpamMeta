@@ -3,6 +3,9 @@
     <hilights></hilights>
     <msgs></msgs>
   </channel>
+  <channel id="default">
+    <hilights></hilights>
+  </channel>
   <channel id="master">
     <hilights>
     </hilights>
