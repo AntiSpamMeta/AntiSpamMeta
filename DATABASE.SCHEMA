@@ -52,7 +52,7 @@ CREATE TABLE `action` (
   `geco` varchar(255) DEFAULT NULL,
   `content1` varchar(1000) NOT NULL,
   KEY `index` (`index`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 CREATE TABLE `joins` (
   `index` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -63,7 +63,7 @@ CREATE TABLE `joins` (
   `host` varchar(63) NOT NULL,
   `geco` varchar(255) DEFAULT NULL,
   KEY `index` (`index`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 CREATE TABLE `kick` (
   `index` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -83,7 +83,7 @@ CREATE TABLE `kick` (
   `victim_ip` int(10) unsigned DEFAULT NULL,
   `victim_account` varchar(17) DEFAULT NULL,
   KEY `index` (`index`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 CREATE TABLE `mode` (
   `index` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -96,7 +96,7 @@ CREATE TABLE `mode` (
   `content1` varchar(2) NOT NULL,
   `content2` varchar(1000) DEFAULT NULL,
   KEY `index` (`index`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 CREATE TABLE `nick` (
   `index` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -107,7 +107,7 @@ CREATE TABLE `nick` (
   `geco` varchar(255) DEFAULT NULL,
   `content1` varchar(16) NOT NULL,
   KEY `index` (`index`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 CREATE TABLE `notice` (
   `index` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -119,7 +119,7 @@ CREATE TABLE `notice` (
   `geco` varchar(255) DEFAULT NULL,
   `content1` varchar(1000) NOT NULL,
   KEY `index` (`index`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 CREATE TABLE `part` (
   `index` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -133,7 +133,7 @@ CREATE TABLE `part` (
   `account` varchar(17) DEFAULT NULL,
   `content1` varchar(1000) NOT NULL,
   KEY `index` (`index`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 CREATE TABLE `privmsg` (
   `index` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -145,7 +145,7 @@ CREATE TABLE `privmsg` (
   `geco` varchar(255) DEFAULT NULL,
   `content1` varchar(1000) NOT NULL,
   KEY `index` (`index`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 CREATE TABLE `quit` (
   `index` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -158,7 +158,7 @@ CREATE TABLE `quit` (
   `account` varchar(17) DEFAULT NULL,
   `content1` varchar(1000) NOT NULL,
   KEY `index` (`index`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 CREATE TABLE `topic` (
   `index` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -170,5 +170,5 @@ CREATE TABLE `topic` (
   `geco` varchar(255) DEFAULT NULL,
   `content1` varchar(1000) NOT NULL,
   KEY `index` (`index`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
