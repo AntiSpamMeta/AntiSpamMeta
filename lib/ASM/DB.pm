@@ -93,7 +93,7 @@ sub actionlog
     $host = $event->{host};
   } elsif (($event->{type} eq 'part') && ($event->{args}->[0] =~ /^requested by (\S+) \((.*)\)/)) {
     $bynick = $1;
-    $reason = $2 unless (lc $reason eq lc $event->{nick});
+    $reason = $2 unless (lc $2 eq lc $event->{nick});
     $action = 'remove';
     $nick = $event->{nick};
     $user = $event->{user};
