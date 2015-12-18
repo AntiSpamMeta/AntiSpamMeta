@@ -6,8 +6,13 @@ use strict;
 use DBI; 
 
 use CGI_Lite;
+use XML::Simple qw(:strict);
+my $xs1 = XML::Simple->new( KeyAttr => ['id'], Cache => [ qw/memcopy/ ]);
+my $sqlconf = $xs1->XMLin( "/home/icxcnika/AntiSpamMeta/config-main/mysql.xml",
+                           ForceArray => ['ident', 'geco'],
+                           'GroupTags' => { ignoredidents => 'ident', ignoredgecos => 'geco' });
 
-my $dbh = DBI->connect("DBI:mysql:database=asm_main;host=localhost;port=3306", 'USER', 'PASSWORD');
+my $dbh = DBI->connect("DBI:mysql:database=" . $sqlconf->{db} . ";host=" . $sqlconf->{host} . ";port=" . $sqlconf->{port}, $sqlconf->{user}, $sqlconf->{pass});
 
 my $debug = 0;
 
@@ -99,7 +104,7 @@ HTML
 
 ##Queryable items:
 ## nick, user, host, realip, gecos, account
-my $qry = 'SELECT * FROM actionlog WHERE ';
+my $qry = 'SELECT * FROM ' . $sqlconf->{actiontable} . ' WHERE ';
 
 if (defined($data{nick}) && ($data{nick} ne "*") && ($data{nick} ne "")) {
   $qry .= " nick like " . esc($data{nick}) . ' or ';

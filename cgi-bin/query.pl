@@ -7,7 +7,13 @@ use DBI;
 
 use CGI_Lite;
 
-my $dbh = DBI->connect("DBI:mysql:database=asm_main;host=localhost;port=3306", 'USER', 'PASSWORD');
+use XML::Simple qw(:strict);
+my $xs1 = XML::Simple->new( KeyAttr => ['id'], Cache => [ qw/memcopy/ ]);
+my $sqlconf = $xs1->XMLin( "/home/icxcnika/AntiSpamMeta/config-main/mysql.xml",
+                           ForceArray => ['ident', 'geco'],
+                           'GroupTags' => { ignoredidents => 'ident', ignoredgecos => 'geco' });
+
+my $dbh = DBI->connect("DBI:mysql:database=" . $sqlconf->{db} . ";host=" . $sqlconf->{host} . ";port=" . $sqlconf->{port}, $sqlconf->{user}, $sqlconf->{pass});
 
 my $debug = 0;
 
