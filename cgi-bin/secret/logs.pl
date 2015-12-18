@@ -15,14 +15,9 @@ if ( !defined($index) ) {
   exit 0;
 }
 $index = int $index;
+my $i = int($index / 10000) + 1;
 
-if ( $index < 50000) {
-  my $block;
-  $block = "50K" if $index < 50000;
-  $block = "40K" if $index < 40000;
-  $block = "30K" if $index < 30000;
-  $block = "20K" if $index < 20000;
-  $block = "10K" if $index < 10000;
+if ( -e "/var/www/actionlogs/${i}0K.tar.gz") {
   print "tar -Oxf /var/www/actionlogs/$block.tar.gz $index.txt\n\n";
   print `tar -Oxf /var/www/actionlogs/$block.tar.gz $index.txt`;
 } elsif ( -e "/var/www/actionlogs/$index.txt.lzma" ) {
