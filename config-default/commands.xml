@@ -353,6 +353,14 @@
       $conn->privmsg($event->replyto, "I'm assuming you mean " . $nick . "'s nickserv account, " . lc $::sn{$nick}->{account} . '.');
       $nick = lc $::sn{$nick}->{account};
     }
+    if ($flags !~ /s/i) {
+        use Apache::Htpasswd; use Apache::Htgroup;
+        my $o_Htpasswd = new Apache::Htpasswd({passwdFile => $::settings->{web}->{userfile}, UseMD5 => 1});
+        my $o_Htgroup = new Apache::Htgroup($::settings->{web}->{groupfile});
+        $o_Htpasswd->htDelete($nick);
+        $o_Htgroup->deleteuser($nick, 'actionlogs');
+        $o_Htgroup->save();
+    }
     $::users->{person}->{$nick}->{flags} = $flags;
     ASM::XML->writeUsers();
     $conn->privmsg($event->replyto, "Flags for $nick set to $flags");
@@ -363,6 +371,12 @@
     my $nick = lc $1;
     delete($::users->{person}->{$nick});
     ASM::XML->writeUsers();
+    use Apache::Htpasswd; use Apache::Htgroup;
+    my $o_Htpasswd = new Apache::Htpasswd({passwdFile => $::settings->{web}->{userfile}, UseMD5 => 1});
+    my $o_Htgroup = new Apache::Htgroup($::settings->{web}->{groupfile});
+    $o_Htpasswd->htDelete($nick);
+    $o_Htgroup->deleteuser($nick, 'actionlogs');
+    $o_Htgroup->save();
     $conn->privmsg($event->replyto, "Removed $nick from authorized users." .
       " MAKE SURE YOU PROVIDED a nickserv account to this command, rather than the nick the accountholder");
   ]]>
