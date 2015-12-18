@@ -290,7 +290,8 @@ sub on_part
   my $chan = lc $event->{to}->[0];
   $::log->logg( $event );
   $::db->logg( $event ) if defined $::db;
-  if (defined $::db and $event->{args}->[0] =~ /^requested by/) {
+  # Ignore channels that are +s and not monitored
+  if (defined $::db and $event->{args}->[0] =~ /^requested by/ and (not ((grep { /^s$/ } @{$::sc{$_}{modes}}) && ($::channels->{channel}->{$_}->{monitor} eq "no"))) ) {
     my $idx = $::db->actionlog( $event);
     $::log->sqlIncident($chan, $idx) if $idx;
   }
@@ -406,7 +407,9 @@ sub on_quit
   $event->{to} = \@channels;
   if (defined $::db) {
       my $idx = $::db->actionlog($event);
-      $::log->sqlIncident( join(',', @channels), $idx ) if $idx;
+      # Ignore channels that are +s and not monitored
+      my @actionlog_channels = grep { not ((grep { /^s$/ } @{$::sc{$_}{modes}}) && ($::channels->{channel}->{$_}->{monitor} eq "no")) } @channels;
+      $::log->sqlIncident( join(',', @actionlog_channels), $idx ) if $idx;
       $::db->logg( $event );
   }
   $::log->logg( $event );
@@ -536,8 +539,11 @@ sub on_kick {
   $::log->logg( $event );
   if (defined $::db) {
       $::db->logg( $event );
-      my $idx = $::db->actionlog($event);
-      $::log->sqlIncident($chan, $idx) if $idx;
+      # Ignore channels that are +s and not monitored
+      if( not ((grep { /^s$/ } @{$::sc{$chan}{modes}}) && ($::channels->{channel}->{$chan}->{monitor} eq "no")) ) {
+          my $idx = $::db->actionlog($event);
+          $::log->sqlIncident($chan, $idx) if $idx;
+      }
   }
   if (defined($::sn{$nick}) && defined($::sn{$nick}->{mship})) {
     my @mship = @{$::sn{$nick}->{mship}};
@@ -673,8 +679,11 @@ sub on_mode
           my @affected = whoGotHit($chan, $ex[1]);
           if ( defined($::db) && (@affected) && (scalar @affected <= 4) ) {
             foreach my $victim (@affected) {
-              my $idx = $::db->actionlog($event, 'ban', $victim);
-              $::log->sqlIncident( $chan, $idx ) if $idx;
+              # Ignore channels that are +s and not monitored
+              if ( not ((grep { /^s$/ } @{$::sc{$_}{modes}}) && ($::channels->{channel}->{$_}->{monitor} eq "no")) ) {
+                my $idx = $::db->actionlog($event, 'ban', $victim);
+                $::log->sqlIncident( $chan, $idx ) if $idx;
+              }
             }
           }
           if ($ex[1] =~ /^\*\!\*\@(.*)$/) {
@@ -697,8 +706,11 @@ sub on_mode
           my @affected = whoGotHit($chan, $ex[1]);
           if ( defined($::db) && (@affected) && (scalar @affected <= 4) ) {
             foreach my $victim (@affected) {
-              my $idx = $::db->actionlog($event, 'quiet', $victim);
-              $::log->sqlIncident( $chan, $idx ) if $idx;
+              # Ignore channels that are +s and not monitored
+              if ( not ((grep { /^s$/ } @{$::sc{$_}{modes}}) && ($::channels->{channel}->{$_}->{monitor} eq "no")) ) {
+                my $idx = $::db->actionlog($event, 'quiet', $victim);
+                $::log->sqlIncident( $chan, $idx ) if $idx;
+              }
             }
           }
           if ($ex[1] =~ /^\*\!\*\@(.*)$/) {
