@@ -649,7 +649,17 @@
     my $str = lc $1;
     use String::CRC32;
     my $id = sprintf("%08x", crc32($str));
-    $::blacklist->{string}->{$id} = { "content" => $str, "setby" => $event->nick, "settime" => strftime('%F', gmtime) };
+    $::blacklist->{string}->{$id} = { "content" => $str, "type" => "string", "setby" => $event->nick, "settime" => strftime('%F', gmtime) };
+    ASM::XML->writeBlacklist();
+    $conn->privmsg($event->replyto, "$str blacklisted with id $id, please use ;blreason $id reasonGoesHere to set a reason");
+  ]]>
+  </command>
+  <command cmd="^;blacklistpcre (.*)" flag="a">
+  <![CDATA[
+    my $str = lc $1;
+    use String::CRC32;
+    my $id = sprintf("%08x", crc32($str));
+    $::blacklist->{string}->{$id} = { "content" => $str, "type" => "pcre", "setby" => $event->nick, "settime" => strftime('%F', gmtime) };
     ASM::XML->writeBlacklist();
     $conn->privmsg($event->replyto, "$str blacklisted with id $id, please use ;blreason $id reasonGoesHere to set a reason");
   ]]>
@@ -713,8 +723,9 @@
       my $setby = $::blacklist->{string}->{$id}->{setby};
       my $settime = $::blacklist->{string}->{$id}->{settime};
       my $reason = $::blacklist->{string}->{$id}->{reason};
+      my $type = $::blacklist->{string}->{$id}->{type};
       $reason = 'none ever provided' unless defined($reason);
-      $conn->privmsg($event->nick, "'$content' blacklisted by $setby on $settime with reason $reason");
+      $conn->privmsg($event->nick, "'$content' $type blacklisted by $setby on $settime with reason $reason");
       if ($event->{to}->[0] =~ /^#/) {
         $conn->privmsg($event->replyto, "Info on blacklist ID $id sent via PM");
       }

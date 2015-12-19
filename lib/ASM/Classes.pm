@@ -16,6 +16,7 @@ sub new
   my $tbl = {
     "strbl" => \&strbl,
     "strblnew" => \&strblnew,
+    "strblpcre" => \&strblpcre,
     "dnsbl" => \&dnsbl,
     "floodqueue" => \&floodqueue,
     "floodqueue2" => \&floodqueue2,
@@ -395,9 +396,28 @@ sub strblnew {
   my ($chk, $xid, $event, $chan) = @_;
   my $match = lc $event->{args}->[0];
   foreach my $id (keys %{$::blacklist->{string}}) {
+    next unless $::blacklist->{string}->{$id}->{type} eq "string";
     my $line = lc $::blacklist->{string}->{$id}->{content};
     my $idx = index $match, $line;
     if ( $idx != -1 ) {
+      my $setby = $::blacklist->{string}->{$id}->{setby};
+      $setby = substr($setby, 0, 1) . "\x02\x02" . substr($setby, 1);
+      return defined($::blacklist->{string}->{$id}->{reason}) ?
+        "id $id added by $setby because $::blacklist->{string}->{$id}->{reason}" :
+        "id $id added by $setby for no reason";
+    }
+  }
+  return 0;
+}
+
+sub strblpcre {
+  my ($chk, $xid, $event, $chan) = @_;
+  my $match = lc $event->{args}->[0];
+  foreach my $id (keys %{$::blacklist->{string}}) {
+    next unless $::blacklist->{string}->{$id}->{type} eq "pcre";
+    my $line = lc $::blacklist->{string}->{$id}->{content};
+    my $idx = index $match, $line;
+    if ( $match =~ /$line/ ) {
       my $setby = $::blacklist->{string}->{$id}->{setby};
       $setby = substr($setby, 0, 1) . "\x02\x02" . substr($setby, 1);
       return defined($::blacklist->{string}->{$id}->{reason}) ?

@@ -8,6 +8,7 @@
   <event id="autoremove" class="re" reason="on chanserv autoremove" risk="info" type="part">^requested by ChanServ</event>
   <event id="blacklist" class="strbl" reason="sending message containing blacklisted content" risk="low" type="public,part,quit,caction">blah</event>
   <event id="blacklist2" class="strblnew" reason="blacklist $xresult" risk="medium" type="public,part,quit,caction">blah</event>
+  <event id="blacklistpcre" class="strblpcre" reason="pcre blacklist $xresult" risk="medium" type="public,part,quit,caction">blah</event>
   <event id="ctcp-dcc" class="re" reason="ctcp-dcc" risk="high" type="cdcc">.*</event>
   <event id="ctcp-ping" class="re" reason="channel-wide CTCP PING" risk="medium" type="cping">.*</event>
   <event id="ctcp-version" class="re" reason="channel-wide CTCP VERSION" risk="medium" type="cversion">.*</event>
