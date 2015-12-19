@@ -508,7 +508,7 @@
   <![CDATA[
     my $chan = lc $1;
     unless (defined($::channels->{channel}->{$chan})) {
-      $::channels->{channel}->{$chan} = { };
+      $::channels->{channel}->{$chan} = { monitor => "yes", silence => "no" };
       ASM::XML->writeChannels();
     }
     $conn->join($chan);
