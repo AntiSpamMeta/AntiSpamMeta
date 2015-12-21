@@ -62,6 +62,7 @@ CREATE TABLE `joins` (
   `user` varchar(10) NOT NULL,
   `host` varchar(63) NOT NULL,
   `geco` varchar(255) DEFAULT NULL,
+  'account' varchar(16) DEFAULT NULL,
   KEY `index` (`index`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
@@ -171,4 +172,3 @@ CREATE TABLE `topic` (
   `content1` varchar(1000) NOT NULL,
   KEY `index` (`index`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-
