@@ -172,4 +172,3 @@ CREATE TABLE `topic` (
   `content1` varchar(1000) NOT NULL,
   KEY `index` (`index`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-
