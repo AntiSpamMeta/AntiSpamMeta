@@ -291,7 +291,7 @@ sub on_part
   $::log->logg( $event );
   $::db->logg( $event ) if defined $::db;
   # Ignore channels that are +s and not monitored
-  if (defined $::db and $event->{args}->[0] =~ /^requested by/ and (not ((grep { /^s$/ } @{$::sc{$_}{modes}}) && ($::channels->{channel}->{$_}->{monitor} eq "no"))) ) {
+  if (defined $::db and $event->{args}->[0] =~ /^requested by/ and (not ((grep { /^s$/ } @{$::sc{$chan}{modes}} ) && ($::channels->{channel}->{$chan}->{monitor} eq "no"))) ) {
     my $idx = $::db->actionlog( $event);
     $::log->sqlIncident($chan, $idx) if $idx;
   }
@@ -680,7 +680,7 @@ sub on_mode
           if ( defined($::db) && (@affected) && (scalar @affected <= 4) ) {
             foreach my $victim (@affected) {
               # Ignore channels that are +s and not monitored
-              if ( not ((grep { /^s$/ } @{$::sc{$_}{modes}}) && ($::channels->{channel}->{$_}->{monitor} eq "no")) ) {
+              if ( not ((grep { /^s$/ } @{$::sc{$chan}{modes}}) && ($::channels->{channel}->{$chan}->{monitor} eq "no")) ) {
                 my $idx = $::db->actionlog($event, 'ban', $victim);
                 $::log->sqlIncident( $chan, $idx ) if $idx;
               }
@@ -707,7 +707,7 @@ sub on_mode
           if ( defined($::db) && (@affected) && (scalar @affected <= 4) ) {
             foreach my $victim (@affected) {
               # Ignore channels that are +s and not monitored
-              if ( not ((grep { /^s$/ } @{$::sc{$_}{modes}}) && ($::channels->{channel}->{$_}->{monitor} eq "no")) ) {
+              if ( not ((grep { /^s$/ } @{$::sc{$chan}{modes}}) && ($::channels->{channel}->{$chan}->{monitor} eq "no")) ) {
                 my $idx = $::db->actionlog($event, 'quiet', $victim);
                 $::log->sqlIncident( $chan, $idx ) if $idx;
               }
