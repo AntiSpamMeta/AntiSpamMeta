@@ -63,7 +63,12 @@ CREATE TABLE `joins` (
   `host` varchar(63) NOT NULL,
   `geco` varchar(255) DEFAULT NULL,
   `account` varchar(16) DEFAULT NULL,
-  KEY `index` (`index`)
+  KEY `index` (`index`),
+  KEY `nick` (`nick`),
+  KEY `user` (`user`),
+  KEY `host` (`host`),
+  KEY `geco` (`geco`),
+  KEY `account` (`account`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 CREATE TABLE `kick` (
