@@ -262,6 +262,9 @@ sub logg
   if ($table eq 'kick') {
     $string = $string . ', victim_nick, victim_user, victim_host, victim_geco, content1';
   }
+  if ($table eq 'join') {
+    $string .= ', account';
+  }
   $string = $string . ') VALUES (';
   if (($table ne 'nick') && ($table ne 'quit') && ($table ne 'kick')) {
     $string = $string . $dbh->quote($event->{to}->[0]) . ", ";
@@ -285,8 +288,17 @@ sub logg
   if ($table eq 'mode') {
     $string = $string . ', ' . $dbh->quote($event->{args}->[1]);
   }
+  if ($table eq 'join') {
+    my $account = $::sn{lc $event->{nick}}->{account};
+    if (!defined($account) or ($account eq '0') or ($account eq '*')) {
+      $account = 'NULL';
+    } else {
+      $account = $dbh->quote($account);
+    }
+    $string .= ', ' . $account;
+  }
   $string = $string . ');';
-#  ASM::Util->dprint($string, "mysql");
+  ASM::Util->dprint($string, 'mysql');
   $dbh->do($string);
 }
   
