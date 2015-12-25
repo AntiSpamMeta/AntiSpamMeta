@@ -3,26 +3,10 @@ use warnings;
 use strict;
 
 use Data::Dumper;
-use Text::LevenshteinXS qw(distance);
 use IO::All;
 use POSIX qw(strftime);
 use Regexp::Wildcards;
 use HTTP::Request;
-
-sub cs {
-  my ($chan) = @_;
-  $chan = lc $chan;
-  $chan =~ s/^[@+]//;
-  return $::channels->{channel}->{$chan} if ( defined($::channels->{channel}->{$chan}) );
-  return $::channels->{channel}->{default};
-}
-
-sub maxlen {
-  my ($a, $b) = @_;
-  my ($la, $lb) = (length($a), length($b));
-  return $la if ($la > $lb);
-  return $lb;
-}
 
 sub new
 {

@@ -5,7 +5,6 @@ use warnings;
 use Text::LevenshteinXS qw(distance);
 use Data::Dumper;
 use Regexp::Wildcards;
-use Carp qw(cluck);
 
 my %sf = ();
 
@@ -193,7 +192,6 @@ sub dnsbl
 #  return 0;
   if (defined $rev) {
     ASM::Util->dprint("Querying $rev$chk->{content}", "dnsbl");
-    #cluck "Calling gethostbyname in dnsbl";
     my $iaddr = gethostbyname( "$rev$chk->{content}" );
     my @dnsbl = unpack( 'C4', $iaddr ) if defined $iaddr;
     my $strip;

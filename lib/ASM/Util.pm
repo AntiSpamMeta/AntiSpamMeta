@@ -6,7 +6,6 @@ use strict;
 use Term::ANSIColor qw (:constants);
 use Socket qw( inet_aton inet_ntoa );
 use Data::Dumper;
-use Carp qw(cluck);
 
 %::RISKS =
 (
@@ -116,7 +115,6 @@ sub speak
 
 #this item is a stub, dur
 sub hostip {
-  #cluck "Calling gethostbyname in hostip";
   return gethostbyname($_[0]);
 }
 
@@ -231,14 +229,7 @@ sub intToDottedQuad {
 sub dottedQuadToInt
 {
   my ($module, $dottedquad) = @_;
-#  my $ip_number = 0;
-#  my @octets = split(/\./, $dottedquad);
-#  foreach my $octet (@octets) {
-#    $ip_number <<= 8;
-#    $ip_number |= $octet;
-#  }
-#  return $ip_number;
- return unpack('N', inet_aton($dottedquad)); 
+  return unpack('N', inet_aton($dottedquad)); 
 }
 
 sub getHostIP
@@ -257,7 +248,6 @@ sub getHostIP
     my $host = join('.', unpack('C4', pack('N', (hex($splitip[6] . $splitip[7])^hex('ffffffff')))));
     return dottedQuadToInt(undef, $host);
   }
-  #cluck "Calling gethostbyname in getHostIP";
   my @resolve = gethostbyname($host);
   return unless @resolve;
   return dottedQuadToInt(undef, join('.', unpack('C4', $resolve[4])));
@@ -278,24 +268,6 @@ sub getNickIP
     return $ip;
   }
   return;
-#  if ( ($host =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/) or
-#       ($host =~ /^gateway\/web\/freenode\/ip\.(\d+)\.(\d+)\.(\d+)\.(\d+)$/) ) {
-#    #yay, easy IP!
-#    $::sn{$nick}{ip} = dottedQuadToInt(undef, "$1.$2.$3.$4");
-#    return $::sn{$nick}{ip};
-#  } elsif (index($host, '/') != -1) {
-#    return;
-#  } elsif ($host =~ /^2001:0:/) {
-#    my @splitip = split(/:/, $host);
-#    #I think I can just do (hex($splitip[6] . $splitip[7]) ^ hex('ffffffff')) here but meh
-#    my $host = join('.', unpack('C4', pack('N', (hex($splitip[6] . $splitip[7])^hex('ffffffff')))));
-#    $::sn{$nick}{ip} = dottedQuadToInt(undef, $host);
-#    return $::sn{$nick}{ip};
-#  }
-#  my @resolve = gethostbyname($::sn{$nick}{host});
-#  return unless @resolve;
-#  $::sn{$nick}{ip} = dottedQuadToInt(undef, join('.', unpack('C4', $resolve[4])));
-#  return $::sn{$nick}{ip};
 }
 
 sub notRestricted {

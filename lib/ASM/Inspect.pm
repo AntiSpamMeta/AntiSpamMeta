@@ -1,12 +1,9 @@
 package ASM::Inspect;
 use warnings;
 use strict;
-use feature qw(say);
 
 use Data::Dumper;
-#use List::Util qw(first);
 use String::Interpolate qw(interpolate);
-use Carp qw(cluck);
 
 %::ignored = ();
 sub new

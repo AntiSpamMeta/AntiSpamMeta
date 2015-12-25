@@ -19,13 +19,6 @@ sub new {
   return $self;
 }
 
-#sub sql_connect
-#{
-#  $::dbh = DBI->connect("DBI:mysql:database=$::mysql->{db};host=$::mysql->{host};port=$::mysql->{port}",
-#                        $::mysql->{user}, $::mysql->{pass});
-#  $::dbh->{mysql_auto_reconnect} = 1;
-#}
-
 sub raw
 {
   my $self = shift;

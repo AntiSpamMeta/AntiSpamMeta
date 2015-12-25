@@ -736,7 +736,7 @@
   </command>
   <command cmd="^;falsematch\b" flag="s">
   <![CDATA[
-    $conn->privmsg($event->replyto, 'To whitelist false matches for the impersonation check, have someone with the a flag run ";restrict nick LegitimateNickGoesHere +nonickbl_impersonate". Contact ilbelkyr if this issue reoccurs.');
+    $conn->privmsg($event->replyto, 'To whitelist false matches for the impersonation check, have someone with the "a" flag run ";restrict nick LegitimateNickGoesHere +nonickbl_impersonate". Contact ilbelkyr if this issue reoccurs.');
   ]]>
   </command>
 </commands>

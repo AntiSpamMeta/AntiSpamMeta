@@ -3,7 +3,6 @@ package ASM::Log;
 use warnings;
 use strict;
 
-#use IO::All;
 use POSIX qw(strftime);
 
 sub new
@@ -105,7 +104,6 @@ sub logg
     if (defined($spy)) {
       say $spy "$chan: $nostamp";
     }
-#    $_ >> io($path);
   }
 }
 

@@ -42,12 +42,12 @@ sub doServices {
     }
     elsif ($event->{args}->[0] =~ /has been (killed|released)/ )
     {
-#      ASM::Util->dprint('Got kill/release successful from NickServ!', 'snotice');
+      ASM::Util->dprint('Got kill/release successful from NickServ!', 'snotice');
       $conn->nick( $::settings->{nick} );
     }
     elsif ($event->{args}->[0] =~ /has been regained/ )
     {
-#      ASM::Util->dprint('Got regain successful from nickserv!', 'snotice');
+      ASM::Util->dprint('Got regain successful from nickserv!', 'snotice');
     }
     elsif ($event->{args}->[0] =~ /Password Incorrect/ )
     {
