@@ -33,7 +33,7 @@ BEGIN {
 use strict;
 use vars qw($VERSION);
 
-$VERSION = "0.80";
+$VERSION = "0.90";
 
 sub new {
   my $proto = shift;
@@ -755,5 +755,3 @@ http://www.irchelp.org/, home of fine IRC resources.
 =back
 
 =cut
-
-    
