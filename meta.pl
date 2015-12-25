@@ -7,7 +7,7 @@ no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 use FindBin;
 use lib "$FindBin::Bin/lib";;
 
-use Net::IRC;
+use Net::IRC 0.90;
 use Data::Dumper;
 use IO::All;
 use Getopt::Long;
