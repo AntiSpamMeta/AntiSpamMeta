@@ -841,7 +841,7 @@ sub parse {
   my ($from, $type, $message, @stuff, $itype, $ev, @lines, $line);
   
   if (defined ($self->ssl ?
-               $self->socket->read($line, 10240) :
+               $self->socket->sysread($line, 10240) :
                $self->socket->recv($line, 10240, 0))
       and
       (length($self->{_frag}) + length($line)) > 0)  {
