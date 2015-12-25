@@ -140,12 +140,44 @@ sub getAlert {
   $c =~ s/^[@+]//;
   foreach my $prisk ( keys %::RISKS) {
     if ( $::RISKS{$risk} >= $::RISKS{$prisk} ) {
-      push( @x, @{$::channels->{channel}->{master}->{$t}->{$prisk}} ) if defined $::channels->{channel}->{master}->{$t}->{$prisk};
-      push( @x, @{cs($module, $c)->{$t}->{$prisk}} ) if defined cs($module, $c)->{$t}->{$prisk};
+      if (defined $::channels->{channel}->{master}->{$t}->{$prisk}) {
+        foreach my $nick (@{$::channels->{channel}->{master}->{$t}->{$prisk}}) {
+          if ($nick =~ /^\$a:/) {
+            push @x, @{accountToNicks($module, $nick)};
+          } else {
+            push @x, $nick;
+          }
+        }
+      }
+      if (defined cs($module, $c)->{$t}->{$prisk}) {
+        foreach my $nick (@{cs($module, $c)->{$t}->{$prisk}}) {
+          if ($nick =~ /^\$a:/) {
+            push @x, @{accountToNicks($module, $nick)};
+          } else {
+            push @x, $nick;
+          }
+        }
+      }
     }
   }
-  push( @disable, @{$::channels->{channel}->{master}->{$t}->{disable}} ) if defined $::channels->{channel}->{master}->{$t}->{disable};
-  push( @disable, @{cs($module, $c)->{$t}->{disable}} ) if defined cs($module, $c)->{$t}->{disable};
+  if (defined $::channels->{channel}->{master}->{$t}->{disable}) {
+    foreach my $nick (@{$::channels->{channel}->{master}->{$t}->{disable}}) {
+      if ($nick =~ /^\$a:/) {
+        push @disable, @{accountToNicks($module, $nick)};
+      } else {
+        push @disable, $nick;
+      }
+    }
+  }
+  if (defined cs($module, $c)->{$t}->{disable}) {
+    foreach my $nick (@{cs($module, $c)->{$t}->{disable}}) {
+      if ($nick =~ /^\$a:/) {
+        push @disable, @{accountToNicks($module, $nick)};
+      } else {
+        push @disable, $nick;
+      }
+    }
+  }
   @x = unique(@x);
   @x = array_diff(@x, @disable);
   return @x;
@@ -292,6 +324,13 @@ sub notRestricted {
     }
   }
   return 1;
+}
+
+sub accountToNicks {
+  my ($module, $account) = @_;
+  $account =~ s/^\$a://;
+  my @ret = grep( { (lc ($account) eq lc ($::sn{$_}->{account})) } keys %::sn );
+  return \@ret;
 }
 
 return 1;
