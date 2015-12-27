@@ -14,20 +14,21 @@ sub new
                "conn" => $args[1]
   };
   mkfifo("fifo", 0777);
-  sysopen( my $fifo, "fifo", O_NONBLOCK );
+  open( my $fifo, "+<", "fifo" );
   $self->{fifo} = $fifo;
   bless($self);
-  $self->{irc}->addfh( $self->{fifo}, sub { $self->process(@_); }, 'r' );
+  $self->{irc}->addfh( $self->{fifo}, $self->can('process'), 'r', $self );
   return $self;
 }
 
 sub process
 {
   my ($self, $fifo) = @_;
-  my $line = readline($fifo);
-  return unless defined($line);
-  chomp $line;
-  $self->{conn}->privmsg($::settings->{masterchan}, $line);
+  my $lines;
+  $fifo->sysread($lines, 10240);
+  foreach my $line (split /\n/, $lines) {
+  $self->{conn}->privmsg($::settings->{masterchan}, $line); }
+  return 0;
 }
 
 1;
