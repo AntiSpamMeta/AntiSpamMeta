@@ -23,7 +23,10 @@ sub command
   my $cmd = $args;
   my $d1;
   my $nick = lc $event->{nick};
-  my $acct = lc $::sn{$nick}->{account};
+  my $acct;
+  if (defined($::sn{$nick}) && defined($::sn{$nick}->{account})) {
+    $acct = lc $::sn{$nick}->{account};
+  }
 #  return 0 unless (ASM::Util->speak($event->{to}->[0]));
   foreach my $command ( @{$::commands->{command}} )
   {
