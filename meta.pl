@@ -27,6 +27,7 @@ use ASM::Log;
 use ASM::Commander;
 use ASM::Classes;
 use ASM::DB;
+use ASM::Fifo;
 
 $Data::Dumper::Useqq=1;
 
@@ -119,6 +120,7 @@ sub init {
   $::commander = ASM::Commander->new();
   ASM::Event->new($conn, $::inspector);
   $::classes = ASM::Classes->new();
+  $::fifo = ASM::Fifo->new($irc, $conn);
   my @strbl = io('string_blacklist.txt')->getlines;
   chomp @strbl;
   @::string_blacklist = @strbl;
