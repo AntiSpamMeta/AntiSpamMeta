@@ -105,7 +105,7 @@
   <command cmd="^;mship (\S+)" flag="s">
   <![CDATA[
     my $nick = $1;
-    if (defined($::sn{lc $nick}->{mship})) {
+    if (defined($::sn{lc $nick})) {
       if ($event->{to}->[0] =~ /^#/) {
         $conn->privmsg($event->replyto, $nick . " is on: " . ASM::Util->commaAndify(sort(grep { not grep { /^s$/ } @{$::sc{$_}{modes}} } @{$::sn{lc $nick}->{mship}})));
       } else {
