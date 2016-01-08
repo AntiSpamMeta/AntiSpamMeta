@@ -38,7 +38,14 @@ sub doServices {
         $conn->join(join(',', @autojoins));
       }
       $conn->sl("PING :" . time);
-      $conn->schedule(2, sub { $conn->privmsg($::settings->{masterchan}, 'Now joined to all channels in '. (time - $::starttime) . " seconds."); });
+      foreach my $chan (@autojoins[0..1]) {
+        ASM::Util->dprint("Syncing $chan", "sync");
+        $conn->sl('who ' . $chan . ' %tcnuhra,314');
+        $conn->sl('mode ' . $chan);
+        $conn->sl('mode ' . $chan . ' b');
+      }
+        @::syncqueue = @autojoins[1..$#autojoins];
+#      $conn->schedule(2, sub { $conn->privmsg($::settings->{masterchan}, 'Now joined to all channels in '. (time - $::starttime) . " seconds."); });
     }
     elsif ($event->{args}->[0] =~ /has been (killed|released)/ )
     {

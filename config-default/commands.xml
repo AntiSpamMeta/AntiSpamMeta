@@ -200,11 +200,11 @@
     my $dbh = $::db->{DBH};
 
     my $mnicks = $dbh->do("SELECT * from $::db->{ACTIONTABLE} WHERE nick like " .    $dbh->quote($nick) . ';');
-    my $musers = (lc $person->{user} ~~ $::mysql->{ignoredidents}) ? "didn't check ($person->{user})" :
+    my $musers = (lc $person->{user} ~~ $::mysql->{ignoredidents}) ? "didn't check" :
                  $dbh->do("SELECT * from $::db->{ACTIONTABLE} WHERE user like " .    $dbh->quote($person->{user}) . ';');
     my $mhosts = $dbh->do("SELECT * from $::db->{ACTIONTABLE} WHERE host like " .    $dbh->quote($person->{host}) . ';');
     my $maccts = $dbh->do("SELECT * from $::db->{ACTIONTABLE} WHERE account like " . $dbh->quote($person->{account}) . ';');
-    my $mgecos = (lc $person->{gecos} ~~ $::mysql->{ignoredgecos}) ? "didn't check ($person->{gecos})" :
+    my $mgecos = (lc $person->{gecos} ~~ $::mysql->{ignoredgecos}) ? "didn't check" :
                  $dbh->do("SELECT * from $::db->{ACTIONTABLE} WHERE gecos like " .   $dbh->quote($person->{gecos}) . ';');
 
     my $ip = ASM::Util->getNickIP($nick);
@@ -218,14 +218,14 @@
     $matchedip =~ s/0E0/0/;
     my $dq = '';
     if (defined($ip)) {
-      $dq = '&realip=' . join '.', unpack 'C4', pack 'N', $ip;
+      $dq = join '.', unpack 'C4', pack 'N', $ip;
     }
-    $conn->privmsg($event->replyto, "I found $mnicks matches by nick, $musers user matches, $mhosts by hostname, " .
-                                 "$maccts by NickServ account, $mgecos by gecos field, and $matchedip by real IP." .
+    $conn->privmsg($event->replyto, "I found $mnicks matches by nick ($nick), $musers by user ($person->{user}), $mhosts by hostname ($person->{host}), " .
+                                 "$maccts by NickServ account ($person->{account}), $mgecos by gecos field ($person->{gecos}), and $matchedip by real IP ($dq)." .
                     ' Web results are at https://antispammeta.net/cgi-bin/secret/investigate.pl?nick=' . uri_escape($nick) .
         ((lc $person->{user} ~~ $::mysql->{ignoredidents}) ? '' : '&user=' . uri_escape($person->{user})) .
         '&host=' . uri_escape($person->{host}) . '&account=' . uri_escape($person->{account}) .
-        ((lc $person->{gecos} ~~ $::mysql->{ignoredgecos}) ? '' : '&gecos=' . uri_escape($person->{gecos})) . $dq);
+        ((lc $person->{gecos} ~~ $::mysql->{ignoredgecos}) ? '' : '&gecos=' . uri_escape($person->{gecos})) . '&realip=' . $dq);
   ]]>
   </command>
   <command cmd="^;investigate2 (\S+) ?(\d*) *$" flag="s">
@@ -426,11 +426,11 @@
   </command>
   <command cmd="^;showhilights (\S+) *$" flag="h">
   <![CDATA[
-    my $nick = lc $1;
+    my $nick = $1;
     my @channels = ();
     foreach my $chan (keys(%{$::channels->{channel}})) {
       foreach my $level (keys(%{$::channels->{channel}->{$chan}->{hilights}})) {
-        if (grep(/^${nick}$/i, @{$::channels->{channel}->{$chan}->{hilights}->{$level}})) {
+        if ( $nick ~~ $::channels->{channel}->{$chan}->{hilights}->{$level}) {
           push @channels, $chan . " ($level)";
         }
       }

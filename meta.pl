@@ -2,7 +2,6 @@
 
 use strict;
 use warnings;
-no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
 use FindBin;
 use lib "$FindBin::Bin/lib";;
@@ -17,6 +16,7 @@ use File::Monitor;
 use feature qw(say);
 use HTTP::Async;
 use Carp;
+use Tie::CPHash;
 
 use ASM::Util;
 use ASM::XML;
@@ -28,6 +28,7 @@ use ASM::Commander;
 use ASM::Classes;
 use ASM::DB;
 use ASM::Fifo;
+no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
 $Data::Dumper::Useqq=1;
 
@@ -68,8 +69,10 @@ $::settingschanged = 0;
 %::spy = ();
 $::starttime = time;
 @::syncqueue = ();
+$::pendingsync = 0;
 %::watchRegged = ();
 $::lastline = "";
+%::sn = (); %::sc = (); tie %::sc, 'Tie::CPHash'; tie %::sn, 'Tie::CPHash';
 
 $SIG{__WARN__} = sub {
   $Data::Dumper::Useqq=1;
@@ -113,6 +116,7 @@ sub init {
                          Nick => $::settings->{nick},
                          Ircname => $::settings->{realname},
                          Username => $::settings->{username},
+                         Password => $::settings->{pass},
 			 Pacing => 0 );
   $conn->debug($::debug);
   $::inspector = ASM::Inspect->new();

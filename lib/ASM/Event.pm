@@ -7,6 +7,7 @@ use IO::All;
 use POSIX qw(strftime);
 use Regexp::Wildcards;
 use HTTP::Request;
+use Array::Utils qw(:all);
 
 sub new
 {
@@ -144,7 +145,7 @@ sub on_pong
   if (($pongcount++ % 3) == 0) { #easiest way to do something roughly every 90 seconds
     $conn->sl('STATS p');
   }
-  if ( @::syncqueue || $::netsplit_ignore_lag ) {
+  if ( @::syncqueue || $::netsplit_ignore_lag || $::pendingsync) {
     return; #we don't worry about lag if we've just started up and are still syncing, or just experienced a netsplit
   }
   if (($lag > 2) && ($lag < 5)) {
@@ -216,9 +217,9 @@ sub on_connect {
   if (lc $event->{args}->[0] ne lc $::settings->{nick}) {
     ASM::Util->dprint('Attempting to regain my main nick', 'startup');
     $conn->sl("NickServ regain $::settings->{nick} $::settings->{pass}");
-  } else {
-    $conn->sl("NickServ identify $::settings->{nick} $::settings->{pass}");
-  }
+  }# else {
+#    $conn->sl("NickServ identify $::settings->{nick} $::settings->{pass}");
+#  }
   $conn->sl('CAP REQ :extended-join multi-prefix account-notify'); #god help you if you try to use this bot off freenode
 }
 
@@ -232,12 +233,14 @@ sub on_join {
     $::sc{$chan} = {};
     mkdir($::settings->{log}->{dir} . $chan);
     $::synced{$chan} = 0;
-    unless ( @::syncqueue ) {
-      $conn->sl('who ' . $chan . ' %tcnuhra,314');
-      $conn->sl('mode ' . $chan);
-      $conn->sl('mode ' . $chan . ' bq');
-    }
-    push @::syncqueue, $chan;
+    $::pendingsync++;
+#    unless ( (scalar @::syncqueue) > 4 ) {
+#      ASM::Util->dprint("Syncing $chan", "sync");
+#      $conn->sl('who ' . $chan . ' %tcnuhra,314');
+#      $conn->sl('mode ' . $chan);
+#      $conn->sl('mode ' . $chan . ' bq');
+#    }
+#    push @::syncqueue, $chan;
   }
   $::sc{$chan}{users}{$nick} = {};
   $::sc{$chan}{users}{$nick}{hostmask} = $event->{userhost};
@@ -421,6 +424,7 @@ sub blah
 {
   my ($self, $event) = @_;
   ASM::Util->dprint(Dumper($event), 'misc');
+  return if ($event->{nick} =~ /\./);
   $::inspector->inspect($self, $event);
 }
 
@@ -640,6 +644,7 @@ sub whoGotHit
 sub on_mode
 {
   my ($conn, $event) = @_;
+  return if ($event->{nick} =~ /\./); #if I ever want to track what modes ASM has on itself, this will have to die
   my $chan = lc $event->{to}->[0];
 # holy shit, I feel so bad doing this
 # I have no idea how or why Net::IRC fucks up modes if they've got a ':' in one of the args
@@ -829,13 +834,19 @@ sub on_whoxreply
 sub on_whoxover
 {
   my ($conn, $event) = @_;
-  my $chan = pop @::syncqueue;
+  $::pendingsync--;
   $::synced{lc $event->{args}->[1]} = 1;
+  if ($event->{args}->[1] ~~ @::syncqueue) {
+    my @diff = (lc $event->{args}->[1]);
+    @::syncqueue = array_diff(@::syncqueue, @diff);
+  }
+  my $chan = pop @::syncqueue;
   if (defined($chan) ){
+    ASM::Util->dprint("Syncing $chan", "sync");
     $conn->sl('who ' . $chan . ' %tcnuhra,314');
     $conn->sl('mode ' . $chan);
-    $conn->sl('mode ' . $chan . ' bq');
-  } else {
+    $conn->sl('mode ' . $chan . ' b');
+  } elsif ($::pendingsync == 0) {
     my $size = `ps -p $$ h -o size`;
     my $cputime = `ps -p $$ h -o time`;
     chomp $size; chomp $cputime;
@@ -861,6 +872,15 @@ sub on_whoxover
     foreach my $cx (keys %::sc) { delete $x{$cx}; }
     if (scalar (keys %x)) {
       $conn->privmsg($::settings->{masterchan}, "Syncing appears to have failed for " . ASM::Util->commaAndify(keys %x)) unless $::no_autojoins;
+    }
+    # There are some odd undefined values getting made somewhere, this is a nice way of fixing it
+    foreach my $nick (keys %::sn) { 
+      if ( !defined($::sn{$nick}->{mship}) ) {
+        $::sn{$nick}->{mship} = [];
+      }
+      if (!defined($::sn{$nick}->{host})) {
+        $::sn{$nick}->{host} = "";
+      }
     }
   }
 }

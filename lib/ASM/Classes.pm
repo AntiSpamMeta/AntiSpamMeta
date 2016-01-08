@@ -37,11 +37,24 @@ sub new
     "garbagemeter" => \&garbagemeter,
     "cyclebotnet" => \&cyclebotnet,
     "banevade" => \&banevade,
-    "urlcrunch" => \&urlcrunch
+    "urlcrunch" => \&urlcrunch,
+    "cloning" => \&cloning
   };
   $self->{ftbl} = $tbl;
   bless($self);
   return $self;
+}
+
+sub cloning {
+  my ($chk, $id, $event, $chan, $rev) = @_;
+  my $max = int($chk->{content});
+  my @nicks = grep {($::sn{$_}->{host} eq $event->{host}) && (lc $chan ~~ $::sn{$_}->{mship})} keys %::sn;
+  # It's lines like these that make me love Perl no matter how much it drives dwfreed up a tree.
+  # Understanding how that line works is simple and is left as an exercise to the reader.
+  if ($#nicks >= $max) {
+    return ASM::Util->commaAndify(@nicks);
+  }
+  return 0;
 }
 
 sub garbagemeter {

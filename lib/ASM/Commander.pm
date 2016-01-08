@@ -35,7 +35,10 @@ sub command
       next unless (defined($command->{nohush}) && ($command->{nohush} eq "nohush"));
     }
     if (defined($command->{flag})) { #If the command is restricted,
-      if (!defined($::users->{person}->{$acct})) { #make sure the requester has an account
+      if (!defined($acct)) {
+        $fail = 1;
+      }
+      elsif (!defined($::users->{person}->{$acct})) { #make sure the requester has an account
         $fail = 1;
       }
       elsif (!defined($::users->{person}->{$acct}->{flags})) { #make sure the requester has flags defined
