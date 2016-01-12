@@ -1,5 +1,5 @@
 package ASM::Classes;
-
+no autovivification;
 use strict;
 use warnings;
 use Text::LevenshteinXS qw(distance);
@@ -48,9 +48,12 @@ sub new
 sub cloning {
   my ($chk, $id, $event, $chan, $rev) = @_;
   my $max = int($chk->{content});
-  my @nicks = grep {($::sn{$_}->{host} eq $event->{host}) && (lc $chan ~~ $::sn{$_}->{mship})} keys %::sn;
-  # It's lines like these that make me love Perl no matter how much it drives dwfreed up a tree.
-  # Understanding how that line works is simple and is left as an exercise to the reader.
+  my @nicks = grep {
+                    (defined($::sn{$_}->{host})) &&
+                    (defined($::sn{$_}->{mship})) &&
+                    ($::sn{$_}->{host} eq $event->{host}) &&
+                    (lc $chan ~~ $::sn{$_}->{mship})
+                   } keys %::sn;
   if ($#nicks >= $max) {
     return ASM::Util->commaAndify(@nicks);
   }
