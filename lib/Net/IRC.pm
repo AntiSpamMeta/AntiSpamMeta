@@ -43,6 +43,7 @@ sub new {
     '_connhash'         => {},
     '_error'            => IO::Select->new(),
     '_debug'            => 0,
+    '_debugsock'        => 0,
     '_schedulequeue'    => new Net::IRC::EventQueue(),
     '_outputqueue'      => new Net::IRC::EventQueue(),
     '_read'             => IO::Select->new(),
@@ -113,6 +114,17 @@ sub debug {
     $self->{_debug} = $_[0];
   }
   return $self->{_debug};
+}
+
+# Sets or returns the socket debugging flag for this object.
+# Takes 1 optional arg: a new boolean value for the flag.
+sub debugsock {
+  my $self = shift;
+  
+  if (@_) {
+    $self->{_debugsock} = $_[0];
+  }
+  return $self->{_debugsock};
 }
 
 # Goes through one iteration of the main event loop. Useful for integrating

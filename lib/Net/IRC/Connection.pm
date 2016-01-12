@@ -63,6 +63,7 @@ sub new {
   
   my $self = {                # obvious defaults go here, rest are user-set
     _debug      => $_[0]->{_debug},
+    _debugsock  => $_[0]->{_debugsock},
     _port       => 6667,
     # Evals are for non-UNIX machines, just to make sure.
     _username   => eval { scalar getpwuid($>) } || $ENV{USER} || $ENV{LOGNAME} || "japh",
@@ -375,6 +376,16 @@ sub debug {
     $self->{_debug} = $_[0];
   }
   return $self->{_debug};
+}
+
+# Sets or returns the socket debugging flag for this object.
+# Takes 1 optional arg: a new boolean value for the flag.
+sub debugsock {
+  my $self = shift;
+  if (@_) {
+    $self->{_debugsock} = $_[0];
+  }
+  return $self->{_debugsock};
 }
 
 
@@ -868,7 +879,7 @@ sub parse {
    $line =~ s/[\012\015]+$//;
    next unless $line;
    
-   print STDERR "<<< $line\n" if $self->{_debug};
+   print STDERR "<<< $line\n" if ($self->{_debug} || $self->{_debugsock});
    
    $::lastline = $line; #this is so __WARN__ can print the last line received on IRC.
    # Like the RFC says: "respond as quickly as possible..."
@@ -1396,8 +1407,8 @@ sub sl_real {
   }
   
   ### DEBUG DEBUG DEBUG
-  if ($self->{_debug}) {
-    print ">>> $line\n";
+  if ($self->{_debug} || $self->{_debugsock}) {
+    print STDERR ">>> $line\n";
   }
   
   # RFC compliance can be kinda nice...

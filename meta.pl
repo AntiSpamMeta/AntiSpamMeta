@@ -96,6 +96,9 @@ sub init {
               'pass|p=s'   => \$::pass,
               'config|c=s' => \$::cset
             );
+  if (-e "debugmode") {
+    $::debug = 1;
+  }
   if ($::cset eq '') { $::cset = 'config-default'; }
                 else { $::cset = "config-$::cset"; }
   ASM::XML->readXML();
@@ -106,6 +109,9 @@ sub init {
   $host = ${$::settings->{server}}[rand @{$::settings->{server}}];
   ASM::Util->dprint( "Connecting to $host", "startup");
   $irc->debug($::debug);
+  if (-e "debugsock") {
+    $irc->debugsock(1);
+  }
   if (!$::mysql->{disable}) {
       $::db = ASM::DB->new($::mysql->{db}, $::mysql->{host}, $::mysql->{port},
                            $::mysql->{user}, $::mysql->{pass}, $::mysql->{table},
@@ -120,6 +126,9 @@ sub init {
                          Password => $::settings->{pass},
 			 Pacing => 0 );
   $conn->debug($::debug);
+  if (-e "debugsock") {
+    $conn->debugsock(1);
+  }
   $::inspector = ASM::Inspect->new();
   $::services = ASM::Services->new();
   $::commander = ASM::Commander->new();
