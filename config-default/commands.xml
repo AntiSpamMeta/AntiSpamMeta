@@ -1,5 +1,5 @@
 <commands>
-  <command cmd=";wallop" flag="d">
+  <command cmd="^;wallop" flag="d">
   <![CDATA[
     my @chans = ();
     foreach my $chan (keys %{$::channels->{channel}}) {
@@ -15,9 +15,9 @@
     print Dumper(\@chans);
   ]]>
   </command>
-  <command cmd="^;;addwebuser (\S+)" flag="s">
+  <command cmd="^;;addwebuser (?&lt;pass&gt;.{6,})" flag="s">
   <![CDATA[
-    my $pass = $1;
+    my $pass = $+{pass};
     if ($event->{to}->[0] =~ /^#/) {
       $conn->privmsg($event->replyto, "This command must be used in PM. Try again WITH A DIFFERENT PASSWORD!");
       return;
@@ -34,9 +34,9 @@
     $conn->privmsg($event->replyto, "Added $user to the list of authorized web users.")
   ]]>
   </command>
-  <command cmd="^;delwebuser (\S+)" flag="a">
+  <command cmd="^;delwebuser (?&lt;user&gt;\S+)" flag="a">
   <![CDATA[
-    my $user = $1;
+    my $user = $+{user};
     use Apache::Htpasswd; use Apache::Htgroup;
     my $o_Htpasswd = new Apache::Htpasswd({passwdFile => $::settings->{web}->{userfile}, UseMD5 => 1});
     my $o_Htgroup = new Apache::Htgroup($::settings->{web}->{groupfile});
@@ -46,9 +46,9 @@
     $conn->privmsg($event->replyto, "Removed $user from the list of authorized web users.")
   ]]>
   </command>
-  <command cmd="^;teredo (\S+)">
+  <command cmd="^;teredo (?&lt;ip&gt;\S+)">
   <![CDATA[
-    my $arg1 = $1;
+    my $arg1 = $+{ip};
     my @splitip = split(/:/, $arg1);
     if ( (int($splitip[0]) != 2001) || (int($splitip[1]) != 0) ) {
       $conn->privmsg($event->replyto, "This is not a teredo-tunnelled IP.");
@@ -102,9 +102,9 @@
      ", has sent $tx of data, and received $rx of data.");
   ]]>
   </command>
-  <command cmd="^;mship (\S+)" flag="s">
+  <command cmd="^;mship (?&lt;nick&gt;\S+)" flag="s">
   <![CDATA[
-    my $nick = $1;
+    my $nick = $+{nick};
     if (defined($::sn{lc $nick})) {
       if ($event->{to}->[0] =~ /^#/) {
         $conn->privmsg($event->replyto, $nick . " is on: " . ASM::Util->commaAndify(sort(grep { not grep { /^s$/ } @{$::sc{$_}{modes}} } @{$::sn{lc $nick}->{mship}})));
@@ -121,7 +121,7 @@
     $conn->privmsg($event->replyto, "source is at https://gitlab.devlabs.linuxassist.net/asm/antispammeta/");
   ]]>
   </command>
-  <command cmd="^;sql (main|log) (.*)" flag="d">
+  <command cmd="^;sql (?&lt;db&gt;main|log) (?&lt;string&gt;.*)" flag="d">
   <![CDATA[
     if (!defined $::db) {
       $conn->privmsg($event->replyto, "I am set to run without a database, fool.");
@@ -129,43 +129,55 @@
     }
 
     my $dbh = $::db->{DBH};
-    if ($1 eq 'log') {
+    if ($+{db} eq 'log') {
       $dbh = $::db->{DBH_LOG};
     }
-    $::db->raw($conn, $event->{to}->[0], $dbh, $2);
+    $::db->raw($conn, $event->{to}->[0], $dbh, $+{string});
   ]]>
   </command>
-  <command cmd="^;monitor (\S+) ?(yes|no)?$" flag="a">
+  <command cmd="^;monitor (?&lt;chan&gt;\S+) ?(?&lt;switch&gt;yes|no)$" flag="a">
   <![CDATA[
-    my $chan = lc $1;
-    my $link = ASM::Util->getLink(lc $chan);
-    if ( lc $link ne lc $chan ) {
-      $conn->privmsg($event->replyto, "Error: $chan is linked to $link - use $link instead.");
-      return;
-    }
-    if (defined($2)) {
-      my $switch = lc $2;
-      $::channels->{channel}->{$chan}->{monitor} = $switch;
-      ASM::XML->writeChannels();
-      $conn->privmsg($event->replyto, "Monitor flag for $chan set to $switch");
-    } else {
-      my $switch = $::channels->{channel}->{$chan}->{monitor} // 'yes';
-      $conn->privmsg($event->replyto, "Monitor flag for $chan is currently set to $switch");
-    }
+    my $chan = lc $+{chan};
+    my $switch = lc $+{switch};
+    $::channels->{channel}->{$chan}->{monitor} = $switch;
+    ASM::XML->writeChannels();
+    $conn->privmsg($event->replyto, "Monitor flag for $chan set to $switch");
   ]]>
   </command>
-  <command cmd="^;silence (\S+) ?(yes|no)?$" flag="a">
+  <command cmd="^;monitor (?&lt;chan&gt;\S+) *$" flag="s">
+  <![CDATA[
+    my $chan = lc $+{chan};
+    my $switch = $::channels->{channel}->{$chan}->{monitor} // 'yes';
+    $conn->privmsg($event->replyto, "Monitor flag for $chan is currently set to $switch");
+  ]]>
+  </command>
+  <command cmd="^;suppress (?&lt;chan&gt;\S+) *$" flag="s">
   <![CDATA[
     my $chan = lc $1;
-    if (defined($2)) {
-      my $switch = lc $2;
-      $::channels->{channel}->{$chan}->{silence} = $switch;
+    my $old = $::channels->{channel}->{$chan}->{monitor};
+    $::channels->{channel}->{$chan}->{monitor} = "no";
+    $conn->schedule(30*60, sub {
+      $::channels->{channel}->{$chan}->{monitor} = $old;
+      $conn->privmsg($event->replyto, "Unsuppressed $chan");
       ASM::XML->writeChannels();
-      $conn->privmsg($event->replyto, "Silence flag for $chan set to $switch");
-    } else {
-      my $switch = $::channels->{channel}->{$chan}->{silence} // 'no';
-      $conn->privmsg($event->replyto, "Silence flag for $chan is currently set to $switch");
-    }
+    });
+    $conn->privmsg($event->replyto, "Suppressing alerts from $chan for 30 minutes. If the bot restarts or the config is changed, you will need to do ;monitor $chan  to check the status of the monitor flag");
+  ]]>
+  </command>
+  <command cmd="^;silence (?&lt;chan&gt;\S+) *$" flag="s">
+  <![CDATA[
+    my $chan = lc $+{chan};
+    my $switch = $::channels->{channel}->{$chan}->{silence} // 'no';
+    $conn->privmsg($event->replyto, "Silence flag for $chan is currently set to $switch");
+  ]]>
+  </command>
+  <command cmd="^;silence (?&lt;chan&gt;\S+) (?&lt;switch&gt;yes|no) *$" flag="a">
+  <![CDATA[
+    my $chan = lc $+{chan};
+    my $switch = lc $+{switch};
+    $::channels->{channel}->{$chan}->{silence} = $switch;
+    ASM::XML->writeChannels();
+    $conn->privmsg($event->replyto, "Silence flag for $chan set to $switch");
   ]]>
   </command>
   <command cmd="^;help$">
@@ -319,7 +331,7 @@
   <command cmd="^;userx flags (\S+) ?$">
   <![CDATA[
     my $nick = lc $1;
-    if ( (defined($::sn{$nick}->{account})) && ( lc $::sn{$nick}->{account} ne $nick ) ) {
+    if ( defined($::sn{$nick}) && (defined($::sn{$nick}->{account})) && ( lc $::sn{$nick}->{account} ne $nick ) ) {
       $conn->privmsg($event->replyto, "I'm assuming you mean " . $nick . "'s nickserv account, " . lc $::sn{$nick}->{account} . '.');
       $nick = lc $::sn{$nick}->{account};
     }
