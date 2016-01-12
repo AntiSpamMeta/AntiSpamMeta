@@ -1,4 +1,5 @@
 package ASM::Event;
+no autovivification;
 use warnings;
 use strict;
 

@@ -1,4 +1,5 @@
 package ASM::Services;
+no autovivification;
 use warnings;
 use strict;
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-
+no autovivification;
 use strict;
 use warnings;
 
@@ -30,6 +30,7 @@ use ASM::DB;
 use ASM::Fifo;
 no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
+$|++;
 $Data::Dumper::Useqq=1;
 
 $::pass = '';

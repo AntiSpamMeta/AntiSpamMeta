@@ -1,4 +1,5 @@
 package ASM::Inspect;
+no autovivification;
 use warnings;
 use strict;
 

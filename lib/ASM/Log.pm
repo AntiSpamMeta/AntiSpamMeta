@@ -1,4 +1,5 @@
 package ASM::Log;
+no autovivification;
 
 use warnings;
 use strict;

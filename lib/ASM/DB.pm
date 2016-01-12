@@ -1,4 +1,5 @@
 package ASM::DB;
+no autovivification;
 
 use warnings;
 use strict;

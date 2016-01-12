@@ -1,4 +1,5 @@
 package ASM::Fifo;
+no autovivification;
 
 use warnings;
 use strict;

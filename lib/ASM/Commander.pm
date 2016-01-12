@@ -1,4 +1,5 @@
 package ASM::Commander;
+no autovivification;
 
 use warnings;
 use strict;

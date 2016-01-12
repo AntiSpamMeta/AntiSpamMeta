@@ -1,4 +1,5 @@
 package ASM::XML;
+no autovivification;
 use warnings;
 use strict;
 

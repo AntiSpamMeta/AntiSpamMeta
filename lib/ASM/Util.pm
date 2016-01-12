@@ -1,4 +1,5 @@
 package ASM::Util;
+no autovivification;
 use Array::Utils qw(:all);
 use POSIX qw(strftime);
 use warnings;
@@ -301,7 +302,7 @@ sub notRestricted {
 sub accountToNicks {
   my ($module, $account) = @_;
   $account =~ s/^\$a://;
-  my @ret = grep( { (lc ($account) eq lc ($::sn{$_}->{account})) } keys %::sn );
+  my @ret = grep( { (lc ($account) eq lc ($::sn{$_}->{account} // '')) } keys %::sn );
   return \@ret;
 }
 
