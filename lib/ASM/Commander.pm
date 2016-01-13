@@ -7,6 +7,7 @@ use IO::All;
 use POSIX qw(strftime);
 use Data::Dumper;
 use URI::Escape;
+no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
 sub new
 {

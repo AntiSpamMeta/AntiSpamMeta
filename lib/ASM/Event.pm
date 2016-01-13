@@ -9,6 +9,7 @@ use POSIX qw(strftime);
 use Regexp::Wildcards;
 use HTTP::Request;
 use Array::Utils qw(:all);
+no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
 sub new
 {

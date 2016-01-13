@@ -5,6 +5,7 @@ use warnings;
 use Text::LevenshteinXS qw(distance);
 use Data::Dumper;
 use Regexp::Wildcards;
+no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
 my %sf = ();
 

@@ -7,6 +7,7 @@ use strict;
 use Term::ANSIColor qw (:constants);
 use Socket qw( inet_aton inet_ntoa );
 use Data::Dumper;
+no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
 %::RISKS =
 (

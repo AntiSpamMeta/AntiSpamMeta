@@ -5,6 +5,7 @@ use strict;
 
 use Data::Dumper;
 use String::Interpolate qw(interpolate);
+no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
 %::ignored = ();
 sub new

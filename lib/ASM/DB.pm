@@ -5,6 +5,7 @@ use warnings;
 use strict;
 use DBI;
 use Data::Dumper;
+no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
 sub new {
   my $module = shift;

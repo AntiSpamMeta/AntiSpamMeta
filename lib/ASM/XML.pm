@@ -5,6 +5,7 @@ use strict;
 
 use XML::Simple qw(:strict);
 use IO::All;
+no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
 $::xs1 = XML::Simple->new( KeyAttr => ['id'], Cache => [ qw/memcopy/ ]);
 

@@ -5,6 +5,7 @@ use warnings;
 use strict;
 
 use POSIX qw(strftime);
+no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
 sub new
 {
