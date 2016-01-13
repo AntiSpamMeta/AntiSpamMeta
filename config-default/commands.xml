@@ -233,8 +233,8 @@
       $dq = join '.', unpack 'C4', pack 'N', $ip;
     }
     $conn->privmsg($event->replyto, "I found $mnicks matches by nick ($nick), $musers by user ($person->{user}), $mhosts by hostname ($person->{host}), " .
-                                 "$maccts by NickServ account ($person->{account}), $mgecos by gecos field ($person->{gecos}), and $matchedip by real IP ($dq)." .
-                    ' Web results are at https://antispammeta.net/cgi-bin/secret/investigate.pl?nick=' . uri_escape($nick) .
+                                 "$maccts by NickServ account ($person->{account}), $mgecos by gecos field ($person->{gecos}), and $matchedip by real IP ($dq).")
+    $conn->privmsg($event->replyto, ' Web results are at https://antispammeta.net/cgi-bin/secret/investigate.pl?nick=' . uri_escape($nick) .
         ((lc $person->{user} ~~ $::mysql->{ignoredidents}) ? '' : '&user=' . uri_escape($person->{user})) .
         '&host=' . uri_escape($person->{host}) . '&account=' . uri_escape($person->{account}) .
         ((lc $person->{gecos} ~~ $::mysql->{ignoredgecos}) ? '' : '&gecos=' . uri_escape($person->{gecos})) . '&realip=' . $dq);
