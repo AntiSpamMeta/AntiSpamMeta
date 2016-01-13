@@ -20,33 +20,26 @@ sub doServices {
   if ($event->{from} eq 'NickServ!NickServ@services.')
   {
     ASM::Util->dprint("NickServ: $event->{args}->[0]", 'snotice');
-    if ( $::no_autojoins && $event->{args}->[0] =~ /^Please identify/ )
+    if ( $::no_autojoins && ( $event->{args}->[0] =~ /^Please identify/ || $event->{args}->[0] =~ /^This nickname is registered/ ) )
     {
       $::no_autojoins = 0;
       $conn->sl("NickServ identify $::settings->{nick} $::settings->{pass}" );
     }
     elsif ( $event->{args}->[0] =~ /^You are now identified/ )
     {
-      my @autojoins = @{$::settings->{autojoins}};
-      if (defined($autojoins[30])) {
-        $conn->join(join(',', @autojoins[0..30]));
-        if (defined($autojoins[60])) {
-          $conn->join(join(',', @autojoins[30..60]));
-          $conn->join(join(',', @autojoins[60..$#autojoins]));
-        } else {
-          $conn->join(join(',', @autojoins[30..$#autojoins]));
+      my $joinstring = "";
+      foreach my $autojoin (@{$::settings->{autojoins}})
+      {
+        if ( length($joinstring) + length($autojoin) > 504 )
+        {
+          $conn->join($joinstring);
+          $joinstring = "";
         }
-      } else {
-        $conn->join(join(',', @autojoins));
+        $joinstring .= ',' if length($joinstring);
+        $joinstring .= "$autojoin";
       }
+      $conn->join($joinstring) if length($joinstring);
       $conn->sl("PING :" . time);
-      foreach my $chan (@autojoins[0..1]) {
-        ASM::Util->dprint("Syncing $chan", "sync");
-        $conn->sl('who ' . $chan . ' %tcnuhra,314');
-        $conn->sl('mode ' . $chan);
-        $conn->sl('mode ' . $chan . ' b');
-      }
-        @::syncqueue = @autojoins[1..$#autojoins];
 #      $conn->schedule(2, sub { $conn->privmsg($::settings->{masterchan}, 'Now joined to all channels in '. (time - $::starttime) . " seconds."); });
     }
     elsif ($event->{args}->[0] =~ /has been (killed|released)/ )
@@ -58,7 +51,7 @@ sub doServices {
     {
       ASM::Util->dprint('Got regain successful from nickserv!', 'snotice');
     }
-    elsif ($event->{args}->[0] =~ /Password Incorrect/ )
+    elsif ($event->{args}->[0] =~ /Invalid password/ )
     {
       die("NickServ password invalid.")
     }

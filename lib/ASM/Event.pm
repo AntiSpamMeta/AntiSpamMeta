@@ -236,13 +236,13 @@ sub on_join {
     mkdir($::settings->{log}->{dir} . $chan);
     $::synced{$chan} = 0;
     $::pendingsync++;
-#    unless ( (scalar @::syncqueue) > 4 ) {
-#      ASM::Util->dprint("Syncing $chan", "sync");
-#      $conn->sl('who ' . $chan . ' %tcnuhra,314');
-#      $conn->sl('mode ' . $chan);
-#      $conn->sl('mode ' . $chan . ' bq');
-#    }
-#    push @::syncqueue, $chan;
+    unless ( scalar @::syncqueue ) {
+      ASM::Util->dprint("Syncing $chan", "sync");
+      $conn->sl('who ' . $chan . ' %tcnuhra,314');
+      $conn->sl('mode ' . $chan);
+      $conn->sl('mode ' . $chan . ' b');
+    }
+    push @::syncqueue, $chan;
   }
   $::sc{$chan}{users}{$nick} = {};
   $::sc{$chan}{users}{$nick}{hostmask} = $event->{userhost};
@@ -902,8 +902,7 @@ sub on_whofuckedup
 
 sub on_bannedfromchan {
   my ($conn, $event) = @_;
-  ASM::Util->dprint("I'm banned from " . $event->{args}->[1] . "... attempting to unban myself", 'startup');
-  $conn->privmsg('ChanServ', "unban $event->{args}->[1]");
+  ASM::Util->dprint("I'm banned from " . $event->{args}->[1], 'startup');
 }
 
 sub on_byechan {
