@@ -185,6 +185,18 @@
     $conn->privmsg($event->replyto, "Please refer to http://antispammeta.net and irc.freenode.net #antispammeta");
   ]]>
   </command>
+  <command cmd="^;help (?&lt;cmd&gt;\S+)$">
+  <![CDATA[
+    my @cmds = grep { $_->{cmd} =~ /$+{cmd}/} @{$::commands->{command}};
+    if ((scalar @cmds) > 2) {
+      $conn->privmsg($event->replyto, "Please refer to http://antispammeta.net and irc.freenode.net #antispammeta");
+    } else {
+      foreach my $cmd (@cmds) {
+        $conn->privmsg($event->replyto, ($cmd->{flag} // ' ') . ' ' . $cmd->{cmd})
+      }
+    }
+  ]]>
+  </command>
   <command cmd="^;db$">
   <![CDATA[
     $conn->privmsg($event->replyto, "db is at http://antispammeta.net/query.html");
