@@ -106,8 +106,6 @@ sub init {
   if ($::cset eq '') { $::cset = 'config-default'; }
                 else { $::cset = "config-$::cset"; }
   ASM::XML->readXML();
-  mkdir($::settings->{log}->{dir});
-  $::log = ASM::Log->new($::settings->{log});
   $::pass = $::settings->{pass} if $::pass eq '';
   $::async = HTTP::Async->new();
   $host = ${$::settings->{server}}[rand @{$::settings->{server}}];
@@ -133,8 +131,10 @@ sub init {
   if (-e "debugsock") {
     $conn->debugsock(1);
   }
-  $::inspector = ASM::Inspect->new();
+
   $::event = ASM::Event->new($conn, $::inspector);
+  $::inspector = ASM::Inspect->new();
+  $::log = ASM::Log->new($conn);
   $::commander = ASM::Commander->new($conn);
   $::services = ASM::Services->new($conn);
   ASM::Statsp->new($conn);

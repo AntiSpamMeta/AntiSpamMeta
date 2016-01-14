@@ -4,17 +4,30 @@ no autovivification;
 use warnings;
 use strict;
 
+use ASM::Util;
 use POSIX qw(strftime);
 no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
 sub new
 {
   my $module = shift;
-  my $config = shift;
+  my ($conn) = @_;
   my $self = {};
-  $self->{CONFIG} = $config;
+  $self->{CONFIG} = $::settings->{log};
   $self->{backlog} = {};
+  $self->{CONN} = $conn;
   bless($self);
+  mkdir($self->{CONFIG}->{dir});
+  $conn->add_handler('public',    sub { logg($self, @_); }, "before");
+  $conn->add_handler('join',      sub { logg($self, @_); }, "before");
+  $conn->add_handler('part',      sub { logg($self, @_); }, "before");
+  $conn->add_handler('caction',   sub { logg($self, @_); }, "before");
+  $conn->add_handler('nick',      sub { logg($self, @_); }, "after"); #allow state tracking to molest this
+  $conn->add_handler('quit',      sub { logg($self, @_); }, "before");
+  $conn->add_handler('kick',      sub { logg($self, @_); }, "before");
+  $conn->add_handler('notice',    sub { logg($self, @_); }, "before");
+  $conn->add_handler('mode',      sub { logg($self, @_); }, "before");
+  $conn->add_handler('topic',     sub { logg($self, @_); }, "before");
   return $self;
 }
 
@@ -52,7 +65,7 @@ sub sqlIncident
 sub logg
 {
   my $self = shift;
-  my ($event) = @_;
+  my ($conn, $event) = @_;
   my $cfg = $self->{CONFIG};
   my @chans = @{$event->{to}};
   @chans = ( $event->{args}->[0] ) if ($event->{type} eq 'kick');

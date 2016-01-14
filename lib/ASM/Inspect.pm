@@ -23,7 +23,7 @@ sub inspect {
   my (@dnsbl, @uniq);
   my ($match, $txtz, $iaddr);
   my @override = [];
-  my $nick = lc $event->{nick};
+  my $nick = ($event->{type} eq 'nick') ? $event->{args}->[0] : lc $event->{nick};
   my $xresult;
   return if (index($nick, ".") != -1);
   if ( $event->{type} eq 'join' ) {

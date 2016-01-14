@@ -221,7 +221,6 @@ sub on_join {
   $::sn{$nick}->{host} = $event->{host};
   $::sn{$nick}->{account} = lc $event->{args}->[0];
   $::db->logg($event) if defined $::db;
-  $::log->logg( $event );
   $::inspector->inspect( $conn, $event ) unless $::netsplit;
 }
 
@@ -230,7 +229,6 @@ sub on_part
   my ($conn, $event) = @_;
   my $nick = lc $event->{nick};
   my $chan = lc $event->{to}->[0];
-  $::log->logg( $event );
   $::db->logg( $event ) if defined $::db;
   # Ignore channels that are +s and not monitored
   if (defined $::db and $event->{args}->[0] =~ /^requested by/ and (not ((grep { /^s$/ } @{$::sc{$chan}{modes}} ) && ($::channels->{channel}->{$chan}->{monitor} eq "no"))) ) {
@@ -277,7 +275,6 @@ sub on_public
 #  alarm 200;
   my $chan = lc $event->{to}[0];
   $chan =~ s/^[+@]//;
-  $::log->logg( $event );
   $::db->logg( $event ) if defined $::db;
   if ($event->{args}->[0] =~ /(https?:\/\/bitly.com\/\w+|https?:\/\/bit.ly\/\w+|https?:\/\/j.mp\/\w+|https?:\/\/tinyurl.com\/\w+)/i) {
     my $reqid = $::async->add( HTTP::Request->new( GET => $1 ) );
@@ -315,7 +312,6 @@ sub on_notice
 {
   my ($conn, $event) = @_;
   return if ( $event->{to}->[0] eq '$*' ); # if this is a global notice FUCK THAT SHIT
-  $::log->logg( $event );
   $::db->logg( $event ) if defined $::db;
   $::inspector->inspect( $conn, $event );
 }
@@ -351,7 +347,6 @@ sub on_quit
       $::log->sqlIncident( join(',', @actionlog_channels), $idx ) if $idx;
       $::db->logg( $event );
   }
-  $::log->logg( $event );
 
   if (($event->{args}->[0] eq "*.net *.split") && (lc $event->{nick} ne 'chanserv')) { #special, netsplit situation
     if ($::netsplit == 0){
@@ -425,7 +420,6 @@ sub irc_topic {
       $::sc{$chan}{topic}{time} = time;
       $::sc{$chan}{topic}{by} = $event->{from};
     }
-    $::log->logg($event);
     $::db->logg( $event ) if defined $::db;
     $::inspector->inspect($conn, $event);
   }
@@ -460,11 +454,6 @@ sub on_nick {
   $::db->logg( $event ) if defined $::db;
   delete( $::sn{$oldnick}) if ($oldnick ne $newnick);
   $event->{to} = \@channels;
-  $::log->logg($event);
-  # Well, the nick change actually was done from the old nick ... but
-  # by the time we process it, they already changed nicks. Therefore
-  # we'll pretend it's the *new* nick that generated the event.
-  $event->{nick} = $event->{args}[0];
   $::inspector->inspect($conn, $event);
 }
 
@@ -476,7 +465,6 @@ sub on_kick {
   }
   my $nick = lc $event->{to}->[0];
   my $chan = lc $event->{args}->[0];
-  $::log->logg( $event );
   if (defined $::db) {
       $::db->logg( $event );
       # Ignore channels that are +s and not monitored
@@ -683,7 +671,6 @@ sub on_mode
         }
       }
     }
-    $::log->logg($event);
   }
 }
 
