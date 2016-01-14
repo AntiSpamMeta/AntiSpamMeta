@@ -142,9 +142,13 @@ my $cmdtbl = {
 
 sub new {
 	my $module = shift;
+	my ($conn) = @_;
 	my $self = {};
 	$self->{cmdtbl} = $cmdtbl;
+	$self->{CONN} = $conn;
 	bless($self);
+	$conn->add_handler('msg', sub { command($self, @_); }, "after");
+	$conn->add_handler('public', sub { command($self, @_); }, "after");
 	return $self;
 }
 

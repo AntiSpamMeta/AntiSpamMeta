@@ -6,7 +6,7 @@ use warnings;
 use FindBin;
 use lib "$FindBin::Bin/lib";;
 
-use Net::IRC 0.90;
+use Net::IRC 0.91;
 use Data::Dumper;
 use IO::All;
 use Getopt::Long;
@@ -133,8 +133,8 @@ sub init {
   }
   $::inspector = ASM::Inspect->new();
   $::services = ASM::Services->new();
-  $::commander = ASM::Commander->new();
   $::event = ASM::Event->new($conn, $::inspector);
+  $::commander = ASM::Commander->new($conn);
   $::classes = ASM::Classes->new();
   $::fifo = ASM::Fifo->new($irc, $conn);
   my @nickbl = io('nick_blacklist.txt')->getlines;

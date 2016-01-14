@@ -311,7 +311,6 @@ sub on_part
 sub on_msg
 {
   my ($conn, $event) = @_;
-  $::commander->command($conn, $event);
   ASM::Util->dprint($event->{from} . " - " . $event->{args}->[0], 'msg');
   if ((ASM::Util->notRestricted($event->{nick}, "nomsgs")) && ($event->{args}->[0] !~ /^;;/)) {
 # disabled by DL 130513 due to spammer abuse
@@ -337,7 +336,6 @@ sub on_public
     else { $conn->schedule( 1, sub { checkHTTP($conn); } ); }
   }
   $::inspector->inspect( $conn, $event );
-  $::commander->command( $conn, $event );
   $::sc{$chan}{users}{lc $event->{nick}}{msgtime} = time;
 }
 
