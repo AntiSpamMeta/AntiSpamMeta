@@ -132,9 +132,9 @@ sub init {
     $conn->debugsock(1);
   }
   $::inspector = ASM::Inspect->new();
-  $::services = ASM::Services->new();
   $::event = ASM::Event->new($conn, $::inspector);
   $::commander = ASM::Commander->new($conn);
+  $::services = ASM::Services->new($conn);
   $::classes = ASM::Classes->new();
   $::fifo = ASM::Fifo->new($irc, $conn);
   my @nickbl = io('nick_blacklist.txt')->getlines;

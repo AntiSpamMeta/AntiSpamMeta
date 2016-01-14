@@ -9,13 +9,17 @@ no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
 sub new
 {
+  my $module = shift;
+  my ($conn) = @_;
   my $self = {};
+  $self->{CONN} = $conn;
   bless($self);
+  $conn->add_handler('notice', \&doServices, "after");
   return $self;
 }
 
 sub doServices {
-  my ($self, $conn, $event) = @_;
+  my ($conn, $event) = @_;
   my $i = 1;
   if ($event->{from} eq 'NickServ!NickServ@services.')
   {

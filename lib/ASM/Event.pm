@@ -365,7 +365,6 @@ sub on_notice
   $::log->logg( $event );
   $::db->logg( $event ) if defined $::db;
   $::inspector->inspect( $conn, $event );
-  $::services->doServices($conn, $event);
 }
 
 sub on_errnickinuse
