@@ -63,6 +63,8 @@ sub new
   $conn->add_handler('480', \&on_jointhrottled);
   $conn->add_handler('invite', \&blah); # This doesn't need to be fancy; I just need it to go through inspect
   $conn->add_handler('servicesdown', \&on_servicesdown);
+  $conn->add_handler('endofbanlist', \&on_banlistend);
+  $conn->add_handler('quietlistend', \&on_quietlistend);
   bless($self);
   return $self;
 }
@@ -235,9 +237,8 @@ sub on_join {
     $::pendingsync++;
     unless ( scalar @::syncqueue ) {
       ASM::Util->dprint("Syncing $chan", "sync");
-      $conn->sl('who ' . $chan . ' %tcnuhra,314');
+      $conn->sl('who ' . $chan . ' %tcuihnar,314');
       $conn->sl('mode ' . $chan);
-      $conn->sl('mode ' . $chan . ' b');
     }
     push @::syncqueue, $chan;
   }
@@ -268,7 +269,7 @@ sub on_join {
   $::log->logg( $event );
   $::inspector->inspect( $conn, $event ) unless $::netsplit;
 }
-	
+
 sub on_part
 {
   my ($conn, $event) = @_;
@@ -517,7 +518,7 @@ sub on_nick {
 
 sub on_kick {
   my ($conn, $event) = @_;
-  if (lc $event->{to}->[0] eq lc $::settings->{nick}) {
+  if (lc $event->{to}->[0] eq lc $conn->{_nick}) {
     $conn->privmsg($::settings->{masterchan}, "I've been kicked from " . $event->{args}->[0] . ": " . $event->{args}->[1]);
 #    $conn->join($event->{args}->[0]);
   }
@@ -527,7 +528,7 @@ sub on_kick {
   if (defined $::db) {
       $::db->logg( $event );
       # Ignore channels that are +s and not monitored
-      if( not ((grep { /^s$/ } @{$::sc{$chan}{modes}}) && ($::channels->{channel}->{$chan}->{monitor} eq "no")) ) {
+      if ( not ((grep { /^s$/ } @{$::sc{$chan}{modes}}) && ($::channels->{channel}->{$chan}->{monitor} eq "no")) ) {
           my $idx = $::db->actionlog($event);
           $::log->sqlIncident($chan, $idx) if $idx;
       }
@@ -754,11 +755,26 @@ sub on_banlist
 {
   my ($conn, $event) = @_;
   my ($me, $chan, $ban, $banner, $bantime) = @{$event->{args}};
-  $::sc{lc $chan}{bans}{$ban} = { bannedBy => $banner, bannedOn => $bantime };
-  if ($ban =~ /^\*\!\*\@((([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9]))$/) {
+  $chan = lc $chan;
+  if ($chan ~~ @::bansyncqueue) {
+    my @diff = ($chan);
+    @::bansyncqueue = array_diff(@::bansyncqueue, @diff);
+    push @::quietsyncqueue, $chan;
+    my $nextchan = $::bansyncqueue[0];
+    if (defined($nextchan) ){
+      ASM::Util->dprint("Syncing $nextchan bans", "sync");
+      $conn->sl('mode ' . $nextchan . ' b');
+    } else {
+      $nextchan = $::quietsyncqueue[0];
+      ASM::Util->dprint("Syncing $nextchan quiets", "sync");
+      $conn->sl('mode ' . $nextchan . ' q');
+    }
+  }
+  $::sc{$chan}{bans}{$ban} = { bannedBy => $banner, bannedOn => $bantime };
+  if ($ban =~ /^\*\!\*\@(.*)$/) {
     # ASM::Util->dprint("banlist hostname $ban $1", 'sync');
     my $ip = ASM::Util->getHostIP($1);
-    $::sc{lc $chan}{ipbans}{$ip} = { bannedBy => $banner, bannedOn => $bantime } if defined($ip);
+    $::sc{$chan}{ipbans}{$ip} = { bannedBy => $banner, bannedOn => $bantime } if defined($ip);
   }
 }
 
@@ -766,11 +782,21 @@ sub on_quietlist
 {
   my ($conn, $event) = @_;
   my ($me, $chan, $mode, $ban, $banner, $bantime) = @{$event->{args}};
-  $::sc{lc $chan}{quiets}{$ban} = { bannedBy => $banner, bannedOn => $bantime };
-  if ($ban =~ /^\*\!\*\@((([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9]))$/) {
+  $chan = lc $chan;
+  if ($chan ~~ @::quietsyncqueue) {
+    my @diff = ($chan);
+    @::quietsyncqueue = array_diff(@::quietsyncqueue, @diff);
+    my $nextchan = $::quietsyncqueue[0];
+    if (defined($nextchan) ){
+      ASM::Util->dprint("Syncing $nextchan quiets", "sync");
+      $conn->sl('mode ' . $nextchan . ' q');
+    }
+  }
+  $::sc{$chan}{quiets}{$ban} = { bannedBy => $banner, bannedOn => $bantime };
+  if ($ban =~ /^\*\!\*\@(.*)$/) {
     # ASM::Util->dprint("quietlist hostname $ban $1", 'sync');
     my $ip = ASM::Util->getHostIP($1);
-    $::sc{lc $chan}{ipquiets}{$ip} = { bannedBy => $banner, bannedOn => $bantime } if defined($ip);
+    $::sc{$chan}{ipquiets}{$ip} = { bannedBy => $banner, bannedOn => $bantime } if defined($ip);
   }
 }
 
@@ -814,8 +840,8 @@ sub on_ctcp_source
 sub on_whoxreply
 {
   my ($conn, $event) = @_;
-  return unless $event->{args}->[1] eq '314';
-  my ($tgt, $magic, $chan, $user, $host, $nick, $account, $gecos) = @{$event->{args}};
+  my ($tgt, $magic, $chan, $user, $realip, $host, $nick, $account, $gecos) = @{$event->{args}};
+  return unless $magic eq '314';
   $nick = lc $nick; $chan = lc $chan;
   if (!defined $::sn{lc $nick}) {
     $::sn{$nick} = {};
@@ -828,59 +854,31 @@ sub on_whoxreply
   $::sn{$nick}->{user} = $user;
   $::sn{$nick}->{host} = $host;
   $::sn{$nick}->{account} = lc $account;
+  if ( $realip ne '255.255.255.255' && index($realip, ':') == -1 ) # some day I dream of ASM handling IPv6
+  {
+    $::sn{$nick}->{ip} = ASM::Util->dottedQuadToInt($realip);
+  }
 }
 
 sub on_whoxover
 {
   my ($conn, $event) = @_;
-  $::pendingsync--;
-  $::synced{lc $event->{args}->[1]} = 1;
-  if ($event->{args}->[1] ~~ @::syncqueue) {
-    my @diff = (lc $event->{args}->[1]);
+  my $syncedchan = lc $event->{args}->[1];
+  $::synced{$syncedchan} = 1;
+  if ($syncedchan ~~ @::syncqueue) {
+    my @diff = ($syncedchan);
     @::syncqueue = array_diff(@::syncqueue, @diff);
+    push @::bansyncqueue, $syncedchan;
   }
-  my $chan = pop @::syncqueue;
+  my $chan = $::syncqueue[0];
   if (defined($chan) ){
     ASM::Util->dprint("Syncing $chan", "sync");
-    $conn->sl('who ' . $chan . ' %tcnuhra,314');
+    $conn->sl('who ' . $chan . ' %tcuihnar,314');
     $conn->sl('mode ' . $chan);
+  } else {
+    $chan = $::bansyncqueue[0];
+    ASM::Util->dprint("Syncing $chan bans", "sync");
     $conn->sl('mode ' . $chan . ' b');
-  } elsif ($::pendingsync == 0) {
-    my $size = `ps -p $$ h -o size`;
-    my $cputime = `ps -p $$ h -o time`;
-    chomp $size; chomp $cputime;
-    my ($tx, $rx);
-    if ($conn->{_tx}/1024 > 1024) {
-      $tx = sprintf("%.2fMB", $conn->{_tx}/(1024*1024));
-    } else {
-      $tx = sprintf("%.2fKB", $conn->{_tx}/1024);
-    }
-    if ($conn->{_rx}/1024 > 1024) {
-      $rx = sprintf("%.2fMB", $conn->{_rx}/(1024*1024));
-    } else {
-      $rx = sprintf("%.2fKB", $conn->{_rx}/1024);
-    }
-    $conn->privmsg($::settings->{masterchan}, "Finished syncing after " . (time - $::starttime) . " seconds. " .
-     "I'm tracking " . (scalar (keys %::sn)) . " nicks" .
-     " across " . (scalar (keys %::sc)) . " tracked channels." .
-     " I'm using " . $size . "KB of RAM" . 
-     ", have used " . $cputime . " of CPU time" .
-     ", have sent $tx of data, and received $rx of data.");
-    my %x = ();
-    foreach my $c (@{$::settings->{autojoins}}) { $x{$c} = 1; }
-    foreach my $cx (keys %::sc) { delete $x{$cx}; }
-    if (scalar (keys %x)) {
-      $conn->privmsg($::settings->{masterchan}, "Syncing appears to have failed for " . ASM::Util->commaAndify(keys %x)) unless $::no_autojoins;
-    }
-    # There are some odd undefined values getting made somewhere, this is a nice way of fixing it
-    foreach my $nick (keys %::sn) { 
-      if ( !defined($::sn{$nick}->{mship}) ) {
-        $::sn{$nick}->{mship} = [];
-      }
-      if (!defined($::sn{$nick}->{host})) {
-        $::sn{$nick}->{host} = "";
-      }
-    }
   }
 }
 
@@ -914,6 +912,70 @@ sub on_servicesdown
     $::no_autojoins = 1;
     $conn->join($::settings->{masterchan}); # always join masterchan, so we can find you
     $conn->sl("PING :" . time);
+  }
+}
+
+sub on_banlistend
+{
+  my ($conn, $event) = @_;
+  my $chan = lc $event->{args}->[1];
+  if ($chan ~~ @::bansyncqueue) {
+    my @diff = ($chan);
+    @::bansyncqueue = array_diff(@::bansyncqueue, @diff);
+    push @::quietsyncqueue, $chan;
+    my $nextchan = $::bansyncqueue[0];
+    if (defined($nextchan) ){
+      ASM::Util->dprint("Syncing $nextchan bans", "sync");
+      $conn->sl('mode ' . $nextchan . ' b');
+    } else {
+      $nextchan = $::quietsyncqueue[0];
+      ASM::Util->dprint("Syncing $nextchan quiets", "sync");
+      $conn->sl('mode ' . $nextchan . ' q');
+    }
+  }
+}
+
+sub on_quietlistend
+{
+  my ($conn, $event) = @_;
+  my $chan = lc $event->{args}->[1];
+  if ($chan ~~ @::quietsyncqueue) {
+    my @diff = ($chan);
+    @::quietsyncqueue = array_diff(@::quietsyncqueue, @diff);
+    my $nextchan = $::quietsyncqueue[0];
+    if (defined($nextchan) ){
+      ASM::Util->dprint("Syncing $nextchan quiets", "sync");
+      $conn->sl('mode ' . $nextchan . ' q');
+    }
+  }
+  $::pendingsync--;
+  if ($::pendingsync == 0) {
+    my $size = `ps -p $$ h -o size`;
+    my $cputime = `ps -p $$ h -o time`;
+    chomp $size; chomp $cputime;
+    my ($tx, $rx);
+    if ($conn->{_tx}/1024 > 1024) {
+      $tx = sprintf("%.2fMB", $conn->{_tx}/(1024*1024));
+    } else {
+      $tx = sprintf("%.2fKB", $conn->{_tx}/1024);
+    }
+    if ($conn->{_rx}/1024 > 1024) {
+      $rx = sprintf("%.2fMB", $conn->{_rx}/(1024*1024));
+    } else {
+      $rx = sprintf("%.2fKB", $conn->{_rx}/1024);
+    }
+    $conn->privmsg($::settings->{masterchan}, "Finished syncing after " . (time - $::starttime) . " seconds. " .
+      "I'm tracking " . (scalar (keys %::sn)) . " nicks" .
+      " across " . (scalar (keys %::sc)) . " tracked channels." .
+      " I'm using " . $size . "KB of RAM" .
+      ", have used " . $cputime . " of CPU time" .
+      ", have sent $tx of data, and received $rx of data.");
+    my %x = ();
+    foreach my $c (@{$::settings->{autojoins}}) { $x{$c} = 1; }
+    foreach my $cx (keys %::sc) { delete $x{$cx}; }
+    if (scalar (keys %x)) {
+      $conn->privmsg($::settings->{masterchan}, "Syncing appears to have failed for " . ASM::Util->commaAndify(keys %x)) unless $::no_autojoins;
+    }
   }
 }
 

@@ -241,14 +241,14 @@ sub getHostIP
        ($host =~ /^gateway\/web\/.*\/ip\.(\d+)\.(\d+)\.(\d+)\.(\d+)$/) ) {
     #yay, easy IP!   
     return dottedQuadToInt(undef, "$1.$2.$3.$4");
-  } elsif (index($host, '/') != -1) {
-    return;
   } elsif ($host =~ /^2001:0:/) {
     my @splitip = split(/:/, $host);
     return unless defined($splitip[6]) && defined($splitip[7]);
     #I think I can just do (hex($splitip[6] . $splitip[7]) ^ hex('ffffffff')) here but meh
     my $host = join('.', unpack('C4', pack('N', (hex($splitip[6] . $splitip[7])^hex('ffffffff')))));
     return dottedQuadToInt(undef, $host);
+  } elsif ($host !~ /^(([a-z0-9]([a-z0-9\-]*[a-z0-9])?\.)*([a-z0-9]([a-z0-9\-]*[a-z0-9])?\.?))$/i) {
+    return;
   }
   $ENV{RES_OPTIONS} = "timeout:1 attempts:1";
   my @resolve = gethostbyname($host);

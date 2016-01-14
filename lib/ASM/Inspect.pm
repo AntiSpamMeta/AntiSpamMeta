@@ -26,15 +26,10 @@ sub inspect {
   my $nick = lc $event->{nick};
   my $xresult;
   return if (index($nick, ".") != -1);
-  if ( $event->{host} =~ /gateway\/web\// ) {
-    if ( $event->{user} =~ /([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})/ ) {
-      $rev = sprintf("%d.%d.%d.%d.", hex($4), hex($3), hex($2), hex($1));
-    }
-  }
-  if ( (!defined($rev)) && ($event->{type} eq 'join') ) {
+  if ( $event->{type} eq 'join' ) {
 # Only doing DNS lookups for join events will mean that DNSBL will break if we try to do it on something other than joins,
 # But it also means we cut back on the DNS lookups by a metric shitton
-    $iaddr = gethostbyname($event->{host}) if ($event->{host} !~ /\//);
+    $iaddr = ASM::Util->getHostIP($event->{host});
     $rev = join('.', reverse(unpack('C4', $iaddr))).'.' if (defined $iaddr);
   }
   ## NB: isn't there a better way to do this with grep, somehow?
