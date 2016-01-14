@@ -35,7 +35,6 @@ $Data::Dumper::Useqq=1;
 
 $::pass = '';
 @::nick_blacklist=();
-@::string_blacklist=();
 $::netsplit = 0;
 $::netsplit_ignore_lag = 0;
 $::no_autojoins = 0;
@@ -135,9 +134,6 @@ sub init {
   ASM::Event->new($conn, $::inspector);
   $::classes = ASM::Classes->new();
   $::fifo = ASM::Fifo->new($irc, $conn);
-  my @strbl = io('string_blacklist.txt')->getlines;
-  chomp @strbl;
-  @::string_blacklist = @strbl;
   my @nickbl = io('nick_blacklist.txt')->getlines;
   chomp @nickbl;
   @::nick_blacklist = @nickbl;
@@ -158,7 +154,6 @@ sub init {
   foreach my $file ("channels", "commands", "dnsbl", "mysql", "restrictions", "rules", "settings", "users", "blacklist") {
     $::fm->watch("./" . $::cset . '/' . $file . ".xml");
   }
-  $::fm->watch("string_blacklist.txt");
   $::fm->scan();
   $irc->start();
 }

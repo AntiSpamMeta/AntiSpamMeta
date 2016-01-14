@@ -572,9 +572,6 @@
   <command cmd="^;rehash$" flag="a">
   <![CDATA[
     ASM::XML->readXML();
-    my @strbl = io('string_blacklist.txt')->getlines;
-    chomp @strbl;
-    @::string_blacklist = @strbl;
     $conn->privmsg($event->replyto, 'config files were re-read');
   ]]>
   </command>

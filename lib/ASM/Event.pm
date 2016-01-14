@@ -136,9 +136,6 @@ sub on_pong
     } else {
       $conn->privmsg($::settings->{masterchan}, "Config files changed, auto rehash triggered. Check console for possible errors.");
       ASM::XML->readXML();
-      my @strbl = io('string_blacklist.txt')->getlines;
-      chomp @strbl;
-      @::string_blacklist = @strbl;
     }
   }
   if ($lag > 1) {

@@ -14,7 +14,6 @@ sub new
   my $module = shift;
   my $self = {};
   my $tbl = {
-    "strbl" => \&strbl,
     "strblnew" => \&strblnew,
     "strblpcre" => \&strblpcre,
     "dnsbl" => \&dnsbl,
@@ -391,19 +390,6 @@ sub re {
   my $match = $event->{args}->[0];
   $match = $event->{nick} if ($event->{type} eq 'join');
   return 1 if ($match =~ /$chk->{content}/);
-  return 0;
-}
-
-sub strbl {
-  my ($chk, $id, $event, $chan) = @_;
-  my $match = lc $event->{args}->[0];
-  foreach my $line (@::string_blacklist) {
-    my $xline = lc $line;
-    my $idx = index $match, $xline;
-    if ( $idx != -1 ) {
-      return 1;
-    }
-  }
   return 0;
 }
 
