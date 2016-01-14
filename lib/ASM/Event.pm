@@ -9,6 +9,7 @@ use POSIX qw(strftime);
 use Regexp::Wildcards;
 use HTTP::Request;
 use Array::Utils qw(:all);
+use Net::DNS::Async;
 no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
 sub new
@@ -16,6 +17,7 @@ sub new
   my $module = shift;
   my ($conn, $inspector) = @_;
   my $self = {};
+  $self->{DNS} = Net::DNS::Async->new(QueueSize => 5000, Retries => 3);
   $self->{CONN} = $conn;
   $self->{INSPECTOR} = $inspector;
   ASM::Util->dprint('Installing handler routines...', 'startup');
@@ -772,9 +774,19 @@ sub on_banlist
   }
   $::sc{$chan}{bans}{$ban} = { bannedBy => $banner, bannedOn => $bantime };
   if ($ban =~ /^\*\!\*\@(.*)$/) {
-    # ASM::Util->dprint("banlist hostname $ban $1", 'sync');
-    my $ip = ASM::Util->getHostIP($1);
-    $::sc{$chan}{ipbans}{$ip} = { bannedBy => $banner, bannedOn => $bantime } if defined($ip);
+    my $host = $1;
+    my $ip = ASM::Util->getHostIPFast($host);
+    if (defined($ip)) {
+      $::sc{$chan}{ipbans}{$ip} = { bannedBy => $banner, bannedOn => $bantime };
+    } elsif ( $host =~ /^(([a-z0-9]([a-z0-9\-]*[a-z0-9])?\.)*([a-z0-9]([a-z0-9\-]*[a-z0-9])?\.?))$/i) {
+      ASM::Util->dprint("banlist hostname $chan $host", 'dns');
+      $::event->{DNS}->add(
+        sub {
+          my ($packet) = @_;
+          $ip = ASM::Util->stripResp($packet);
+          $::sc{$chan}{ipbans}{$ip} = { bannedBy => $banner, bannedOn => $bantime } if defined($ip);
+        }, $host, 'A');
+    }
   }
 }
 
@@ -794,9 +806,19 @@ sub on_quietlist
   }
   $::sc{$chan}{quiets}{$ban} = { bannedBy => $banner, bannedOn => $bantime };
   if ($ban =~ /^\*\!\*\@(.*)$/) {
-    # ASM::Util->dprint("quietlist hostname $ban $1", 'sync');
-    my $ip = ASM::Util->getHostIP($1);
-    $::sc{$chan}{ipquiets}{$ip} = { bannedBy => $banner, bannedOn => $bantime } if defined($ip);
+    my $host = $1;
+    my $ip = ASM::Util->getHostIPFast($host);
+    if (defined($ip)) {
+      $::sc{$chan}{ipquiets}{$ip} = { bannedBy => $banner, bannedOn => $bantime };
+    } elsif ( $host =~ /^(([a-z0-9]([a-z0-9\-]*[a-z0-9])?\.)*([a-z0-9]([a-z0-9\-]*[a-z0-9])?\.?))$/i) {
+      ASM::Util->dprint("quietlist hostname $chan $host", 'dns');
+      $::event->{DNS}->add(
+        sub {
+          my ($packet) = @_;
+          $ip = ASM::Util->stripResp($packet);
+          $::sc{$chan}{ipquiets}{$ip} = { bannedBy => $banner, bannedOn => $bantime } if defined($ip);
+        }, $host, 'A');
+    }
   }
 }
 
@@ -964,6 +986,7 @@ sub on_quietlistend
     } else {
       $rx = sprintf("%.2fKB", $conn->{_rx}/1024);
     }
+    $::event->{DNS}->await();
     $conn->privmsg($::settings->{masterchan}, "Finished syncing after " . (time - $::starttime) . " seconds. " .
       "I'm tracking " . (scalar (keys %::sn)) . " nicks" .
       " across " . (scalar (keys %::sc)) . " tracked channels." .

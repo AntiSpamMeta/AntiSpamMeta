@@ -63,7 +63,8 @@ $::settingschanged = 0;
   "latency" => RED,
   "statsp" => MAGENTA,
   "ctcp" => 0, #RED,
-  "logger" => 0
+  "logger" => 0,
+  "dns" => 0
 );
 %::dsock = ();
 %::spy = ();
@@ -133,7 +134,7 @@ sub init {
   $::inspector = ASM::Inspect->new();
   $::services = ASM::Services->new();
   $::commander = ASM::Commander->new();
-  ASM::Event->new($conn, $::inspector);
+  $::event = ASM::Event->new($conn, $::inspector);
   $::classes = ASM::Classes->new();
   $::fifo = ASM::Fifo->new($irc, $conn);
   my @nickbl = io('nick_blacklist.txt')->getlines;

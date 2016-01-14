@@ -7,6 +7,7 @@ use strict;
 use Term::ANSIColor qw (:constants);
 use Socket qw( inet_aton inet_ntoa );
 use Data::Dumper;
+
 no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
 %::RISKS =
@@ -225,7 +226,7 @@ sub dprint {
 
 sub intToDottedQuad {
   my ($module, $num) = @_;
- return inet_ntoa(pack('N', $num)); 
+  return inet_ntoa(pack('N', $num)); 
 }
 
 sub dottedQuadToInt
@@ -234,25 +235,47 @@ sub dottedQuadToInt
   return unpack('N', inet_aton($dottedquad)); 
 }
 
-sub getHostIP
+sub stripResp
+{
+  my $module = shift;
+  my $response = shift;
+  my @answer = $response->answer;
+  if ($response->{header}->{rcode} ne "NOERROR") {
+	  dprint($module, Dumper($response), 'dns');
+    return;
+  }
+  if ((!(@answer)) || ($answer[0]->{type} ne 'A')) {
+    return undef;
+  }
+  return dottedQuadToInt($module, $answer[0]->{address});
+}
+
+sub getHostIPFast
 {
   my ($module, $host) = @_;
   if ( ($host =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/) or
        ($host =~ /^gateway\/web\/.*\/ip\.(\d+)\.(\d+)\.(\d+)\.(\d+)$/) ) {
-    #yay, easy IP!   
+    #yay, easy IP!
     return dottedQuadToInt(undef, "$1.$2.$3.$4");
   } elsif ($host =~ /^2001:0:/) {
     my @splitip = split(/:/, $host);
     return unless defined($splitip[6]) && defined($splitip[7]);
-    #I think I can just do (hex($splitip[6] . $splitip[7]) ^ hex('ffffffff')) here but meh
     my $host = join('.', unpack('C4', pack('N', (hex($splitip[6] . $splitip[7])^hex('ffffffff')))));
     return dottedQuadToInt(undef, $host);
-  } elsif ($host !~ /^(([a-z0-9]([a-z0-9\-]*[a-z0-9])?\.)*([a-z0-9]([a-z0-9\-]*[a-z0-9])?\.?))$/i) {
-    return;
   }
-  $ENV{RES_OPTIONS} = "timeout:1 attempts:1";
+  return undef;
+}
+
+sub getHostIP
+{
+  my ($module, $host) = @_;
+  my $ip = getHostIPFast($module, $host);
+  return $ip if defined($ip);
+  if ( $host !~ /^(([a-z0-9]([a-z0-9\-]*[a-z0-9])?\.)*([a-z0-9]([a-z0-9\-]*[a-z0-9])?\.?))$/i) {
+    return undef;
+  }
   my @resolve = gethostbyname($host);
-  return unless @resolve;
+  return undef unless @resolve;
   return dottedQuadToInt(undef, join('.', unpack('C4', $resolve[4])));
 }
 
