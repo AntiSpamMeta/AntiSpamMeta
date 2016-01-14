@@ -154,7 +154,7 @@ sub init {
     $::wordlist{lc $item} = 1;
   }
   $::fm = File::Monitor->new();
-  foreach my $file ("channels", "commands", "dnsbl", "mysql", "restrictions", "rules", "settings", "users", "blacklist") {
+  foreach my $file ("channels", "dnsbl", "mysql", "restrictions", "rules", "settings", "users", "blacklist") {
     $::fm->watch("./" . $::cset . '/' . $file . ".xml");
   }
   $::fm->scan();

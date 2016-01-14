@@ -17,7 +17,6 @@ sub readXML {
                                                    autojoins => 'autojoin' });
   $::channels     = $::xs1->XMLin( "$p/channels.xml",     ForceArray => \@fchan );
   $::users        = $::xs1->XMLin( "$p/users.xml",        ForceArray => 'person');
-  $::commands     = $::xs1->XMLin( "$p/commands.xml",     ForceArray => [qw/command/]);
   $::mysql        = $::xs1->XMLin( "$p/mysql.xml",        ForceArray => ['ident', 'geco'],
                                    'GroupTags' => { ignoredidents => 'ident', ignoredgecos => 'geco' });
   $::dnsbl        = $::xs1->XMLin( "$p/dnsbl.xml",        ForceArray => []);
@@ -33,7 +32,6 @@ sub writeXML {
   writeRestrictions();
   writeBlacklist();
   writeMysql();
-#  $::xs1->XMLout($::commands,     RootName => 'commands', KeyAttr => ['id']) > io("$::cset/commands.xml");
 }
 
 sub writeMysql {
