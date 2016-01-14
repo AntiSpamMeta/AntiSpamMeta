@@ -377,6 +377,11 @@
       $conn->privmsg($event->replyto, "I'm assuming you mean " . $nick . "'s nickserv account, " . lc $::sn{$nick}->{account} . '.');
       $nick = lc $::sn{$nick}->{account};
     }
+        if (defined($::users->{person}->{$nick}) &&
+            defined($::users->{person}->{$nick}->{flags}) &&
+            ($::users->{person}->{$nick}->{flags} =~ /d/)) {
+                return $conn->privmsg($event->replyto, "Users with the 'd' flag are untouchable. Edit the config file manually.");
+        }
     if ($flags !~ /s/i) {
         use Apache::Htpasswd; use Apache::Htgroup;
         my $o_Htpasswd = new Apache::Htpasswd({passwdFile => $::settings->{web}->{userfile}, UseMD5 => 1});
@@ -393,6 +398,11 @@
   <command cmd="^;userx del (\S+)$" flag="a">
   <![CDATA[
     my $nick = lc $1;
+        if (defined($::users->{person}->{$nick}) &&
+            defined($::users->{person}->{$nick}->{flags}) &&
+            ($::users->{person}->{$nick}->{flags} =~ /d/)) {
+                return $conn->privmsg($event->replyto, "Users with the 'd' flag are untouchable. Edit the config file manually.");
+        }
     delete($::users->{person}->{$nick});
     ASM::XML->writeUsers();
     use Apache::Htpasswd; use Apache::Htgroup;
