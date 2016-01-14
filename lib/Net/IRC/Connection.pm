@@ -161,7 +161,17 @@ sub _add_generic_handler {
       }
     }
     
-    $hash_ref->{lc $ev} = [ $ref, $rp ];
+#    $hash_ref->{lc $ev} = [ @{$hash_ref->{lc $ev}}, [$ref, $rp] ];
+    if (!defined($hash_ref->{lc $ev})) {
+      $hash_ref->{lc $ev} = [ ];
+    }
+    if ($rp == 0) {
+      $hash_ref->{lc $ev} = [ $ref ];
+    } elsif ($rp == 1) {
+      $hash_ref->{lc $ev} = [ $ref, @{$hash_ref->{lc $ev}} ];
+    } elsif ($rp == 2) {
+      $hash_ref->{lc $ev} = [ @{$hash_ref->{lc $ev}}, $ref ];
+    }
   }
   return 1;
 }
@@ -498,20 +508,8 @@ sub handler {
   } else {
     return $self->_default($event, @_);
   }
-  
-  my ($code, $rp) = @{$handler};
-  
-  # If we have args left, try to call the handler.
-  if ($rp == 0) {                      # REPLACE
+  foreach my $code (@{$handler}) {
     &$code($self, $event, @_);
-  } elsif ($rp == 1) {                 # BEFORE
-    &$code($self, $event, @_);
-    $self->_default($event, @_);
-  } elsif ($rp == 2) {                 # AFTER
-    $self->_default($event, @_);
-    &$code($self, $event, @_);
-  } else {
-    confess "Bad parameter passed to handler(): rp=$rp";
   }
   
   warn "Handler for '$ev' called.\n" if $self->{_debug};
