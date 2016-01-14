@@ -59,8 +59,6 @@ sub new
   $conn->add_handler('channelmodeis', \&on_channelmodeis);
   $conn->add_handler('quietlist', \&on_quietlist);
   $conn->add_handler('pong', \&on_pong);
-  $conn->add_handler('statsdebug', \&on_statsdebug);
-  $conn->add_handler('endofstats', \&on_endofstats);
   $conn->add_handler('channelurlis', \&on_channelurlis);
   $conn->add_handler('480', \&on_jointhrottled);
   $conn->add_handler('invite', \&blah); # This doesn't need to be fancy; I just need it to go through inspect
@@ -71,9 +69,6 @@ sub new
   return $self;
 }
 
-my $clearstatsp = 1;
-my %statsp = ();
-my %oldstatsp = ();
 
 sub on_jointhrottled
 {
@@ -85,46 +80,7 @@ sub on_jointhrottled
   }
 }
 
-sub on_statsdebug
-{
-  my ($conn, $event) = @_;
-  my ($char, $line) = ($event->{args}->[1], $event->{args}->[2]);
-  if ($char eq 'p') {
-    if ($clearstatsp) {
-      $clearstatsp = 0;
-      %oldstatsp = %statsp;
-      %statsp = ();
-    }
-    if ($line =~ /^(\d+) staff members$/) {
-      #this is the end of the report
-    } else {
-      my ($nick, $userhost) = split(" ", $line);
-      $userhost =~ s/\((.*)\)/$1/;
-      my ($user, $host) = split("@", $userhost);
-      $statsp{$nick}= [$user, $host];
-    }
-  }
-}
-
-sub on_endofstats
-{
-  my ($conn, $event) = @_;
-  if ($event->{args}->[1] eq 'p') {
-    $clearstatsp=1;
-    my $tmp = Dumper(\%statsp); chomp $tmp;
-    if ( join(',', sort(keys %oldstatsp)) ne join(',', sort(keys %statsp)) ) {
-      open(FH, '>>', 'statsplog.txt');
-      say FH strftime('%F %T ', gmtime) . join(',', sort(keys %statsp));
-      close(FH);
-      ASM::Util->dprint(join(",", keys %statsp), 'statsp');
-    }
-    # $event->{args}->[2] == "End of /STATS report"
-    #end of /stats p
-  }
-}
-
 my $lagcycles = 0;
-my $pongcount = 0;
 
 sub on_pong
 {
@@ -144,9 +100,6 @@ sub on_pong
   }
   if ($lag > 1) {
     ASM::Util->dprint("Latency: $lag", 'latency');
-  }
-  if (($pongcount++ % 3) == 0) { #easiest way to do something roughly every 90 seconds
-    $conn->sl('STATS p');
   }
   if ( @::syncqueue || $::netsplit_ignore_lag || $::pendingsync) {
     return; #we don't worry about lag if we've just started up and are still syncing, or just experienced a netsplit
@@ -905,9 +858,7 @@ sub on_whofuckedup
 {
   my ($conn, $event) = @_;
   if ($event->{args}->[1] eq "STATS") { 
-#most likely this is getting called because we did stats p too often.
-#unfortunately the server doesn't let us know what exactly we called stats for.
-#anyways, we don't need to do anything for this
+    #we don't need to do anything for this
   } else { #dunno why it got called, print the data and I'll add a handler for it.
     ASM::Util->dprint('on_whofuckedup called!', 'sync');
     ASM::Util->dprint(Dumper($event), 'sync');

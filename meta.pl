@@ -28,6 +28,8 @@ use ASM::Commander;
 use ASM::Classes;
 use ASM::DB;
 use ASM::Fifo;
+use ASM::Statsp;
+
 no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
 $|++;
@@ -135,6 +137,7 @@ sub init {
   $::event = ASM::Event->new($conn, $::inspector);
   $::commander = ASM::Commander->new($conn);
   $::services = ASM::Services->new($conn);
+  ASM::Statsp->new($conn);
   $::classes = ASM::Classes->new();
   $::fifo = ASM::Fifo->new($irc, $conn);
   my @nickbl = io('nick_blacklist.txt')->getlines;
