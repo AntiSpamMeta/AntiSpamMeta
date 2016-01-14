@@ -578,19 +578,19 @@
     $conn->privmsg($event->replyto, 'config files were re-read');
   ]]>
   </command>
-  <command cmd="^;restrict (nick|account|host) (\S+) (\+|-)([a-z0-9_-]+)$" flag="a">
+  <command cmd="^;restrict (?&lt;type&gt;nick|account|host) (?&lt;who&gt;\S+) (?&lt;mode&gt;\+|-)(?&lt;restriction&gt;[a-z0-9_-]+)$" flag="a">
   <![CDATA[
-    my ($type, $who, $mode, $restriction) = ($1, lc $2, $3, $4);
-    if ($mode eq '-') {
-      delete $::restrictions->{$type . 's'}->{$type}->{$who}->{$restriction};
-      $conn->privmsg($event->replyto, "Removed $restriction restriction for $type $who");
+    my $who = lc $+{who};
+    if ($+{mode} eq '-') {
+      delete $::restrictions->{$+{type} . 's'}->{$+{type}}->{$who}->{$+{restriction}};
+      $conn->privmsg($event->replyto, "Removed $+{restriction} restriction for $+{type} $who");
     }
-    if ($mode eq '+') {
-      if (! defined($::restrictions->{$type . 's'}->{$type}->{$who})) {
-        $::restrictions->{$type . 's'}->{$type}->{$who} = {};
+    if ($+{mode} eq '+') {
+      if (! defined($::restrictions->{$+{type} . 's'}->{$+{type}}->{$who})) {
+        $::restrictions->{$+{type} . 's'}->{$+{type}}->{$who} = {};
       }
-      $::restrictions->{$type . 's'}->{$type}->{$who}->{$restriction} = $restriction;
-      $conn->privmsg($event->replyto, "Added $restriction restriction for $type $who");
+      $::restrictions->{$+{type} . 's'}->{$+{type}}->{$who}->{$+{restriction}} = $+{restriction};
+      $conn->privmsg($event->replyto, "Added $+{restriction} restriction for $+{type} $who");
     }
     ASM::XML->writeRestrictions();
   ]]>
