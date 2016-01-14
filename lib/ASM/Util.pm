@@ -250,6 +250,7 @@ sub getHostIP
     my $host = join('.', unpack('C4', pack('N', (hex($splitip[6] . $splitip[7])^hex('ffffffff')))));
     return dottedQuadToInt(undef, $host);
   }
+  $ENV{RES_OPTIONS} = "timeout:1 attempts:1";
   my @resolve = gethostbyname($host);
   return unless @resolve;
   return dottedQuadToInt(undef, join('.', unpack('C4', $resolve[4])));
