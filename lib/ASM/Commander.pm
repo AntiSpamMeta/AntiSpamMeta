@@ -835,8 +835,8 @@ sub cmd_ops {
 	my $tgt = lc $event->{to}->[0];
 	$tgt = lc $+{chan} if defined($+{chan});
 	my $msg = $+{reason};
-	if ( (($::channels->{channel}->{$tgt}->{monitor} // "yes") eq "no") || #we're not monitoring this channel
-	     !($tgt ~~ $::sn{lc $event->{nick}}->{mship})) { #they're not on the channel they're calling !ops for
+	if ( $tgt =~ /^#/ && ((($::channels->{channel}->{$tgt}->{monitor} // "yes") eq "no") || #we're not monitoring this channel
+	     !($tgt ~~ $::sn{lc $event->{nick}}->{mship})) ) { #they're not on the channel they're calling !ops for
 		return;
 	}
 	if (defined($::ignored{$tgt}) && ($::ignored{$tgt} >= $::RISKS{'opalert'})) {
