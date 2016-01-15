@@ -135,11 +135,11 @@ sub init {
   $::event = ASM::Event->new($conn, $::inspector);
   $::inspector = ASM::Inspect->new();
   $::log = ASM::Log->new($conn);
-  $::commander = ASM::Commander->new($conn);
-  $::services = ASM::Services->new($conn);
+  ASM::Commander->new($conn);
+  ASM::Services->new($conn);
   ASM::Statsp->new($conn);
   $::classes = ASM::Classes->new();
-  $::fifo = ASM::Fifo->new($irc, $conn);
+  ASM::Fifo->new($irc, $conn);
   my @nickbl = io('nick_blacklist.txt')->getlines;
   chomp @nickbl;
   @::nick_blacklist = @nickbl;
