@@ -5,7 +5,7 @@ use Data::Dumper;
 use strict;
 use DBI; 
 
-use CGI_Lite;
+use CGI;
 use XML::Simple qw(:strict);
 my $xs1 = XML::Simple->new( KeyAttr => ['id'], Cache => [ qw/memcopy/ ]);
 my $sqlconf = $xs1->XMLin( "/home/icxcnika/AntiSpamMeta/config-main/mysql.xml",
@@ -13,6 +13,7 @@ my $sqlconf = $xs1->XMLin( "/home/icxcnika/AntiSpamMeta/config-main/mysql.xml",
                            'GroupTags' => { ignoredidents => 'ident', ignoredgecos => 'geco' });
 
 my $dbh = DBI->connect("DBI:mysql:database=" . $sqlconf->{db} . ";host=" . $sqlconf->{host} . ";port=" . $sqlconf->{port}, $sqlconf->{user}, $sqlconf->{pass});
+$dbh->do("SET time_zone = '+0:00';");
 
 my $debug = 0;
 
@@ -38,8 +39,8 @@ sub dottedQuadToInt
   return $ip_number;
 }
 
-my $cgi = new CGI_Lite;
-my %data = $cgi->parse_form_data;
+my $cgi = CGI->new;
+my %data = %{$cgi->{param}};
 
 $debug = int($data{debug}) if (defined($data{debug}));
 
@@ -51,7 +52,11 @@ print <<HTML;
     <title>AntiSpamMeta database query page</title>
   </head>
   <body>
-  <h3>Maintaining AntiSpamMeta takes work! Please 
+  <h1>NEW: READ ME.</h1>
+  <h2>I'm looking to move AntiSpamMeta, and its databases, to a new server. This will cost me about \$400/year, however will allow
+      for recursive lookups similar to stalker.pl - Finding a nick tied to a host tied to another nick tied to a nickserv account tied to a geco, etc.</h2>
+  <h2>This will make the most comprehensive tracking database for Freenode to date, but I need your help with the bills!</h2>
+<h3>
 <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
 <input type="hidden" name="cmd" value="_s-xclick">
 <input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----
@@ -64,12 +69,12 @@ except for the realIP field, which must be blank or an IPv4 dotted quad.</p>
     <form action="/cgi-bin/secret/investigate.pl" method="get">
       <input type="hidden" name="query" value="1" />
 HTML
-print '      Nickname: <input type="text" name="nick" ' . (defined($data{nick}) ? 'value="'.$data{nick}.'" ' : '') . "/><br />\n";
-print '      User: <input type="text" name="user" ' . (defined($data{user}) ? 'value="'.$data{user}.'" ' : '') . "/><br />\n";
-print '      Hostname: <input type="text" name="host" ' . (defined($data{host}) ? 'value="'.$data{host}.'" ' : '') . "/><br />\n";
-print '      Gecos: <input type="text" name="gecos" ' . (defined($data{gecos}) ? 'value="'.$data{gecos}.'" ' : '') . "/><br />\n";
-print '      Account: <input type="text" name="account" ' . (defined($data{account}) ? 'value="'.$data{account}.'" ' : '') . "/><br />\n";
-print '      Real IP: <input type="text" name="realip" ' . (defined($data{realip}) ? 'value="'.$data{realip}.'" ' : '') . "/>\n";
+print '      Nickname: <input type="text" name="nick" ' . (defined($data{nick}) ? 'value="'.$data{nick}->[0].'" ' : '') . "/><br />\n";
+print '      User: <input type="text" name="user" ' . (defined($data{user}) ? 'value="'.$data{user}->[0].'" ' : '') . "/><br />\n";
+print '      Hostname: <input type="text" name="host" ' . (defined($data{host}) ? 'value="'.$data{host}->[0].'" ' : '') . "/><br />\n";
+print '      Gecos: <input type="text" name="gecos" ' . (defined($data{gecos}) ? 'value="'.$data{gecos}->[0].'" ' : '') . "/><br />\n";
+print '      Account: <input type="text" name="account" ' . (defined($data{account}) ? 'value="'.$data{account}->[0].'" ' : '') . "/><br />\n";
+print '      Real IP: <input type="text" name="realip" ' . (defined($data{realip}) ? 'value="'.$data{realip}->[0].'" ' : '') . "/>\n";
 print <<HTML;
       <br /><br /><input type="submit" value="Query!" />
     </form>
@@ -106,28 +111,28 @@ HTML
 ## nick, user, host, realip, gecos, account
 my $qry = 'SELECT * FROM ' . $sqlconf->{actiontable} . ' WHERE ';
 
-if (defined($data{nick}) && ($data{nick} ne "*") && ($data{nick} ne "")) {
-  $qry .= " nick like " . esc($data{nick}) . ' or ';
+if (defined($data{nick}) && ($data{nick}->[0] ne "*") && ($data{nick}->[0]  ne "")) {
+  $qry .= " nick like " . esc($data{nick}->[0] ) . ' or ';
 }
 
-if (defined($data{user}) && ($data{user} ne "*") && ($data{user} ne "")) {
-  $qry .= ' user like ' . esc($data{user}) . ' or ';
+if (defined($data{user}) && ($data{user}->[0] ne "*") && ($data{user}->[0] ne "")) {
+  $qry .= ' user like ' . esc($data{user}->[0] ) . ' or ';
 }
 
-if (defined($data{host}) && ($data{host} ne "*") && ($data{host} ne "")) {
-  $qry .= ' host like ' . esc($data{host}) . ' or ';
+if (defined($data{host}) && ($data{host}->[0]  ne "*") && ($data{host}->[0] ne "")) {
+  $qry .= ' host like ' . esc($data{host}->[0] ) . ' or ';
 }
 
-if (defined($data{gecos}) && ($data{gecos} ne "*") && ($data{gecos} ne "")) {
-  $qry .= ' gecos like ' . esc($data{gecos}) . ' or ';
+if (defined($data{gecos}) && ($data{gecos}->[0]  ne "*") && ($data{gecos}->[0] ne "")) {
+  $qry .= ' gecos like ' . esc($data{gecos}->[0] ) . ' or ';
 }
 
-if (defined($data{account}) && ($data{account} ne "*") && ($data{account} ne "")) {
-  $qry .= ' account like ' . esc($data{account}) . ' or ';
+if (defined($data{account}) && ($data{account}->[0]  ne "*") && ($data{account}->[0] ne "")) {
+  $qry .= ' account like ' . esc($data{account}->[0] ) . ' or ';
 }
 
-if (defined($data{realip}) && ($data{realip} =~ /^\d+\.\d+\.\d+\.\d+$/)) {
-  $qry .= ' ip = ' . dottedQuadToInt($data{realip}) . ' or ';
+if (defined($data{realip}) && ($data{realip}->[0]  =~ /^\d+\.\d+\.\d+\.\d+$/)) {
+  $qry .= ' ip = ' . dottedQuadToInt($data{realip}->[0] ) . ' or ';
 }
 
 $qry .= '(1 = 0)'; # rather than trying to get rid of a trailing 'or '

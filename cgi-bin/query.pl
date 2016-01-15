@@ -5,7 +5,7 @@ use Data::Dumper;
 use strict;
 use DBI; 
 
-use CGI_Lite;
+use CGI;
 
 use XML::Simple qw(:strict);
 my $xs1 = XML::Simple->new( KeyAttr => ['id'], Cache => [ qw/memcopy/ ]);
@@ -27,10 +27,10 @@ sub esc
   return $arg;
 }
 
-my $cgi = new CGI_Lite;
-my %data = $cgi->parse_form_data;
+my $cgi = CGI->new;
+my %data = %{$cgi->{param}};
 
-$debug = int($data{debug}) if (defined($data{debug}));
+$debug = int($data{debug}->[0]) if (defined($data{debug}));
 
 if ($debug) {
   print "Content-type: text/plain", "\n\n";
@@ -45,54 +45,54 @@ my ($level, $id, $reason);
 
 my $qry = "SELECT time, channel, nick, user, host, gecos, level, id, reason FROM alertlog WHERE ";
 
-if (defined($data{channel})) {
-  $qry = $qry . "channel like " . esc($data{channel});
+if (defined($data{channel}->[0])) {
+  $qry = $qry . "channel like " . esc($data{channel}->[0]);
 } else { die "channel not defined!\n"; }
 
-if (defined($data{nick}) && ($data{nick} ne "*") && ($data{nick} ne "")) {
-  $qry .= " and nick like " . esc($data{nick});
+if (defined($data{nick}->[0]) && ($data{nick}->[0] ne "*") && ($data{nick}->[0] ne "")) {
+  $qry .= " and nick like " . esc($data{nick}->[0]);
 }
 
-if (defined($data{user}) && ($data{user} ne "*") && ($data{user} ne "")) {
-  $qry .= " and user like " . esc($data{user});
+if (defined($data{user}->[0]) && ($data{user}->[0] ne "*") && ($data{user}->[0] ne "")) {
+  $qry .= " and user like " . esc($data{user}->[0]);
 }
 
-if (defined($data{host}) && ($data{host} ne "*") && ($data{host} ne "")) {
-  $qry .= " and host like " . esc($data{host});
+if (defined($data{host}->[0]) && ($data{host}->[0] ne "*") && ($data{host}->[0] ne "")) {
+  $qry .= " and host like " . esc($data{host}->[0]);
 }
 
-if (defined($data{gecos}) && ($data{gecos} ne "*") && ($data{gecos} ne "")) {
-  $qry .= " and gecos like " . esc($data{gecos});
+if (defined($data{gecos}->[0]) && ($data{gecos}->[0] ne "*") && ($data{gecos}->[0] ne "")) {
+  $qry .= " and gecos like " . esc($data{gecos}->[0]);
 }
 
-if (defined($data{since})) {
+if (defined($data{since}->[0])) {
   $qry .= sprintf("and time > '%04d-%02d-%02d %02d:%02d:%02d'",
-                  int($data{syear}), int($data{smonth}), int($data{sday}),
-                  int($data{shour}), int($data{smin}), int($data{ssec}));
+                  int($data{syear}->[0]), int($data{smonth}->[0]), int($data{sday}->[0]),
+                  int($data{shour}->[0]), int($data{smin}->[0]), int($data{ssec}->[0]));
 }
 
-if (defined($data{before})) {
+if (defined($data{before}->[0])) {
   $qry .= sprintf("and time < '%04d-%02d-%02d %02d:%02d:%02d'",
-                  int($data{byear}), int($data{bmonth}), int($data{bday}),
-                  int($data{bhour}), int($data{bmin}), int($data{bsec}));
+                  int($data{byear}->[0]), int($data{bmonth}->[0]), int($data{bday}->[0]),
+                  int($data{bhour}->[0]), int($data{bmin}->[0]), int($data{bsec}->[0]));
 }
 
 #if (defined($data{id})) {
 #  $qry .= " and id = " . $dbh->quote($data{id});
 #}
 
-if (defined($data{level}) && ($data{level} ne "any")) {
-  $qry .= " and level = " . $dbh->quote($data{level});
+if (defined($data{level}->[0]) && ($data{level}->[0] ne "any")) {
+  $qry .= " and level = " . $dbh->quote($data{level}->[0]);
 }
 
-if (defined($data{reason})) {
-  $qry .= " and reason like " . esc($data{reason});
+if (defined($data{reason}->[0])) {
+  $qry .= " and reason like " . esc($data{reason}->[0]);
 }
 
-if (defined($data{sort}) && defined($data{order}) && ($data{order} =~ /^[ad]$/ ) &&
-    ( $data{sort} =~ /^(time|nick|user|host|level|id|reason)$/ ) ) {
-  $qry .= " order by " . $data{sort};
-  $qry .= " desc" if $data{order} eq "d";
+if (defined($data{sort}) && defined($data{order}) && ($data{order}->[0] =~ /^[ad]$/ ) &&
+    ( $data{sort}->[0] =~ /^(time|nick|user|host|level|id|reason)$/ ) ) {
+  $qry .= " order by " . $data{sort}->[0];
+  $qry .= " desc" if $data{order}->[0] eq "d";
 }
 
 if ($debug) {

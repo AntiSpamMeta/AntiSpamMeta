@@ -17,10 +17,13 @@ List of ASM's commands.
   Responds with a URL to the bot's source
 
 ;help
-  Refers you to ASM's website
+  ASM's least helpful command, accompanied by the least helpful description.
 
 ;ping
   Replies "pong".
+
+;ping <string>								Restricted to flag "s"
+  pong <string>
 
 *** These are commands used for check to see if a user has a "bad past" ***
 
@@ -47,15 +50,6 @@ List of ASM's commands.
 ;mship <nick>								Restricted to flag "s"
   Reports channels that both ASM and <nick> is on.
 
-;;addwebuser <password>							Restricted to flag "s"
-  THIS COMMAND MUST BE SENT IN PM, WITH TWO SEMICOLONS.
-  This will give you access to the restricted areas of ASM's database, using an http login of
-  [yourIRCnick] and [password].
-  No assurance of privacy is made with regards to your password. Make it secure, so that someone
-  else won't use your login, and make it unique - i.e. not something you use for /ns identify.
-
-
-
 *** These commands are for managing who has access to the bot ***
 
 ;userx add <nickserv account> <flags>					Restricted to flag "a"
@@ -72,11 +66,21 @@ List of ASM's commands.
 ;userx flags <nickserv account> <flags>					Restricted to flag "a"
   Sets the flags for that nickserv account - NOT NECESSARILY THE SAME AS THEIR NICK - to the
   provided set of flags. Once again, you can't give flags you don't already have, and you can't
-  ever give the 'd' flag.
+  ever give the 'd' flag. If you want to give the "d" flag, you will absolutely have to edit
+  the users.xml file by hand.
 
 ;userx del <nickserv account>						Restricted to flag "a"
   Removes the nickserv account from ASM's list of authorized users.
 
+;;addwebuser <password>							Restricted to flag "s"
+  THIS COMMAND MUST BE SENT IN PM, WITH TWO SEMICOLONS.
+  This will give you access to the restricted areas of ASM's database, using an http login of
+  [yourIRCnick] and [password].
+  No assurance of privacy is made with regards to your password. Make it secure, so that someone
+  else won't use your login, and make it unique - i.e. not something you use for /ns identify.
+
+;delwebuser <account>							Restricted to flag "a"
+  Deletes an individual's web access.
 
 
 *** These commands are for managing who/where the bot notifies of bad stuff ***
@@ -86,9 +90,13 @@ List of ASM's commands.
   So, to send low-risk alerts and above concerning #spammychannel to #opschannel, you'd do
   ;target #spammychannel #opschannel info
   If a level isn't specified, it defaults to "debug".
+  <nick> may be in the form of $a:nickservAccount in which case ASM will substitute that
+  nickserv account for all nicks currently signed onto that nickserv account
 
-;detarget <source channel> <target channel>				Restricted to flag "a"
-  Stops sending messages concerning <source channel> to <target channel>.
+;detarget <source channel> <target channel or nick>			Restricted to flag "a"
+  Stops sending messages concerning <source channel> to <target channel or nick>.
+  <nick> may be in the form of $a:nickservAccount in which case ASM will substitute that
+  nickserv account for all nicks currently signed onto that nickserv account
 
 ;showhilights <nick>							Restricted to flag "h"
   shows all the channels that it's configured to hilight <nick> on, and what level it's for.
@@ -96,9 +104,12 @@ List of ASM's commands.
 ;hilight <channel> <nick><optional:,nick2,nick3> <optional:level>	Restricted to flag "h"
   Adds <nick[s]> to the list of hilights for <channel> for risks of <level> and above.
   If <level> is unspecified, it defaults to "info".
+  <nick> may be in the form of $a:nickservAccount in which case ASM will substitute that
+  nickserv account for all nicks currently signed onto that nickserv account
 
 ;dehilight <channel> <nick><optional:,nick2,nick3>      		Restricted to flag "h"
   Removes the list of nicks from the list of hilights for <channel>.
+  <nick> may be in the form of $a:nickservAccount.
 
 
 *** Blacklist management commands ***
@@ -108,6 +119,9 @@ List of ASM's commands.
   like that is done, although it is case insensitive. Please for the love of everything that
   is holy use common sense with this. Don't blacklist "nigger" or something like that...
   but definitely blacklist "http://spammyurl.com" etc.
+
+;blacklistpcre <string>							Restricted to flag "a"
+  Adds <string> to the list of strings ASM will watch out for. Regular expression matching.
 
 ;blreason <id> <reason>                                                 Restricted to flag "s"
   use the ID returned by ;blacklist to set a reason for why you blacklisted it.
@@ -130,13 +144,15 @@ List of ASM's commands.
 ;rehash									Restricted to flag "a"
   Re-reads the string blacklist files and config files etc etc.
 
-;monitor <chan> (yes|no)						Restricted to flag "a"
+;monitor <chan> optional:(yes|no)					Restricted to flag "a"
   Sets whether or not the channel is monitored for spam stuffs.
   This is obviously "yes" by default, but some places turn it off for their #blah-ops channel.
+  If yes/no is not specified, show the current state of the monitor flag.
 
-;silence <chan> (yes|no)						Restricted to flag "a"
+;silence <chan> optional:(yes|no)					Restricted to flag "a"
   Sets whether or not ASM ignores commands (other than !ops) in the channel.
   "no" by default; public channels often want this.
+  If yes/no is not specified, show the current state of the silence flag.
 
 ;quit <reason>								Restricted to flag "a"
   Quits IRC using reason as the quit message. ASM is run in a while loop, so it'll probably
@@ -152,6 +168,8 @@ List of ASM's commands.
     notrigger  - prevents the target from causing the bot to generate a spam alert.
     nomsgs     - don't relay private messages from target to the master channel
     nocommands - prevent target from sending the bot commands.
+    noidstring - e.g. nonickbl_impersonate, to prevent them from triggering the
+                 nickbl_impersonate rule
 
 
 *** Highly restricted debug commands ***
@@ -164,6 +182,9 @@ List of ASM's commands.
 
 ;ev <code>								Restricted to flag "d"
   Evaluates raw perl code - output is sent to STDOUT, not to IRC.
+
+;wallop <msg>								Restricted to flag "d"
+  Does nothing. One day, it'll probably broadcast a message to all target-chans.
 
 
 *** Plugin interface ***
