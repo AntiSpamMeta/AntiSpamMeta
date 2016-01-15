@@ -52,7 +52,6 @@ sub new
   $conn->add_handler('pong', \&on_pong);
   $conn->add_handler('channelurlis', \&on_channelurlis);
   $conn->add_handler('480', \&on_jointhrottled);
-  $conn->add_handler('invite', \&blah); # This doesn't need to be fancy; I just need it to go through inspect
   $conn->add_handler('servicesdown', \&on_servicesdown);
   $conn->add_handler('endofbanlist', \&on_banlistend);
   $conn->add_handler('quietlistend', \&on_quietlistend);
@@ -147,9 +146,7 @@ sub on_ping
 {
   my ($conn, $event) = @_;
   $conn->sl("PONG " . $event->{args}->[0]);
-#  alarm 200;
   ASM::Util->dprint('Ping? Pong!', 'pingpong');
-#  ASM::Util->dprint(Dumper($event), 'pingpong');
 }
 
 sub on_account
@@ -175,7 +172,6 @@ sub on_join {
   my $nick = lc $event->{nick};
   my $chan = lc $event->{to}->[0];
   my $rate;
-#  alarm 200;
   if ( lc $conn->{_nick} eq lc $nick)  {
     $::sc{$chan} = {};
     mkdir($::settings->{log}->{dir} . $chan);
@@ -225,9 +221,6 @@ sub on_part
     my $idx = $::db->actionlog( $event);
     $::log->sqlIncident($chan, $idx) if $idx;
   }
-#                 "to" => [ "#antispammeta" ],
-#                 "args" => [ "requested by ow (test)" ],
-#                 "nick" => "aoregcdu",
   if (defined($::sn{$nick}) && defined($::sn{$nick}->{mship})) {
     my @mship = @{$::sn{$nick}->{mship}};
     @mship = grep { lc $_ ne $chan } @mship;

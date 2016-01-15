@@ -29,6 +29,7 @@ sub new
   $conn->add_handler('cuserinfo', \&inspect, "after");
   $conn->add_handler('cclientinfo', \&inspect, "after");
   $conn->add_handler('cfinger', \&inspect, "after");
+  $conn->add_handler('invite', \&inspect, "after");
   $conn->add_handler('public', \&on_public, "after");
   return $self;
 }
