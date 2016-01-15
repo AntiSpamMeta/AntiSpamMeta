@@ -17,6 +17,7 @@ use feature qw(say);
 use HTTP::Async;
 use Carp;
 use Tie::CPHash;
+use Net::DNS::Async;
 
 use ASM::Util;
 use ASM::XML;
@@ -66,7 +67,7 @@ $::settingschanged = 0;
   "statsp" => MAGENTA,
   "ctcp" => 0, #RED,
   "logger" => 0,
-  "dns" => 0
+  "dns" => MAGENTA
 );
 %::dsock = ();
 %::spy = ();
@@ -108,6 +109,7 @@ sub init {
   ASM::XML->readXML();
   $::pass = $::settings->{pass} if $::pass eq '';
   $::async = HTTP::Async->new();
+  $::dns = Net::DNS::Async->new(QueueSize => 5000, Retries => 3);
   $host = ${$::settings->{server}}[rand @{$::settings->{server}}];
   ASM::Util->dprint( "Connecting to $host", "startup");
   $irc->debug($::debug);
@@ -132,8 +134,8 @@ sub init {
     $conn->debugsock(1);
   }
 
-  $::event = ASM::Event->new($conn, $::inspector);
-  $::inspector = ASM::Inspect->new();
+  ASM::Event->new($conn);
+  ASM::Inspect->new($conn);
   $::log = ASM::Log->new($conn);
   ASM::Commander->new($conn);
   ASM::Services->new($conn);

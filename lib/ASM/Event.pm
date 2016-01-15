@@ -7,7 +7,6 @@ use Data::Dumper;
 use IO::All;
 use POSIX qw(strftime);
 use Regexp::Wildcards;
-use HTTP::Request;
 use Array::Utils qw(:all);
 use Net::DNS::Async;
 no if $] >= 5.017011, warnings => 'experimental::smartmatch';
@@ -15,11 +14,9 @@ no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 sub new
 {
   my $module = shift;
-  my ($conn, $inspector) = @_;
+  my ($conn) = @_;
   my $self = {};
-  $self->{DNS} = Net::DNS::Async->new(QueueSize => 5000, Retries => 3);
   $self->{CONN} = $conn;
-  $self->{INSPECTOR} = $inspector;
   ASM::Util->dprint('Installing handler routines...', 'startup');
   $conn->add_default_handler(\&blah);
   $conn->add_handler('bannedfromchan', \&on_bannedfromchan);
@@ -40,14 +37,8 @@ sub new
   $conn->add_handler('nicknameinuse', \&on_errnickinuse);
   $conn->add_handler('bannickchange', \&on_bannickchange);
   $conn->add_handler('kick', \&on_kick);
-  $conn->add_handler('cping', \&on_ctcp);
-  $conn->add_handler('cversion', \&on_ctcp);
   $conn->add_handler('csource', \&on_ctcp_source);
-  $conn->add_handler('ctime', \&on_ctcp);
-  $conn->add_handler('cdcc', \&on_ctcp);
-  $conn->add_handler('cuserinfo', \&on_ctcp);
-  $conn->add_handler('cclientinfo', \&on_ctcp);
-  $conn->add_handler('cfinger', \&on_ctcp);
+  $conn->add_handler('cdcc', \&on_ctcp_dcc);
   $conn->add_handler('354', \&on_whoxreply);
   $conn->add_handler('315', \&on_whoxover);
   $conn->add_handler('263', \&on_whofuckedup);
@@ -221,7 +212,6 @@ sub on_join {
   $::sn{$nick}->{host} = $event->{host};
   $::sn{$nick}->{account} = lc $event->{args}->[0];
   $::db->logg($event) if defined $::db;
-  $::inspector->inspect( $conn, $event ) unless $::netsplit;
 }
 
 sub on_part
@@ -238,7 +228,6 @@ sub on_part
 #                 "to" => [ "#antispammeta" ],
 #                 "args" => [ "requested by ow (test)" ],
 #                 "nick" => "aoregcdu",
-  $::inspector->inspect( $conn, $event );
   if (defined($::sn{$nick}) && defined($::sn{$nick}->{mship})) {
     my @mship = @{$::sn{$nick}->{mship}};
     @mship = grep { lc $_ ne $chan } @mship;
@@ -272,48 +261,17 @@ sub on_msg
 sub on_public
 {
   my ($conn, $event) = @_;
-#  alarm 200;
   my $chan = lc $event->{to}[0];
   $chan =~ s/^[+@]//;
   $::db->logg( $event ) if defined $::db;
-  if ($event->{args}->[0] =~ /(https?:\/\/bitly.com\/\w+|https?:\/\/bit.ly\/\w+|https?:\/\/j.mp\/\w+|https?:\/\/tinyurl.com\/\w+)/i) {
-    my $reqid = $::async->add( HTTP::Request->new( GET => $1 ) );
-    $::httpRequests{$reqid} = $event;
-    my ($response, $id) = $::async->wait_for_next_response( 1 );
-    if (defined($response)) {
-      on_httpResponse($conn, $id, $response);
-    }
-    else { $conn->schedule( 1, sub { checkHTTP($conn); } ); }
-  }
-  $::inspector->inspect( $conn, $event );
   $::sc{$chan}{users}{lc $event->{nick}}{msgtime} = time;
 }
-
-sub checkHTTP
-{
-    my ($conn) = @_;
-    my ($response, $id) = $::async->next_response();
-    if (defined ($response)) {
-      on_httpResponse($conn, $id, $response);
-    }
-    $conn->schedule( 1, sub { checkHTTP($conn); } );
-}
-
-sub on_httpResponse
-{
-  my ($conn, $id, $response) = @_;
-  my $event = $::httpRequests{$id};
-  delete $::httpRequests{$id};
-  $::inspector->inspect( $conn, $event, $response );
-}
-#  if ($response->{_previous}->{_headers}->{location} =~ /^https?:\/\/bitly.com\/a\/warning/)
 
 sub on_notice
 {
   my ($conn, $event) = @_;
   return if ( $event->{to}->[0] eq '$*' ); # if this is a global notice FUCK THAT SHIT
   $::db->logg( $event ) if defined $::db;
-  $::inspector->inspect( $conn, $event );
 }
 
 sub on_errnickinuse
@@ -359,11 +317,6 @@ sub on_quit
       $conn->schedule(2*60, sub { $::netsplit_ignore_lag = 0; });
     }
   }
-  $::inspector->inspect( $conn, $event ) unless $::netsplit;
-  #ugh. Repurge some shit, hopefully this will fix some stuff where things are going wrong
-  foreach my $chan ( keys %::sc ) {
-    delete $::sc{$chan}{users}{lc $event->{nick}};
-  }
   delete($::sn{lc $event->{nick}});
 }
 
@@ -372,7 +325,6 @@ sub blah
   my ($self, $event) = @_;
   ASM::Util->dprint(Dumper($event), 'misc');
   return if ($event->{nick} =~ /\./);
-  $::inspector->inspect($self, $event);
 }
 
 sub irc_users
@@ -421,7 +373,6 @@ sub irc_topic {
       $::sc{$chan}{topic}{by} = $event->{from};
     }
     $::db->logg( $event ) if defined $::db;
-    $::inspector->inspect($conn, $event);
   }
 }
 
@@ -449,12 +400,11 @@ sub on_nick {
   if ($oldnick eq lc $conn->{_nick}) {
     $conn->{_nick} = $event->{args}[0];
   }
- 
+
   $::sn{$newnick} = $::sn{$oldnick} if ($oldnick ne $newnick);
   $::db->logg( $event ) if defined $::db;
   delete( $::sn{$oldnick}) if ($oldnick ne $newnick);
   $event->{to} = \@channels;
-  $::inspector->inspect($conn, $event);
 }
 
 sub on_kick {
@@ -717,7 +667,7 @@ sub on_banlist
       $::sc{$chan}{ipbans}{$ip} = { bannedBy => $banner, bannedOn => $bantime };
     } elsif ( $host =~ /^(([a-z0-9]([a-z0-9\-]*[a-z0-9])?\.)*([a-z0-9]([a-z0-9\-]*[a-z0-9])?\.?))$/i) {
       ASM::Util->dprint("banlist hostname $chan $host", 'dns');
-      $::event->{DNS}->add(
+      $::dns->add(
         sub {
           my ($packet) = @_;
           my @ips = ASM::Util->stripResp($packet);
@@ -751,7 +701,7 @@ sub on_quietlist
       $::sc{$chan}{ipquiets}{$ip} = { bannedBy => $banner, bannedOn => $bantime };
     } elsif ( $host =~ /^(([a-z0-9]([a-z0-9\-]*[a-z0-9])?\.)*([a-z0-9]([a-z0-9\-]*[a-z0-9])?\.?))$/i) {
       ASM::Util->dprint("quietlist hostname $chan $host", 'dns');
-      $::event->{DNS}->add(
+      $::dns->add(
         sub {
           my ($packet) = @_;
           my @ips = ASM::Util->stripResp($packet);
@@ -769,7 +719,7 @@ sub on_channelurlis
   $::sc{lc $event->{args}->[1]}{url} = $event->{args}->[2];
 }
 
-sub on_ctcp
+sub on_ctcp_dcc
 {
   my ($conn, $event) = @_;
   my $acct = lc $::sn{lc $event->{nick}}->{account};
@@ -783,8 +733,6 @@ sub on_ctcp
     if (($spit[0] eq 'CHAT') && ($spit[1] eq 'CHAT')) {
       $::chat = Net::IRC::DCC::CHAT->new($conn, 0, lc $event->{nick}, $spit[2], $spit[3]);
     }
-  } else {
-    $::inspector->inspect($conn, $event);
   }
 }
 
@@ -928,7 +876,7 @@ sub on_quietlistend
     } else {
       $rx = sprintf("%.2fKB", $conn->{_rx}/1024);
     }
-    $::event->{DNS}->await();
+    $::dns->await();
     $conn->privmsg($::settings->{masterchan}, "Finished syncing after " . (time - $::starttime) . " seconds. " .
       "I'm tracking " . (scalar (keys %::sn)) . " nicks" .
       " across " . (scalar (keys %::sc)) . " tracked channels." .

@@ -5,19 +5,72 @@ use strict;
 
 use Data::Dumper;
 use String::Interpolate qw(interpolate);
+use HTTP::Request;
 no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
 %::ignored = ();
 sub new
 {
   my $module = shift;
+  my ($conn) = @_;
   my $self = {};
+  $self->{CONN} = $conn;
   bless($self);
+  $conn->add_handler('join', sub { inspect(@_) unless $::netsplit; }, "after"); #allow state tracking to molest this too
+  $conn->add_handler('quit', sub { inspect(@_) unless $::netsplit; }, "after"); #allow state tracking to molest this too
+  $conn->add_handler('part', \&inspect, "before"); #state tracking will break this if done after
+  $conn->add_handler('notice', \&inspect, "after");
+  $conn->add_handler('nick', \&inspect, "after");
+  $conn->add_handler('cping', \&inspect, "after");
+  $conn->add_handler('cversion', \&inspect, "after");
+  $conn->add_handler('cdcc', \&inspect, "after");
+  $conn->add_handler('csource', \&inspect, "after");
+  $conn->add_handler('ctime', \&inspect, "after");
+  $conn->add_handler('cuserinfo', \&inspect, "after");
+  $conn->add_handler('cclientinfo', \&inspect, "after");
+  $conn->add_handler('cfinger', \&inspect, "after");
+  $conn->add_handler('public', \&on_public, "after");
   return $self;
 }
 
+sub checkHTTP
+{
+  my ($conn) = @_;
+  my ($response, $id) = $::async->next_response();
+  if (defined ($response)) {
+    on_httpResponse($conn, $id, $response);
+  }
+  $conn->schedule( 1, sub { checkHTTP($conn); } );
+}
+
+sub on_httpResponse
+{
+  my ($conn, $id, $response) = @_;
+  my $event = $::httpRequests{$id};
+  delete $::httpRequests{$id};
+  $::inspector->inspect( $conn, $event, $response );
+}
+
+sub on_public
+{
+  my ($conn, $event) = @_;
+  print "on_public inspect\n";
+  my $chan = lc $event->{to}[0];
+  $chan =~ s/^[+@]//;
+  if ($event->{args}->[0] =~ /(https?:\/\/bitly.com\/\w+|https?:\/\/bit.ly\/\w+|https?:\/\/j.mp\/\w+|https?:\/\/tinyurl.com\/\w+)/i) {
+    my $reqid = $::async->add( HTTP::Request->new( GET => $1 ) );
+    $::httpRequests{$reqid} = $event;
+    my ($response, $id) = $::async->wait_for_next_response( 1 );
+    if (defined($response)) {
+      on_httpResponse($conn, $id, $response);
+    }
+    else { $conn->schedule( 1, sub { checkHTTP($conn); } ); }
+  }
+  inspect( $conn, $event );
+}
+
 sub inspect {
-  our ($self, $conn, $event, $response) = @_;
+  our ($conn, $event, $response) = @_;
   my (%aonx, %dct, $rev, $chan, $id);
   %aonx=(); %dct=(); $chan=""; $id="";
   my (@dnsbl, @uniq);
