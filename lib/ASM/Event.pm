@@ -907,9 +907,12 @@ sub on_quietlistend
   }
   $::pendingsync--;
   if ($::pendingsync == 0) {
-    my $size = `ps -p $$ h -o size`;
+    my $size = `pmap -X $$ | tail -n 1`;
+    $size =~ s/^\s+|\s+$//g;
+    my @temp = split(/ +/, $size);
+    $size = $temp[1] + $temp[5];
     my $cputime = `ps -p $$ h -o time`;
-    chomp $size; chomp $cputime;
+    chomp $cputime;
     my ($tx, $rx);
     if ($conn->{_tx}/1024 > 1024) {
       $tx = sprintf("%.2fMB", $conn->{_tx}/(1024*1024));

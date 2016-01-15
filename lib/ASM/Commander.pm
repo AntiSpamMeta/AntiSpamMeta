@@ -270,9 +270,12 @@ sub cmd_teredo {
 sub cmd_status {
 	my ($conn, $event) = @_;
 
-	my $size = `ps -p $$ h -o size`;
+	my $size = `pmap -X $$ | tail -n 1`;
+	$size =~ s/^\s+|\s+$//g;
+	my @temp = split(/ +/, $size);
+	$size = $temp[1] + $temp[5];
 	my $cputime = `ps -p $$ h -o time`;
-	chomp $size; chomp $cputime;
+	chomp $cputime;
 	my $upstr = '';
 	my $up = (time - $::starttime);
 	if (int($up/86400) != 0) { #days
