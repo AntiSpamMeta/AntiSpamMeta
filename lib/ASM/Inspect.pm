@@ -49,7 +49,7 @@ sub on_httpResponse
   my ($conn, $id, $response) = @_;
   my $event = $::httpRequests{$id};
   delete $::httpRequests{$id};
-  $::inspector->inspect( $conn, $event, $response );
+  inspect( $conn, $event, $response );
 }
 
 sub on_public
