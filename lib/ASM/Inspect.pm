@@ -54,7 +54,6 @@ sub on_httpResponse
 sub on_public
 {
   my ($conn, $event) = @_;
-  print "on_public inspect\n";
   my $chan = lc $event->{to}[0];
   $chan =~ s/^[+@]//;
   if ($event->{args}->[0] =~ /(https?:\/\/bitly.com\/\w+|https?:\/\/bit.ly\/\w+|https?:\/\/j.mp\/\w+|https?:\/\/tinyurl.com\/\w+)/i) {
