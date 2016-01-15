@@ -239,6 +239,9 @@ sub stripResp
 {
   my $module = shift;
   my $response = shift;
+  if (!defined($response)) {
+    return undef;
+  }
   my @answer = $response->answer;
   if ($response->{header}->{rcode} ne "NOERROR") {
 	  dprint($module, Dumper($response), 'dns');
