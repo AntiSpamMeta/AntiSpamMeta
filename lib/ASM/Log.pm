@@ -23,7 +23,7 @@ sub new
   $conn->add_handler('part',      sub { logg($self, @_); }, "before");
   $conn->add_handler('caction',   sub { logg($self, @_); }, "before");
   $conn->add_handler('nick',      sub { logg($self, @_); }, "after"); #allow state tracking to molest this
-  $conn->add_handler('quit',      sub { logg($self, @_); }, "before");
+  $conn->add_handler('quit',      sub { logg($self, @_); }, "after"); #allow state tracking to molest this too
   $conn->add_handler('kick',      sub { logg($self, @_); }, "before");
   $conn->add_handler('notice',    sub { logg($self, @_); }, "before");
   $conn->add_handler('mode',      sub { logg($self, @_); }, "before");
