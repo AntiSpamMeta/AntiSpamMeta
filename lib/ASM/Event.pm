@@ -672,7 +672,7 @@ sub on_banlist
           my ($packet) = @_;
           my @ips = ASM::Util->stripResp($packet);
           foreach $ip (@ips) {
-            $::sc{$chan}{ipbans}{$ip} = { bannedBy => $banner, bannedOn => $bantime };
+            $::sc{$chan}{ipbans}{$ip} = { bannedBy => $banner, bannedOn => $bantime } if defined($ip);
           }
         }, $host, 'A');
     }
@@ -706,7 +706,7 @@ sub on_quietlist
           my ($packet) = @_;
           my @ips = ASM::Util->stripResp($packet);
           foreach $ip (@ips) {
-            $::sc{$chan}{ipquiets}{$ip} = { bannedBy => $banner, bannedOn => $bantime };
+            $::sc{$chan}{ipquiets}{$ip} = { bannedBy => $banner, bannedOn => $bantime } if defined($ip);
           }
         }, $host, 'A');
     }
