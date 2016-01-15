@@ -7,6 +7,7 @@ use strict;
 use Term::ANSIColor qw (:constants);
 use Socket qw( inet_aton inet_ntoa );
 use Data::Dumper;
+use Net::DNS 0.55 qw(rrsort);
 
 no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
@@ -245,12 +246,17 @@ sub stripResp
   my @answer = $response->answer;
   if ($response->{header}->{rcode} ne "NOERROR") {
     dprint($module, Dumper($response), 'dns');
-    return;
-  }
-  if ((!(@answer)) || ($answer[0]->{type} ne 'A')) {
     return undef;
   }
-  return dottedQuadToInt($module, $answer[0]->{address});
+  if (!(@answer)) {
+    return undef;
+  }
+  my @addresses = rrsort('A', @answer);
+  my @results = ();
+  foreach my $address (@addresses) {
+    push @results, dottedQuadToInt($module, $address->{address});
+  }
+  return @results;
 }
 
 sub getHostIPFast
