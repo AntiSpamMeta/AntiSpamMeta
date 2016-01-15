@@ -54,26 +54,26 @@ my $cmdtbl = {
 		'cmd' => \&cmd_db },
 	'^;query (\S+) ?(\S+)?$' => {
 		'cmd' => \&cmd_query },
-	'^;investigate (\S+) *$' => {
+	'^;investigate (?<nick>\S+) *$' => {
 		'cmd' => \&cmd_investigate },
-	'^;investigate2 (\S+) ?(\d*) *$' => {
+	'^;investigate2 (?<nick>\S+) ?(?<skip>\d*) *$' => {
 		'flag' => 's',
 		'cmd' => \&cmd_investigate2 },
-	'^;userx? add (\S+) (\S+)$' => {
+	'^;userx? add (?<account>\S+) (?<flags>\S+)$' => {
 		'flag' => 'a',
 		'cmd' => \&cmd_user_add },
-	'^;userx? flags (\S+) ?$' => {
+	'^;userx? flags (?<account>\S+) ?$' => {
 		'cmd' => \&cmd_user_flags },
-	'^;userx? flags (\S+) (\S+)$' => {
+	'^;userx? flags (?<account>\S+) (?<flags>\S+)$' => {
 		'flag' => 'a',
 		'cmd' => \&cmd_user_flags2 },
-	'^;userx? del (?<nick>\S+)$' => {
+	'^;userx? del (?<account>\S+)$' => {
 		'flag' => 'a',
 		'cmd' => \&cmd_user_del },
-	'^;target (?<chan>\S+) (?<nick>\S+) ?(?<level>[a-z]*)$' => {
+	'^;target (?<chan>\S+) (?<nickchan>\S+) ?(?<level>[a-z]*)$' => {
 		'flag' => 'a',
 		'cmd' => \&cmd_target },
-	'^;detarget (?<chan>\S+) (?<nick>\S+)' => {
+	'^;detarget (?<chan>\S+) (?<nickchan>\S+)' => {
 		'flag' => 'a',
 		'cmd' => \&cmd_detarget },
 	'^;showhilights (?<nick>\S+) *$' => {
@@ -106,7 +106,7 @@ my $cmdtbl = {
 	'^;restrict (?<type>nick|account|host) (?<who>\S+) (?<mode>\+|-)(?<restriction>[a-z0-9_-]+)$' => {
 		'flag' => 'a',
 		'cmd' => \&cmd_restrict },
-	'^\s*\!ops ?(#\S+)? ?(.*)' => {
+	'^\s*\!ops ?(?<chan>#\S+)? ?(?<reason>.*)' => {
 		'nohush' => 'nohush',
 		'cmd' => \&cmd_ops },
 	'^;blacklist (?<string>.+)' => {
@@ -163,7 +163,6 @@ sub command {
 	if (defined($::sn{$nick}) && defined($::sn{$nick}->{account})) {
 		$acct = lc $::sn{$nick}->{account};
 	}
-#	 return 0 unless (ASM::Util->speak($event->{to}->[0]));
 	foreach my $command ( keys %{$self->{cmdtbl}} )
 	{
 		my $fail = 0;
@@ -241,7 +240,7 @@ sub cmd_addwebuser {
 sub cmd_delwebuser {
 	my ($conn, $event) = @_;
 
-	my $user = $+{user};
+	my $user = lc $+{user};
 	use Apache::Htpasswd;
 	use Apache::Htgroup;
 	my $o_Htpasswd = new Apache::Htpasswd({passwdFile => $::settings->{web}->{userfile}, UseMD5 => 1});
@@ -316,12 +315,12 @@ sub cmd_status {
 sub cmd_mship {
 	my ($conn, $event) = @_;
 
-	my $nick = $+{nick};
-	if (defined($::sn{lc $nick})) {
+	my $nick = lc $+{nick};
+	if (defined($::sn{$nick})) {
 		if ($event->{to}->[0] =~ /^#/) {
-			$conn->privmsg($event->replyto, $nick . " is on: " . ASM::Util->commaAndify(sort(grep { not grep { /^s$/ } @{$::sc{$_}{modes}} } @{$::sn{lc $nick}->{mship}})));
+			$conn->privmsg($event->replyto, $nick . " is on: " . ASM::Util->commaAndify(sort(grep { not grep { /^s$/ } @{$::sc{$_}{modes}} } @{$::sn{$nick}->{mship}})));
 		} else {
-			$conn->privmsg($event->replyto, $nick . " is on: " . ASM::Util->commaAndify(sort @{$::sn{lc $nick}->{mship}}));
+			$conn->privmsg($event->replyto, $nick . " is on: " . ASM::Util->commaAndify(sort @{$::sn{$nick}->{mship}}));
 		}
 	} else {
 		$conn->privmsg($event->replyto, "I don't see $nick.");
@@ -438,7 +437,7 @@ sub cmd_investigate {
 	my ($conn, $event) = @_;
 
 	return unless defined $::db;
-	my $nick = lc $1;
+	my $nick = lc $+{nick};
 	unless (defined($::sn{$nick})) {
 		$conn->privmsg($event->replyto, "I don't see $nick in my state tracking database, so I can't run any queries on their info, sorry :(" .
 			       " You can try https://antispammeta.net/cgi-bin/secret/investigate.pl?nick=$nick instead!");
@@ -478,17 +477,10 @@ sub cmd_investigate2 {
 	my ($conn, $event) = @_;
 
 	return unless defined $::db;
-	my $nick = lc $1;
+	my $nick = lc $+{nick};
 	my $skip = 0;
-	$skip = $2 if (defined($2) and ($2 ne ""));
-	foreach my $xcommand ( @{$::commands->{command}} ) {
-		next unless $xcommand->{cmd} eq '^;investigate (\S+) *$';
-		if (";investigate $nick" =~ /$xcommand->{cmd}/) {
-			eval $xcommand->{content};
-			warn $@ if $@;
-			last;
-		}
-	}
+	$skip = $+{skip} if (defined($+{skip}) and ($+{skip} ne ""));
+	cmd_investigate($conn, $event);
 	unless (defined($::sn{$nick})) {
 		return;
 	}
@@ -508,10 +500,6 @@ sub cmd_investigate2 {
 	ASM::Util->dprint($query, 'mysql');
 	my $query_handle = $dbh->prepare($query);
 	$query_handle->execute();
-	my $dq = '';
-	if (defined($ip)) {
-		$dq = '&realip=' . join '.', unpack 'C4', pack 'N', $ip;
-	}
 	my @data = @{$query_handle->fetchall_arrayref()};
 	if (@data) {
 		$conn->privmsg($event->replyto, 'Sending you the results...');
@@ -537,8 +525,8 @@ sub cmd_investigate2 {
 sub cmd_user_add {
 	my ($conn, $event) = @_;
 
-	my $nick = lc $1;
-	my $flags = $2;
+	my $nick = lc $+{account};
+	my $flags = $+{flags};
 	my %hasflagshash = ();
 	foreach my $item (split(//, $::users->{person}->{lc $::sn{lc $event->{nick}}->{account}}->{flags})) {
 		$hasflagshash{$item} = 1;
@@ -549,7 +537,7 @@ sub cmd_user_add {
 			return;
 		}
 	}
-	if ($flags =~ /d/i) {
+	if ($flags =~ /d/) {
 		$conn->privmsg($event->replyto, "The d flag may not be assigned over IRC. Edit the configuration manually.");
 		return;
 	}
@@ -557,10 +545,9 @@ sub cmd_user_add {
 		$conn->privmsg($event->replyto, "I'm assuming you mean " . $nick . "'s nickserv account, " . lc $::sn{$nick}->{account} . '.');
 		$nick = lc $::sn{$nick}->{account};
 	}
-	if (defined($::users->{person}->{$nick}) &&
-	    defined($::users->{person}->{$nick}->{flags}) &&
-	    ($::users->{person}->{$nick}->{flags} =~ /d/)) {
-		return $conn->privmsg($event->replyto, "Users with the 'd' flag are untouchable. Edit the config file manually.");
+	if (defined($::users->{person}->{$nick})) {
+		$conn->privmsg($event->replyto, "The user $nick already exists.  Use ;user flags $nick $flags to set their flags");
+		return;
 	}
 	$::users->{person}->{$nick} = { 'flags' => $flags };
 	ASM::XML->writeUsers();
@@ -570,7 +557,7 @@ sub cmd_user_add {
 sub cmd_user_flags {
 	my ($conn, $event) = @_;
 
-	my $nick = lc $1;
+	my $nick = lc $+{account};
 	if ( defined($::sn{$nick}) && (defined($::sn{$nick}->{account})) && ( lc $::sn{$nick}->{account} ne $nick ) ) {
 		$conn->privmsg($event->replyto, "I'm assuming you mean " . $nick . "'s nickserv account, " . lc $::sn{$nick}->{account} . '.');
 		$nick = lc $::sn{$nick}->{account};
@@ -586,8 +573,8 @@ sub cmd_user_flags {
 sub cmd_user_flags2 {
 	my ($conn, $event) = @_;
 
-	my $nick = lc $1;
-	my $flags = $2;
+	my $nick = lc $+{account};
+	my $flags = $+{flags};
 	my %hasflagshash = ();
 	foreach my $item (split(//, $::users->{person}->{lc $::sn{lc $event->{nick}}->{account}}->{flags})) {
 		$hasflagshash{$item} = 1;
@@ -598,7 +585,7 @@ sub cmd_user_flags2 {
 			return;
 		}
 	}
-	if ($flags =~ /d/i) {
+	if ($flags =~ /d/) {
 		$conn->privmsg($event->replyto, "The d flag may not be assigned over IRC. Edit the configuration manually.");
 		return;
 	}
@@ -611,7 +598,7 @@ sub cmd_user_flags2 {
 	    ($::users->{person}->{$nick}->{flags} =~ /d/)) {
 		return $conn->privmsg($event->replyto, "Users with the 'd' flag are untouchable. Edit the config file manually.");
 	}
-	if ($flags !~ /s/i) {
+	if ($flags !~ /s/) {
 		use Apache::Htpasswd; use Apache::Htgroup;
 		my $o_Htpasswd = new Apache::Htpasswd({passwdFile => $::settings->{web}->{userfile}, UseMD5 => 1});
 		my $o_Htgroup = new Apache::Htgroup($::settings->{web}->{groupfile});
@@ -627,7 +614,7 @@ sub cmd_user_flags2 {
 sub cmd_user_del {
 	my ($conn, $event) = @_;
 
-	my $nick = lc $+{nick};
+	my $nick = lc $+{account};
 	if (defined($::users->{person}->{$nick}) &&
 	    defined($::users->{person}->{$nick}->{flags}) &&
 	    ($::users->{person}->{$nick}->{flags} =~ /d/)) {
@@ -648,11 +635,11 @@ sub cmd_user_del {
 sub cmd_target {
 	my ($conn, $event) = @_;
 
-	my $chan = $+{chan};
-	my $nick = lc $+{nick};
+	my $chan = lc $+{chan};
+	my $nick = lc $+{nickchan};
 	my $level= $+{level};
-	my $link = ASM::Util->getLink(lc $chan);
-	if ( lc $link ne lc $chan ) {
+	my $link = lc ASM::Util->getLink($chan);
+	if ( $link ne $chan ) {
 		$conn->privmsg($event->replyto, "Error: $chan is linked to $link - use $link instead.");
 		return;
 	}
@@ -673,17 +660,17 @@ sub cmd_target {
 sub cmd_detarget {
 	my ($conn, $event) = @_;
 
-	my $chan = $+{chan};
-	my $nick = $+{nick};
-	my $link = ASM::Util->getLink(lc $chan);
-	if ( lc $link ne lc $chan ) {
+	my $chan = lc $+{chan};
+	my $nick = lc $+{nickchan};
+	my $link = lc ASM::Util->getLink($chan);
+	if ( $link ne $chan ) {
 		$conn->privmsg($event->replyto, "Error: $chan is linked to $link - use $link instead.");
 		return;
 	}
 	foreach my $risk ( keys %::RISKS ) {
 		next unless defined($::channels->{channel}->{$chan}->{msgs}->{$risk});
 		my @ppl = @{$::channels->{channel}->{$chan}->{msgs}->{$risk}};
-		@ppl = grep { lc $_ ne lc $nick } @ppl;
+		@ppl = grep { lc $_ ne $nick } @ppl;
 		$::channels->{channel}->{$chan}->{msgs}->{$risk} = \@ppl;
 	}
 	ASM::XML->writeChannels();
@@ -693,7 +680,7 @@ sub cmd_detarget {
 sub cmd_showhilights {
 	my ($conn, $event) = @_;
 
-	my $nick = $+{nick};
+	my $nick = lc $+{nick};
 	my @channels = ();
 	foreach my $chan (keys(%{$::channels->{channel}})) {
 		foreach my $level (keys(%{$::channels->{channel}->{$chan}->{hilights}})) {
@@ -712,8 +699,8 @@ sub cmd_showhilights {
 sub cmd_hilight {
 	my ($conn, $event) = @_;
 
-	my $chan = $+{chan};
-	my $nick_str = $+{nicks};
+	my $chan = lc $+{chan};
+	my $nick_str = lc $+{nicks};
 	my @nicks = split(/,/, $nick_str);
 	my $level= $+{level} // '';
 	if ($level eq '') { $level = 'info'; }
@@ -721,8 +708,8 @@ sub cmd_hilight {
 		$conn->privmsg($event->replyto, "Error: I don't recognize $level as a valid level.");
 		return;
 	}
-	my $link = ASM::Util->getLink(lc $chan);
-	if ( lc $link ne lc $chan ) {
+	my $link = lc ASM::Util->getLink($chan);
+	if ( $link ne $chan ) {
 		$conn->privmsg($event->replyto, "Error: $chan is linked to $link - use $link instead.");
 		return;
 	}
@@ -741,11 +728,11 @@ sub cmd_hilight {
 	unless (defined($::channels->{channel}->{$chan}->{hilights}->{$level})) {
 		$::channels->{channel}->{$chan}->{hilights}->{$level} = [];
 	}
+	my @tmphl = @{$::channels->{channel}->{$chan}->{hilights}->{$level}};
 	foreach my $nick (@nicks) {
-		my @tmphl = @{$::channels->{channel}->{$chan}->{hilights}->{$level}};
 		push(@tmphl, $nick);
-		$::channels->{channel}->{$chan}->{hilights}->{$level} = \@tmphl;
 	}
+	$::channels->{channel}->{$chan}->{hilights}->{$level} = \@tmphl;
 	ASM::XML->writeChannels();
 	$conn->privmsg($event->replyto, ASM::Util->commaAndify(@nicks) . " added to $level risk hilights for $chan");
 }
@@ -753,19 +740,17 @@ sub cmd_hilight {
 sub cmd_dehilight {
 	my ($conn, $event) = @_;
 
-	my $chan = $+{chan};
-	my @nicks = split(/,/, $+{nicks});
-	my $link = ASM::Util->getLink(lc $chan);
-	if ( lc $link ne lc $chan ) {
+	my $chan = lc $+{chan};
+	my @nicks = split(/,/, lc $+{nicks});
+	my $link = lc ASM::Util->getLink($chan);
+	if ( $link ne $chan ) {
 		$conn->privmsg($event->replyto, "Error: $chan is linked to $link - use $link instead.");
 		return;
 	}
 	foreach my $risk ( keys %::RISKS ) {
 		next unless defined($::channels->{channel}->{$chan}->{hilights}->{$risk});
 		my @ppl = @{$::channels->{channel}->{$chan}->{hilights}->{$risk}};
-		foreach my $nick (@nicks) {
-			@ppl = grep { lc $_ ne lc $nick } @ppl;
-		}
+		@ppl = grep { !(lc $_ ~~ @nicks) } @ppl;
 		$::channels->{channel}->{$chan}->{hilights}->{$risk} = \@ppl;
 	}
 	ASM::XML->writeChannels();
@@ -829,17 +814,17 @@ sub cmd_rehash {
 sub cmd_restrict {
 	my ($conn, $event) = @_;
 
-	$+{who} = lc $+{who};
+	my $who = lc $+{who};
 	if ($+{mode} eq '-') {
-		delete $::restrictions->{$+{type} . 's'}->{$+{type}}->{$+{who}}->{$+{restriction}};
-		$conn->privmsg($event->replyto, "Removed $+{restriction} restriction for $+{type} $+{who}");
+		delete $::restrictions->{$+{type} . 's'}->{$+{type}}->{$who}->{$+{restriction}};
+		$conn->privmsg($event->replyto, "Removed $+{restriction} restriction for $+{type} $who");
 	}
 	if ($+{mode} eq '+') {
-		if (! defined($::restrictions->{$+{type} . 's'}->{$+{type}}->{$+{who}})) {
-			$::restrictions->{$+{type} . 's'}->{$+{type}}->{$+{who}} = {};
+		if (! defined($::restrictions->{$+{type} . 's'}->{$+{type}}->{$who})) {
+			$::restrictions->{$+{type} . 's'}->{$+{type}}->{$who} = {};
 		}
-		$::restrictions->{$+{type} . 's'}->{$+{type}}->{$+{who}}->{$+{restriction}} = $+{restriction};
-		$conn->privmsg($event->replyto, "Added $+{restriction} restriction for $+{type} $+{who}");
+		$::restrictions->{$+{type} . 's'}->{$+{type}}->{$who}->{$+{restriction}} = $+{restriction};
+		$conn->privmsg($event->replyto, "Added $+{restriction} restriction for $+{type} $who");
 	}
 	ASM::XML->writeRestrictions();
 }
@@ -848,11 +833,10 @@ sub cmd_ops {
 	my ($conn, $event) = @_;
 
 	my $tgt = lc $event->{to}->[0];
-	$tgt = lc $1 if (defined($1));
-	my $msg = $1;
-	$msg = $2 if defined($2);
+	$tgt = lc $+{chan} if defined($+{chan});
+	my $msg = $+{reason};
 	if ( (($::channels->{channel}->{$tgt}->{monitor} // "yes") eq "no") || #we're not monitoring this channel
-	     !(lc $tgt ~~ $::sn{lc $event->{nick}}->{mship})) { #they're not on the channel they're calling !ops for
+	     !($tgt ~~ $::sn{lc $event->{nick}}->{mship})) { #they're not on the channel they're calling !ops for
 		return;
 	}
 	if (defined($::ignored{$tgt}) && ($::ignored{$tgt} >= $::RISKS{'opalert'})) {
@@ -874,15 +858,11 @@ sub cmd_ops {
 		return;
 	}
 	if (ASM::Util->notRestricted(lc $event->{nick}, "noops")) {
-		my $tgt = lc $event->{to}->[0];
-		$tgt = lc $1 if (defined($1));
-		my $msg = $1;
-		$msg = $2 if defined($2);
 		if (lc $event->{to}->[0] eq '##linux') {
 			$conn->privmsg($event->{nick}, "I've summoned op attention. In the future, please use /msg " .
 				       "$conn->{_nick} !ops $event->{to}->[0] reasonGoesHere	- this allows ops to " .
 				       "be notified while minimizing channel hostility.");
-		} elsif ((lc $event->{to}->[0] eq '#wikipedia-en-help') && (!defined($msg))) {
+		} elsif (($tgt eq '#wikipedia-en-help') && (!defined($msg))) {
 			$conn->privmsg($event->{nick}, "I've summoned op attention, but in the future, please specify " .
 				       "a reason, e.g. !ops reasongoeshere - so ops know what is going on. Thanks! :)");
 		} elsif (lc $event->{to}->[0] eq lc $conn->{_nick}) {
@@ -898,7 +878,7 @@ sub cmd_ops {
 		my $hilite=ASM::Util->commaAndify(ASM::Util->getAlert($tgt, 'opalert', 'hilights'));
 		my $txtz = "[\x02$tgt\x02] - $event->{nick} wants op attention";
 		if ((time-$::sc{$tgt}{users}{lc $event->{nick}}{jointime}) > 90) {
-			$txtz = "$txtz ($msg) $hilite !att-$tgt-opalert";
+			$txtz .= " ($msg) $hilite !att-$tgt-opalert";
 		}
 		my @tgts = ASM::Util->getAlert($tgt, 'opalert', 'msgs');
 		ASM::Util->sendLongMsg($conn, \@tgts, $txtz);
@@ -918,12 +898,12 @@ sub cmd_ops {
 sub cmd_blacklist {
 	my ($conn, $event) = @_;
 
-	$+{string} = lc $+{string};
+	my $string = lc $+{string};
 	use String::CRC32;
-	my $id = sprintf("%08x", crc32($+{string}));
-	$::blacklist->{string}->{$id} = { "content" => $+{string}, "type" => "string", "setby" => $event->nick, "settime" => strftime('%F', gmtime) };
+	my $id = sprintf("%08x", crc32($string));
+	$::blacklist->{string}->{$id} = { "content" => $string, "type" => "string", "setby" => $event->nick, "settime" => strftime('%F', gmtime) };
 	ASM::XML->writeBlacklist();
-	$conn->privmsg($event->replyto, "$+{string} blacklisted with id $id, please use ;blreason $id reasonGoesHere to set a reason");
+	$conn->privmsg($event->replyto, "$string blacklisted with id $id, please use ;blreason $id reasonGoesHere to set a reason");
 }
 
 sub cmd_blacklistpcre {
@@ -951,31 +931,32 @@ sub cmd_unblacklist {
 sub cmd_plugin {
 	my ($conn, $event) = @_;
 
-	my $txtz = "\x03" . $::RCOLOR{$::RISKS{$+{risk}}} . "\u$+{risk}\x03 risk threat [\x02$+{chan}\x02] - " .
+	my $chan = lc $+{chan};
+	my $txtz = "\x03" . $::RCOLOR{$::RISKS{$+{risk}}} . "\u$+{risk}\x03 risk threat [\x02$chan\x02] - " .
 	            "\x02($event->{nick} plugin)\x02 - $+{reason}; ping ";
-	$txtz = $txtz . ASM::Util->commaAndify(ASM::Util->getAlert(lc $+{chan}, $+{risk}, 'hilights')) if (ASM::Util->getAlert(lc $+{chan}, $+{risk}, 'hilights'));
-	$txtz = $txtz . ' !att-' . $+{chan} . '-' . $+{risk};
-	my @tgts = ASM::Util->getAlert(lc $+{chan}, $+{risk}, 'msgs');
+	$txtz = $txtz . ASM::Util->commaAndify(ASM::Util->getAlert($chan, $+{risk}, 'hilights')) if (ASM::Util->getAlert($chan, $+{risk}, 'hilights'));
+	$txtz = $txtz . ' !att-' . $chan . '-' . $+{risk};
+	my @tgts = ASM::Util->getAlert($chan, $+{risk}, 'msgs');
 	ASM::Util->sendLongMsg($conn, \@tgts, $txtz);
 }
 
 sub cmd_sync {
 	my ($conn, $event) = @_;
 
-	$conn->sl("MODE $+{chan} bq");
-	$conn->sl("MODE $+{chan}");
 	$conn->sl("WHO $+{chan} %tcuihnar,314");
+	$conn->sl("MODE $+{chan}");
+	$conn->sl("MODE $+{chan} bq");
 }
 
 sub cmd_ping {
 	my ($conn, $event) = @_;
-#
+
 	$conn->privmsg($event->replyto, "pong");
 }
 
 sub cmd_ping2 {
 	my ($conn, $event) = @_;
-#
+
 	$conn->privmsg($event->replyto, "pong $+{string}");
 }
 
