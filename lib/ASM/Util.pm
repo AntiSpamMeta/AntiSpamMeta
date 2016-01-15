@@ -244,7 +244,7 @@ sub stripResp
   }
   my @answer = $response->answer;
   if ($response->{header}->{rcode} ne "NOERROR") {
-	  dprint($module, Dumper($response), 'dns');
+    dprint($module, Dumper($response), 'dns');
     return;
   }
   if ((!(@answer)) || ($answer[0]->{type} ne 'A')) {
@@ -335,3 +335,4 @@ sub accountToNicks {
 }
 
 return 1;
+# vim: ts=2:sts=2:sw=2:expandtab

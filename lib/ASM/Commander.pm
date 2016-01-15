@@ -1015,3 +1015,4 @@ sub cmd_falsematch {
 
 	$conn->privmsg($event->replyto, 'To whitelist false matches for the impersonation check, have someone with the "a" flag run ";restrict nick LegitimateNickGoesHere +nonickbl_impersonate". Contact ilbelkyr if this issue reoccurs.');
 }
+# vim: ts=8:sts=8:sw=8:noexpandtab

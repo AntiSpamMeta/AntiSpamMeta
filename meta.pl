@@ -126,7 +126,7 @@ sub init {
                          Ircname => $::settings->{realname},
                          Username => $::settings->{username},
                          Password => $::settings->{pass},
-			 Pacing => 0 );
+                         Pacing => 0 );
   $conn->debug($::debug);
   if (-e "debugsock") {
     $conn->debugsock(1);
@@ -165,3 +165,4 @@ sub init {
 }
 
 init();
+# vim: ts=2:sts=2:sw=2:expandtab

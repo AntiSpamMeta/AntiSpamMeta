@@ -76,3 +76,4 @@ sub on_whofuckedup
 }
 
 1;
+# vim: ts=8:sts=8:sw=8:noexpandtab
