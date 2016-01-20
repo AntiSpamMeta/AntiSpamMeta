@@ -287,8 +287,9 @@ sub on_quit
 {
   my ($conn, $event) = @_;
   my @channels=();
+  my $nick = lc $event->{nick};
   for ( keys %::sc ) {
-    push ( @channels, lc $_ ) if delete $::sc{lc $_}{users}{lc $event->{nick}};
+    push ( @channels, lc $_ ) if delete $::sc{lc $_}{users}{$nick};
   }
   $event->{to} = \@channels;
   if (defined $::db) {
@@ -298,8 +299,12 @@ sub on_quit
       $::log->sqlIncident( join(',', @actionlog_channels), $idx ) if $idx;
       $::db->logg( $event );
   }
-
-  if (($event->{args}->[0] eq "*.net *.split") && (lc $event->{nick} ne 'chanserv')) { #special, netsplit situation
+  if (
+      ($event->{args}->[0] eq "*.net *.split") && #special, netsplit situation
+      ($nick ne 'chanserv') && # ignore services
+      ($nick ne 'sigyn') && # ignore freenode pseudoservice
+      ($nick ne 'eir') # another freenode pseudoservice
+     ) {
     if ($::netsplit == 0){
       $conn->privmsg($::settings->{masterchan}, "Entering netsplit mode - JOIN and QUIT inspection will be disabled for 60 minutes");
       $::netsplit = 1;
@@ -310,7 +315,7 @@ sub on_quit
       $conn->schedule(2*60, sub { $::netsplit_ignore_lag = 0; });
     }
   }
-  delete($::sn{lc $event->{nick}});
+  delete($::sn{$nick});
 }
 
 sub blah
