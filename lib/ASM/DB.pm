@@ -76,7 +76,7 @@ sub actionlog
     if ($quitmsg =~ /^Killed \((\S+) \((.*)\)\)$/) {
       $bynick = $1;
       $reason = $2 unless ($2 eq '<No reason given>');
-      return if ($reason =~ /Nickname regained by services/);
+      return if (($reason // '') =~ /Nickname regained by services/);
       $action = 'kill';
     } elsif ($quitmsg =~ /^K-Lined$/) {
       $action = 'k-line';
