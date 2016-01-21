@@ -27,5 +27,9 @@
   <web>
     <groupfile>/var/www/.htgroup</groupfile>
     <userfile>/var/www/.htpasswd</userfile>
+    <shortener>
+      <apikey>look.at.shortener.godaddy.com</apikey>
+      <domain>asm.rocks</domain>
+    </shortener>
   </web>
 </settings>
