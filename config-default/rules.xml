@@ -4,11 +4,10 @@
   <event id="joinmsgquit" class="joinmsgquit" reason="joined, said something, parted/quit" risk="info" type="quit,part">3</event>
   <event id="advflood" class="advsplitflood" reason="advanced distributed flooding" risk="high" type="public,part,caction">5:3</event>
   <event id="asciiflood" class="asciiflood" reason="ascii art algorithm" risk="medium" type="public">20:3:3</event>
-  <event id="anontalk1" class="re" reason="anontalk.com spam" risk="medium" type="public">(?i)w(.?)w\1w\1?.\1?a\1n\1o\1n\1t\1a\1l\1k\1?.\1?c\1o\1m</event>
   <event id="autoremove" class="re" reason="on chanserv autoremove" risk="info" type="part">^requested by ChanServ</event>
-  <event id="blacklist" class="strbl" reason="sending message containing blacklisted content" risk="low" type="public,part,quit,caction">blah</event>
   <event id="blacklist2" class="strblnew" reason="blacklist $xresult" risk="medium" type="public,part,quit,caction">blah</event>
   <event id="blacklistpcre" class="strblpcre" reason="pcre blacklist $xresult" risk="medium" type="public,part,quit,caction">blah</event>
+  <event id="cloning" class="cloning" reason="excessive clones detected ($xresult) !clonesdetected " risk="debug" type="join">3</event>
   <event id="ctcp-dcc" class="re" reason="ctcp-dcc" risk="high" type="cdcc">.*</event>
   <event id="ctcp-ping" class="re" reason="channel-wide CTCP PING" risk="medium" type="cping">.*</event>
   <event id="ctcp-version" class="re" reason="channel-wide CTCP VERSION" risk="medium" type="cversion">.*</event>
