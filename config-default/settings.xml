@@ -9,6 +9,7 @@
   <debugchan>#antispammeta-debug</debugchan>
   <log>
     <actiondir>actionlogs/</actiondir>
+    <detectdir>detectlogs/</detectdir>
     <dir>logs/</dir>
     <filefmt>-%Y-%m-%d.log</filefmt>
     <timefmt>%Y-%m-%d %T </timefmt>

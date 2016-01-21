@@ -7,6 +7,8 @@ use IO::All;
 use POSIX qw(strftime);
 use Data::Dumper;
 use URI::Escape;
+use ASM::Shortener;
+
 no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
 my $cmdtbl = {
@@ -880,9 +882,10 @@ sub cmd_ops {
 		if ((time-$::sc{$tgt}{users}{lc $event->{nick}}{jointime}) > 90) {
 			$txtz .= " ($msg) $hilite !att-$tgt-opalert";
 		}
+		my $uuid = $::log->incident($tgt, "$tgt: $event->{nick} requested op attention\n");
+		$txtz = $txtz . ' ' . ASM::Shortener->shorturl($::settings->{web}->{detectdir} . $uuid . '.txt');
 		my @tgts = ASM::Util->getAlert($tgt, 'opalert', 'msgs');
 		ASM::Util->sendLongMsg($conn, \@tgts, $txtz);
-		$::log->incident($tgt, "$tgt: $event->{nick} requested op attention\n");
 	} else {
 		unless (defined($::ignored{$tgt}) && ($::ignored{$tgt} >= $::RISKS{'opalert'})) {
 			my @tgts = ASM::Util->getAlert($tgt, 'opalert', 'msgs');

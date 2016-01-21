@@ -6,6 +6,8 @@ use strict;
 
 use ASM::Util;
 use POSIX qw(strftime);
+use Data::UUID;
+
 no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
 sub new
@@ -16,6 +18,7 @@ sub new
   $self->{CONFIG} = $::settings->{log};
   $self->{backlog} = {};
   $self->{CONN} = $conn;
+  $self->{UUID} = Data::UUID->new;
   bless($self);
   mkdir($self->{CONFIG}->{dir});
   $conn->add_handler('public',    sub { logg($self, @_); }, "before");
@@ -36,13 +39,15 @@ sub incident
   my $self = shift;
   my ($chan, $header) = @_;
   $chan = lc $chan;
-  open(FH, '>>', 'dctlog.txt');
+  my $uuid = $self->{UUID}->create_str();
+  open(FH, '>', $self->{CONFIG}->{detectdir} . $uuid . '.txt');
   print FH $header;
   if (defined($self->{backlog}->{$chan})) {
     print FH join('', @{$self->{backlog}->{$chan}});
   }
   print FH "\n\n";
   close(FH);
+  return $uuid;
 }
 
 #writes out the backlog to a file which correlates to ASM's SQL actionlog table

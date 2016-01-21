@@ -6,6 +6,8 @@ use strict;
 use Data::Dumper;
 use String::Interpolate qw(interpolate);
 use HTTP::Request;
+use ASM::Shortener;
+
 no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
 %::ignored = ();
@@ -128,6 +130,8 @@ sub inspect {
               "\x02$event->{nick}\x02 - ${nicereason}; ping ";
       $txtz = $txtz . ASM::Util->commaAndify(ASM::Util->getAlert(lc $chan, $dct{$id}{risk}, 'hilights')) if (ASM::Util->getAlert(lc $chan, $dct{$id}{risk}, 'hilights'));
       $txtz = $txtz . ' !att-' . $chan . '-' . $dct{$id}{risk};
+      my $uuid = $::log->incident($chan, "$chan: $dct{$id}{risk} risk: $event->{nick} - $nicereason\n");
+      $txtz = $txtz . ' ' . ASM::Shortener->shorturl($::settings->{web}->{detectdir} . $uuid . '.txt');
       if ($id eq 'last_measure_regex') { #TODO: Note that this is another example of things that shouldn't be hardcoded, but are.
 
       }
@@ -140,7 +144,6 @@ sub inspect {
         $conn->schedule(45, sub { delete($::ignored{$chan}) if $::ignored{$chan} == $::RISKS{$dct{$id}{risk}} });
         $::ignored{$chan} = $::RISKS{$dct{$id}{risk}};
       }
-      $::log->incident($chan, "$chan: $dct{$id}{risk} risk: $event->{nick} - $nicereason\n");
     }
   }
 }
