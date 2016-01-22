@@ -332,7 +332,7 @@ sub cmd_mship {
 sub cmd_source {
 	my ($conn, $event) = @_;
 
-	$conn->privmsg($event->replyto, "source is at https://gitlab.devlabs.linuxassist.net/asm/antispammeta/");
+	$conn->privmsg($event->replyto, 'source is at http://asm.rocks/source');
 }
 
 sub cmd_sql {
