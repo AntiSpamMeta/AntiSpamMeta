@@ -9,6 +9,13 @@ sub shorturl
 {
   my $module = shift;
   my ($url) = @_;
+  if ((!defined($::settings->{web}->{shortener})) ||
+      (!defined($::settings->{web}->{shortener}->{domain})) ||
+      (!defined($::settings->{web}->{shortener}->{apikey})) ||
+      ($::settings->{web}->{shortener}->{domain} eq '') ||
+      ($::settings->{web}->{shortener}->{apikey} eq '')) {
+    return $url;
+  }
   my $apikey = $::settings->{web}->{shortener}->{apikey};
   my $domain = $::settings->{web}->{shortener}->{domain};
   my $ua = LWP::UserAgent->new;

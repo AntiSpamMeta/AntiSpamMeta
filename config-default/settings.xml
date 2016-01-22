@@ -30,7 +30,7 @@
     <userfile>/var/www/.htpasswd</userfile>
     <shortener>
       <apikey>look.at.shortener.godaddy.com</apikey>
-      <domain>asm.rocks</domain>
+      <domain></domain>
     </shortener>
   </web>
 </settings>
