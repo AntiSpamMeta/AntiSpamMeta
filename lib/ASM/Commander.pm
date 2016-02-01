@@ -379,7 +379,7 @@ sub cmd_suppress {
 				$conn->privmsg($event->replyto, "Unsuppressed $chan");
 				ASM::XML->writeChannels();
 			});
-	$conn->privmsg($event->replyto, "Suppressing alerts from $chan for 30 minutes. If the bot restarts or the config is changed, you will need to do ;monitor $chan	 to check the status of the monitor flag");
+	$conn->privmsg($event->replyto, "Suppressing alerts from $chan for 30 minutes. If the bot restarts or the config is changed, you will need to do ;monitor $chan to check the status of the monitor flag");
 }
 
 sub cmd_silence {
