@@ -373,6 +373,10 @@ sub cmd_suppress {
 
 	my $chan = lc $1;
 	my $old = $::channels->{channel}->{$chan}->{monitor};
+	if ($old eq 'no') {
+		$conn->privmsg($event->replyto, "$chan is not currently monitored");
+		return;
+	}
 	$::channels->{channel}->{$chan}->{monitor} = "no";
 	$conn->schedule(30*60, sub {
 				$::channels->{channel}->{$chan}->{monitor} = $old;
