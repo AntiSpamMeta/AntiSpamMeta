@@ -51,8 +51,8 @@
   <event id="nickbl_impersonate" class="nickfuzzy" reason="fuzzy matching against nick blacklist (impersonation set), see ;falsematch if in error" risk="medium" type="join,nick">2:botchlab,bremmyfag,ilbelkyr,bremsstrahlung,ishanyx</event>
   <event id="botnickbl" class="nickbl" reason="matches against a possible bot nick" risk="info" type="join,nick">contentisuseless</event>
   <event id="botpattern1" class="nuhg" reason="matches probable botnet pattern" risk="debug" type="join">DISABLED[A-Za-z]{4}\d+!~[A-Za-z]{4}@.*![A-Za-z]{4}</event>
-  <event id="banevade" class="banevade" reason="appears to be ban evading" risk="debug" type="join">contentisuseless</event>
-  <event id="joinfloodquiet" class="floodqueue2" reason="join flood (3 joins in 90 seconds) by quieted user" risk="debug" type="join">3:90</event>
+  <event id="banevade" class="banevade" reason="appears to be ban evading" risk="info" type="join">contentisuseless</event>
+  <event id="joinfloodquiet" class="floodqueue2" reason="join flood (3 joins in 90 seconds) by quieted user" risk="low" type="join">3:90</event>
   <event id="invite" class="invite" reason="invited to a channel" risk="debug" type="invite">blah</event>
   <event id="urlcrunch" class="urlcrunch" reason="URL that resolves to some place that is bad" risk="medium" type="public">^(https?:\/\/bitly.com\/a\/warning|https?://(?:i.)?imgur.com|https?://(?:www.)?hotxgirls.net)</event>
   <!--<event id="incredibl" class="dnsbl" reason="host $evhost is in dnsbl.incredibl.org ( $xresult )" risk="info" type="join">dnsbl.incredibl.org.</event>-->
