@@ -336,7 +336,7 @@ sub notRestricted {
 sub accountToNicks {
   my ($module, $account) = @_;
   $account =~ s/^\$a://;
-  return $::sa{$account};
+  return $::sa{$account} // [];
 }
 
 return 1;
