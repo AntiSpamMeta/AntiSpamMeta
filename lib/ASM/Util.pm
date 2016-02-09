@@ -336,8 +336,7 @@ sub notRestricted {
 sub accountToNicks {
   my ($module, $account) = @_;
   $account =~ s/^\$a://;
-  my @ret = grep( { (lc ($account) eq lc ($::sn{$_}->{account} // '')) } keys %::sn );
-  return \@ret;
+  return $::sa{$account};
 }
 
 return 1;

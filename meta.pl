@@ -79,6 +79,7 @@ $::pendingsync = 0;
 %::watchRegged = ();
 $::lastline = "";
 %::sn = (); %::sc = (); tie %::sc, 'Tie::CPHash'; tie %::sn, 'Tie::CPHash';
+%::sa = (); tie %::sa, 'Tie::CPHash';
 
 $SIG{__WARN__} = sub {
   $Data::Dumper::Useqq=1;

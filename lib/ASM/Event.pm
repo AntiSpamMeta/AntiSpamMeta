@@ -152,7 +152,10 @@ sub on_ping
 sub on_account
 {
   my ($conn, $event) = @_;
+  @{$::sa{$::sn{lc $event->{nick}}{account}}} = grep { $_ ne lc $event->{nick} } @{$::sa{$::sn{lc $event->{nick}}{account}}};
+  delete $::sa{$::sn{lc $event->{nick}}{account}} unless scalar @{$::sa{$::sn{lc $event->{nick}}{account}}};
   $::sn{lc $event->{nick}}{account} = lc $event->{args}->[0];
+  push @{$::sa{$::sn{lc $event->{nick}}{account}}}, lc $event->{nick};
 }
 
 sub on_connect {
@@ -207,6 +210,7 @@ sub on_join {
   $::sn{$nick}->{user} = $event->{user};
   $::sn{$nick}->{host} = $event->{host};
   $::sn{$nick}->{account} = lc $event->{args}->[0];
+  push @{$::sa{$::sn{$nick}->{account}}}, $nick;
   $::db->logg($event) if defined $::db;
 }
 
@@ -227,6 +231,8 @@ sub on_part
     if ( @mship ) {
       $::sn{$nick}->{mship} = \@mship;
     } else {
+      @{$::sa{$::sn{$nick}{account}}} = grep { $_ ne $nick } @{$::sa{$::sn{$nick}{account}}};
+      delete $::sa{$::sn{$nick}{account}} unless scalar @{$::sa{$::sn{$nick}{account}}};
       delete($::sn{$nick});
     }
   }
@@ -315,6 +321,8 @@ sub on_quit
       $conn->schedule(2*60, sub { $::netsplit_ignore_lag = 0; });
     }
   }
+  @{$::sa{$::sn{$nick}{account}}} = grep { $_ ne $nick } @{$::sa{$::sn{$nick}{account}}};
+  delete $::sa{$::sn{$nick}{account}} unless scalar @{$::sa{$::sn{$nick}{account}}};
   delete($::sn{$nick});
 }
 
@@ -401,6 +409,8 @@ sub on_nick {
 
   $::sn{$newnick} = $::sn{$oldnick} if ($oldnick ne $newnick);
   $::db->logg( $event ) if defined $::db;
+  @{$::sa{$::sn{$oldnick}{account}}} = grep { $_ ne $oldnick } @{$::sa{$::sn{$oldnick}{account}}};
+  push @{$::sa{$::sn{$newnick}{account}}}, $newnick;
   delete( $::sn{$oldnick}) if ($oldnick ne $newnick);
   $event->{to} = \@channels;
 }
@@ -427,6 +437,8 @@ sub on_kick {
     if ( @mship ) {
       $::sn{$nick}->{mship} = \@mship;
     } else {
+      @{$::sa{$::sn{$nick}{account}}} = grep { $_ ne $nick } @{$::sa{$::sn{$nick}{account}}};
+      delete $::sa{$::sn{$nick}{account}} unless scalar @{$::sa{$::sn{$nick}{account}}};
       delete($::sn{$nick});
     }
   }
@@ -763,6 +775,7 @@ sub on_whoxreply
   $::sn{$nick}->{user} = $user;
   $::sn{$nick}->{host} = $host;
   $::sn{$nick}->{account} = lc $account;
+  push @{$::sa{$account}}, $nick;
   if ( $realip ne '255.255.255.255' && index($realip, ':') == -1 ) # some day I dream of ASM handling IPv6
   {
     $::sn{$nick}->{ip} = ASM::Util->dottedQuadToInt($realip);
