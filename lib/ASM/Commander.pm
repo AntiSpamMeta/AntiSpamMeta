@@ -450,13 +450,15 @@ sub cmd_investigate {
 		return;
 	}
 	my $person = $::sn{$nick};
+	my $user = lc $person->{user};
+	my $gecos = lc $person->{gecos};
 	my $dbh = $::db->{DBH};
 	
 	my $mnicks = $dbh->do("SELECT * from $::db->{ACTIONTABLE} WHERE nick like " . $dbh->quote($nick) . ';');
-	my $musers = (lc $person->{user} ~~ $::mysql->{ignoredidents}) ? "didn't check" : $dbh->do("SELECT * from $::db->{ACTIONTABLE} WHERE user like " . $dbh->quote($person->{user}) . ';');
+	my $musers = ($user ~~ $::mysql->{ignoredidents}) ? "didn't check" : $dbh->do("SELECT * from $::db->{ACTIONTABLE} WHERE user like " . $dbh->quote($person->{user}) . ';');
 	my $mhosts = $dbh->do("SELECT * from $::db->{ACTIONTABLE} WHERE host like " . $dbh->quote($person->{host}) . ';');
 	my $maccts = $dbh->do("SELECT * from $::db->{ACTIONTABLE} WHERE account like " . $dbh->quote($person->{account}) . ';');
-	my $mgecos = (lc $person->{gecos} ~~ $::mysql->{ignoredgecos}) ? "didn't check" : $dbh->do("SELECT * from $::db->{ACTIONTABLE} WHERE gecos like " . $dbh->quote($person->{gecos}) . ';');
+	my $mgecos = ($gecos ~~ $::mysql->{ignoredgecos}) ? "didn't check" : $dbh->do("SELECT * from $::db->{ACTIONTABLE} WHERE gecos like " . $dbh->quote($person->{gecos}) . ';');
 	
 	my $ip = ASM::Util->getNickIP($nick);
 	my $matchedip = 0;
@@ -474,9 +476,9 @@ sub cmd_investigate {
 	$conn->privmsg($event->replyto, "I found $mnicks matches by nick ($nick), $musers by user ($person->{user}), $mhosts by hostname ($person->{host}), " .
 		       "$maccts by NickServ account ($person->{account}), $mgecos by gecos field ($person->{gecos}), and $matchedip by real IP ($dq). " .
 		       ASM::Shortener->shorturl('https://antispammeta.net/cgi-bin/secret/investigate.pl?nick=' . uri_escape($nick) .
-		       ((lc $person->{user} ~~ $::mysql->{ignoredidents}) ? '' : '&user=' . uri_escape($person->{user})) .
+		       (($user ~~ $::mysql->{ignoredidents}) ? '' : '&user=' . uri_escape($person->{user})) .
 		       '&host=' . uri_escape($person->{host}) . '&account=' . uri_escape($person->{account}) .
-		       ((lc $person->{gecos} ~~ $::mysql->{ignoredgecos}) ? '' : '&gecos=' . uri_escape($person->{gecos})) . '&realip=' . $dq));
+		       (($gecos ~~ $::mysql->{ignoredgecos}) ? '' : '&gecos=' . uri_escape($person->{gecos})) . '&realip=' . $dq));
 }
 
 sub cmd_investigate2 {
@@ -532,6 +534,7 @@ sub cmd_user_add {
 	my ($conn, $event) = @_;
 
 	my $nick = lc $+{account};
+	my $account;
 	my $flags = $+{flags};
 	my %hasflagshash = ();
 	foreach my $item (split(//, $::users->{person}->{lc $::sn{lc $event->{nick}}->{account}}->{flags})) {
@@ -547,9 +550,9 @@ sub cmd_user_add {
 		$conn->privmsg($event->replyto, "The d flag may not be assigned over IRC. Edit the configuration manually.");
 		return;
 	}
-	if ( (defined($::sn{$nick}->{account})) && ( lc $::sn{$nick}->{account} ne $nick ) ) {
-		$conn->privmsg($event->replyto, "I'm assuming you mean " . $nick . "'s nickserv account, " . lc $::sn{$nick}->{account} . '.');
-		$nick = lc $::sn{$nick}->{account};
+	if ( (defined($::sn{$nick}->{account})) && ( ($account = lc $::sn{$nick}->{account}) ne $nick ) ) {
+		$conn->privmsg($event->replyto, "I'm assuming you mean " . $nick . "'s nickserv account, " . $account . '.');
+		$nick = $account;
 	}
 	if (defined($::users->{person}->{$nick})) {
 		$conn->privmsg($event->replyto, "The user $nick already exists.  Use ;user flags $nick $flags to set their flags");
@@ -564,9 +567,10 @@ sub cmd_user_flags {
 	my ($conn, $event) = @_;
 
 	my $nick = lc $+{account};
-	if ( defined($::sn{$nick}) && (defined($::sn{$nick}->{account})) && ( lc $::sn{$nick}->{account} ne $nick ) ) {
-		$conn->privmsg($event->replyto, "I'm assuming you mean " . $nick . "'s nickserv account, " . lc $::sn{$nick}->{account} . '.');
-		$nick = lc $::sn{$nick}->{account};
+	my $account;
+	if ( defined($::sn{$nick}) && (defined($::sn{$nick}->{account})) && ( ($account = lc $::sn{$nick}->{account}) ne $nick ) ) {
+		$conn->privmsg($event->replyto, "I'm assuming you mean " . $nick . "'s nickserv account, " . $account . '.');
+		$nick = $account;
 	}
 	my $sayNick = substr($nick, 0, 1) . "\x02\x02" . substr($nick, 1);
 	if (defined($::users->{person}->{$nick}->{flags})) {
@@ -581,6 +585,7 @@ sub cmd_user_flags2 {
 
 	my $nick = lc $+{account};
 	my $flags = $+{flags};
+	my $account;
 	my %hasflagshash = ();
 	foreach my $item (split(//, $::users->{person}->{lc $::sn{lc $event->{nick}}->{account}}->{flags})) {
 		$hasflagshash{$item} = 1;
@@ -595,9 +600,9 @@ sub cmd_user_flags2 {
 		$conn->privmsg($event->replyto, "The d flag may not be assigned over IRC. Edit the configuration manually.");
 		return;
 	}
-	if ( (defined($::sn{$nick}->{account})) && ( lc $::sn{$nick}->{account} ne $nick ) ) {
-		$conn->privmsg($event->replyto, "I'm assuming you mean " . $nick . "'s nickserv account, " . lc $::sn{$nick}->{account} . '.');
-		$nick = lc $::sn{$nick}->{account};
+	if ( (defined($::sn{$nick}->{account})) && ( ($account = lc $::sn{$nick}->{account}) ne $nick ) ) {
+		$conn->privmsg($event->replyto, "I'm assuming you mean " . $nick . "'s nickserv account, " . $account . '.');
+		$nick = $account;
 	}
 	if (defined($::users->{person}->{$nick}) &&
 	    defined($::users->{person}->{$nick}->{flags}) &&
@@ -839,20 +844,22 @@ sub cmd_ops {
 	my ($conn, $event) = @_;
 
 	my $tgt = lc $event->{to}->[0];
+	my $msgtgt = $tgt;
+	my $nick = lc $event->{nick};
 	$tgt = lc $+{chan} if defined($+{chan});
 	my $msg = $+{reason};
 	if ( $tgt =~ /^#/ && ((($::channels->{channel}->{$tgt}->{monitor} // "yes") eq "no") || #we're not monitoring this channel
-	     !($tgt ~~ $::sn{lc $event->{nick}}->{mship})) ) { #they're not on the channel they're calling !ops for
+	     !($tgt ~~ $::sn{$nick}->{mship})) ) { #they're not on the channel they're calling !ops for
 		return;
 	}
 	if (defined($::ignored{$tgt}) && ($::ignored{$tgt} >= $::RISKS{'opalert'})) {
-		if (ASM::Util->notRestricted(lc $event->{nick}, "noops")) {
-			if (lc $event->{to}->[0] eq '##linux') {
+		if (ASM::Util->notRestricted($nick, "noops")) {
+			if ($msgtgt eq '##linux') {
 				$conn->privmsg($event->{nick}, "I've already been recently asked to summon op attention. " .
 					       "In the future, please use /msg $conn->{_nick} !ops $event->{to}->[0] reasonGoesHere" .
 					       "	- this allows ops to be notified while minimizing channel hostility.");
-			} elsif (lc $event->{to}->[0] eq lc $conn->{_nick}) {
-				if (lc $tgt eq lc $conn->{_nick}) { # they privmsged the bot without providing a target
+			} elsif ($msgtgt eq lc $conn->{_nick}) {
+				if ($tgt eq lc $conn->{_nick}) { # they privmsged the bot without providing a target
 					$conn->privmsg($event->{nick}, "Sorry, it looks like you've tried to use the !ops command " .
 						       "via PM but haven't specified a target. Try again with /msg $conn->{_nick} " .
 						       "!ops #channelGoesHere ReasonGoesHere");
@@ -863,16 +870,16 @@ sub cmd_ops {
 		}
 		return;
 	}
-	if (ASM::Util->notRestricted(lc $event->{nick}, "noops")) {
-		if (lc $event->{to}->[0] eq '##linux') {
+	if (ASM::Util->notRestricted($nick, "noops")) {
+		if ($msgtgt eq '##linux') {
 			$conn->privmsg($event->{nick}, "I've summoned op attention. In the future, please use /msg " .
 				       "$conn->{_nick} !ops $event->{to}->[0] reasonGoesHere	- this allows ops to " .
 				       "be notified while minimizing channel hostility.");
 		} elsif (($tgt eq '#wikipedia-en-help') && (!defined($msg))) {
 			$conn->privmsg($event->{nick}, "I've summoned op attention, but in the future, please specify " .
 				       "a reason, e.g. !ops reasongoeshere - so ops know what is going on. Thanks! :)");
-		} elsif (lc $event->{to}->[0] eq lc $conn->{_nick}) {
-			if (lc $tgt eq lc $conn->{_nick}) { # they privmsged the bot without providing a target
+		} elsif ($msgtgt eq lc $conn->{_nick}) {
+			if ($tgt eq lc $conn->{_nick}) { # they privmsged the bot without providing a target
 				$conn->privmsg($event->{nick}, "Sorry, it looks like you've tried to use the !ops command " .
 					       "via PM but haven't specified a target. Try again with /msg $conn->{_nick} " .
 					       "!ops #channelGoesHere ReasonGoesHere");
@@ -883,7 +890,7 @@ sub cmd_ops {
 		}
 		my $hilite=ASM::Util->commaAndify(ASM::Util->getAlert($tgt, 'opalert', 'hilights'));
 		my $txtz = "[\x02$tgt\x02] - $event->{nick} wants op attention";
-		if ((time-$::sc{$tgt}{users}{lc $event->{nick}}{jointime}) > 90) {
+		if ((time-$::sc{$tgt}{users}{$nick}{jointime}) > 90) {
 			$txtz .= " ($msg) $hilite !att-$tgt-opalert";
 		}
 		my $uuid = $::log->incident($tgt, "$tgt: $event->{nick} requested op attention\n");

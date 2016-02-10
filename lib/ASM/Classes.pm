@@ -8,6 +8,7 @@ use Regexp::Wildcards;
 no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
 my %sf = ();
+my $cvt = Regexp::Wildcards->new(type => 'jokers');
 
 sub new
 {
@@ -48,11 +49,12 @@ sub new
 sub cloning {
   my ($chk, $id, $event, $chan, $rev) = @_;
   my $max = int($chk->{content});
+  $chan = lc $chan;
   my @nicks = grep {
                     (defined($::sn{$_}->{host})) &&
                     (defined($::sn{$_}->{mship})) &&
                     ($::sn{$_}->{host} eq $event->{host}) &&
-                    (lc $chan ~~ $::sn{$_}->{mship})
+                    ($chan ~~ $::sn{$_}->{mship})
                    } keys %::sn;
   if ($#nicks >= $max) {
     return ASM::Util->commaAndify(@nicks);
@@ -86,12 +88,13 @@ sub joinmsgquit
 {
   my ($chk, $id, $event, $chan, $rev) = @_;
   my $time = $chk->{content};
+  my $nick = lc $event->{nick};
 ##STATE
   $chan = lc $chan; #don't know if this is necessary but I'm trying to track down some mysterious state tracking corruption
-  return 0 unless defined($::sc{$chan}{users}{lc $event->{nick}}{jointime});
-  return 0 unless defined($::sc{$chan}{users}{lc $event->{nick}}{msgtime});
-  return 0 if ((time - $::sc{$chan}{users}{lc $event->{nick}}{jointime}) > $time);
-  return 0 if ((time - $::sc{$chan}{users}{lc $event->{nick}}{msgtime}) > $time);
+  return 0 unless defined($::sc{$chan}{users}{$nick}{jointime});
+  return 0 unless defined($::sc{$chan}{users}{$nick}{msgtime});
+  return 0 if ((time - $::sc{$chan}{users}{$nick}{jointime}) > $time);
+  return 0 if ((time - $::sc{$chan}{users}{$nick}{msgtime}) > $time);
   return 1;
 }
 
@@ -187,12 +190,12 @@ sub levenflood
 sub nickfuzzy
 {
   my ($chk, $id, $event, $chan) = @_;
-  my $nick = $event->{nick};
-  $nick = $event->{args}->[0] if ($event->{type} eq 'nick');
+  my $nick = lc $event->{nick};
+  $nick = lc $event->{args}->[0] if ($event->{type} eq 'nick');
   my ($fuzzy, $match) = split(/:/, $chk->{content});
   my @nicks = split(/,/, $match);
   foreach my $item (@nicks) {
-    if (distance(lc $nick, lc $item) <= $fuzzy) {
+    if (distance($nick, lc $item) <= $fuzzy) {
       return 1;
     }
   }
@@ -231,8 +234,7 @@ sub dnsbl
 sub floodqueue2 {
   my ($chk, $id, $event, $chan, $rev) = @_;
   my @cut = split(/:/, $chk->{content});
-
-  my $cvt = Regexp::Wildcards->new(type => 'jokers');
+  my $nick = lc $event->{nick};
   my $hit = 0;
   foreach my $mask ( keys %{$::sc{lc $chan}{quiets}}) {
     if ($mask !~ /^\$/) {
@@ -241,10 +243,10 @@ sub floodqueue2 {
       if (lc $event->{from} =~ lc $regex) {
         $hit = 1;
       }
-    } elsif ( (defined($::sn{lc $event->{nick}}{account})) && ($mask =~ /^\$a:(.*)/)) {
-      my @div = split(/\$/, $mask);
+    } elsif ( (defined($::sn{$nick}{account})) && ($mask =~ /^\$a:(.*)/)) {
+      my @div = split(/\$/, $1);
       my $regex = $cvt->convert($div[0]);
-      if (lc ($::sn{lc $event->{nick}}{account}) =~ lc $regex) {
+      if (lc ($::sn{$nick}{account}) =~ lc $regex) {
         $hit = 1;
       }
     }
@@ -275,9 +277,10 @@ sub cyclebotnet
 {
   my ($chk, $id, $event, $chan, $rev) = @_;
   my ($cycletime, $queueamt, $queuetime) = split(/:/, $chk->{content});
+  my $nick = lc $event->{nick};
   $chan = lc $chan; #don't know if this is necessary but I'm trying to track down some mysterious state tracking corruption
-  return 0 unless defined($::sc{$chan}{users}{lc $event->{nick}}{jointime});
-  return 0 if ((time - $::sc{$chan}{users}{lc $event->{nick}}{jointime}) > int($cycletime));
+  return 0 unless defined($::sc{$chan}{users}{$nick}{jointime});
+  return 0 if ((time - $::sc{$chan}{users}{$nick}{jointime}) > int($cycletime));
   return 1 if ( flood_add( $chan, $id, "cycle", int($queuetime)) == int($queueamt) );
   return 0;
 }
@@ -321,6 +324,7 @@ sub process_cf
 sub splitflood {
   my ($chk, $id, $event, $chan) = @_;
   my $text;
+  my $nick = lc $event->{nick};
   my @cut = split(/:/, $chk->{content});
   $cf{$id}{timeout}=int($cut[1]);
   if ($event->{type} =~ /^(public|notice|part|caction)$/) {
@@ -330,8 +334,8 @@ sub splitflood {
   # a bit ugly but this should avoid false positives on foolish humans
   # give them the benefit of the doubt if they talked before ... but not too recently
   # if we didn't see them join, assume they did talk at some point
-  my $msgtime = $::sc{$chan}{users}{lc $event->{nick}}{msgtime} // 0;
-  $msgtime ||= 1 if !$::sc{$chan}{users}{lc $event->{nick}}{jointime};
+  my $msgtime = $::sc{$chan}{users}{$nick}{msgtime} // 0;
+  $msgtime ||= 1 if !$::sc{$chan}{users}{$nick}{jointime};
   return if $text =~ /^[^\w\s]+\w+\s*$/ && $msgtime && ($msgtime + $cf{$id}{timeout}) < time;
 #  return unless length($text) >= 10;
   if (defined($bs{$id}{$text}) && (time <= $bs{$id}{$text} + 600)) {
@@ -463,8 +467,9 @@ sub gecos {
 
 sub nuhg {
   my ( $chk, $id, $event, $chan) = @_;
-  return 0 unless defined($::sn{lc $event->{nick}}->{gecos});
-  my $match = $event->{from} . '!' . $::sn{lc $event->{nick}}->{gecos};
+  my $nick = lc $event->{nick};
+  return 0 unless defined($::sn{$nick}->{gecos});
+  my $match = $event->{from} . '!' . $::sn{$nick}->{gecos};
   return 1 if ($match =~ /$chk->{content}/);
   return 0;
 }

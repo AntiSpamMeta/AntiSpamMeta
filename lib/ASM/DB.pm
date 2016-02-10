@@ -63,6 +63,7 @@ sub actionlog
   my ($action, $reason, $channel,
         $nick,   $user,   $host,   $gecos,   $account, $ip,
       $bynick, $byuser, $byhost, $bygecos, $byaccount);
+  my ($lcnick, $lcbynick);
 
   if ($event->{type} eq 'mode') {
     $action = $modedata1;
@@ -104,26 +105,26 @@ sub actionlog
     $channel = $event->{args}->[0];
   }
   return unless defined($action);
-#  $bynick = lc $bynick if defined $bynick; #we will lowercase the NUHGA info later.
-  if ( (defined($bynick)) && (defined($::sn{lc $bynick})) ) { #we have the nick taking the action available, fill in missing NUHGA info
-    $byuser //= $::sn{lc $bynick}{user};
-    $byhost //= $::sn{lc $bynick}{host};
-    $bygecos //= $::sn{lc $bynick}{gecos};
-    $byaccount //= $::sn{lc $bynick}{account};
+  $lcbynick = lc $bynick if defined $bynick; #we will lowercase the NUHGA info later.
+  if ( (defined($bynick)) && (defined($::sn{$lcbynick})) ) { #we have the nick taking the action available, fill in missing NUHGA info
+    $byuser //= $::sn{$lcbynick}{user};
+    $byhost //= $::sn{$lcbynick}{host};
+    $bygecos //= $::sn{$lcbynick}{gecos};
+    $byaccount //= $::sn{$lcbynick}{account};
     if (($byaccount eq '0') or ($byaccount eq '*')) {
       $byaccount = undef;
     }
   }
-#  $nick = lc $nick if defined $nick;
-  if ( (defined($nick)) && (defined($::sn{lc $nick})) ) { #this should always be true, else something has gone FUBAR
-    $user //= $::sn{lc $nick}{user};
-    $host //= $::sn{lc $nick}{host};
-    $gecos //= $::sn{lc $nick}{gecos};
-    $account //= $::sn{lc $nick}{account};
+  $lcnick = lc $nick if defined $nick;
+  if ( (defined($nick)) && (defined($::sn{$lcnick})) ) { #this should always be true, else something has gone FUBAR
+    $user //= $::sn{$lcnick}{user};
+    $host //= $::sn{$lcnick}{host};
+    $gecos //= $::sn{$lcnick}{gecos};
+    $account //= $::sn{$lcnick}{account};
     if (($account eq '0') or ($account eq '*')) {
       $account = undef;
     }
-    $ip = ASM::Util->getNickIP(lc $nick);
+    $ip = ASM::Util->getNickIP($lcnick);
   }
 #  my ($action, $reason, $channel,
 #        $nick,   $user,   $host,   $gecos,   $account, $ip
@@ -179,6 +180,8 @@ sub logg
   my ($event) = @_;
   my $dbh = $self->{DBH_LOG};
   my $table = $event->{type};
+  my $nick = lc $event->{nick};
+  my $victim;
   $table = 'action' if ($table eq 'caction');
   $table = 'privmsg' if ($table eq 'public');
   return if (($table eq 'action') or ($table eq 'privmsg')); #Disabling logging of privmsg stuffs to mysql. no point.
@@ -189,10 +192,10 @@ sub logg
   if ($table eq 'quit') {
     $string = 'INSERT INTO `quit` (nick, user, host, geco, ip, account, content1) VALUES (' .
            $dbh->quote($event->{nick}) . ',' . $dbh->quote($event->{user}) . ',' .
-           $dbh->quote($event->{host}) . ',' . $dbh->quote($::sn{lc $event->{nick}}->{gecos}) . ',';
-    my $ip = ASM::Util->getNickIP(lc $event->{nick}, $event->{host});
+           $dbh->quote($event->{host}) . ',' . $dbh->quote($::sn{$nick}->{gecos}) . ',';
+    my $ip = ASM::Util->getNickIP($nick, $event->{host});
     if (defined($ip)) { $ip = $dbh->quote($ip); } else { $ip = 'NULL'; }
-    my $account = $::sn{lc $event->{nick}}->{account};
+    my $account = $::sn{$nick}->{account};
     if (!defined($account) or ($account eq '0') or ($account eq '*')) {
       $account = 'NULL';
     } else {
@@ -206,10 +209,10 @@ sub logg
     $string = 'INSERT INTO `part` (channel, nick, user, host, geco, ip, account, content1) VALUES (' .
               $dbh->quote($event->{to}->[0]) . ',' .
               $dbh->quote($event->{nick}) . ',' . $dbh->quote($event->{user}) . ',' .
-              $dbh->quote($event->{host}) . ',' . $dbh->quote($::sn{lc $event->{nick}}->{gecos}) . ',';
-    my $ip = ASM::Util->getNickIP(lc $event->{nick}, $event->{host});
+              $dbh->quote($event->{host}) . ',' . $dbh->quote($::sn{$nick}->{gecos}) . ',';
+    my $ip = ASM::Util->getNickIP($nick, $event->{host});
     if (defined($ip)) { $ip = $dbh->quote($ip); } else { $ip = 'NULL'; }
-    my $account = $::sn{lc $event->{nick}}->{account};
+    my $account = $::sn{$nick}->{account};
     if (!defined($account) or ($account eq '0') or ($account eq '*')) {
       $account = 'NULL';
     } else {
@@ -220,23 +223,24 @@ sub logg
     ASM::Util->dprint($string, 'mysql');
     return;
   } elsif ($table eq 'kick') {
+    $victim = lc $event->{to}->[0];
     $string = 'INSERT INTO `kick` (channel, nick, user, host, geco, ip, account, ' . 
                       'victim_nick, victim_user, victim_host, victim_geco, victim_ip, victim_account, content1) VALUES (' .
               $dbh->quote($event->{args}->[0]) . ',' .
               $dbh->quote($event->{nick}) . ',' . $dbh->quote($event->{user}) . ',' .
-              $dbh->quote($event->{host}) . ',' . $dbh->quote($::sn{lc $event->{nick}}->{gecos}) . ',';
-    my $ip = ASM::Util->getNickIP(lc $event->{nick});
+              $dbh->quote($event->{host}) . ',' . $dbh->quote($::sn{$nick}->{gecos}) . ',';
+    my $ip = ASM::Util->getNickIP($nick);
     if (defined($ip)) { $ip = $dbh->quote($ip); } else { $ip = 'NULL'; }
-    my $account = $::sn{lc $event->{nick}}->{account};
+    my $account = $::sn{$nick}->{account};
     if (($account eq '0') or ($account eq '*')) { $account = 'NULL'; } else { $account = $dbh->quote($account); }
     $string = $string . $ip . ',' . $account;
     $string = $string . ', ' . $dbh->quote($event->{to}->[0]);
-    $string = $string . ', ' . $dbh->quote($::sn{lc $event->{to}->[0]}->{user});
-    $string = $string . ', ' . $dbh->quote($::sn{lc $event->{to}->[0]}->{host});
-    $string = $string . ', ' . $dbh->quote($::sn{lc $event->{to}->[0]}->{gecos});
-    my $vic_ip = ASM::Util->getNickIP(lc $event->{to}->[0]);
+    $string = $string . ', ' . $dbh->quote($::sn{$victim}->{user});
+    $string = $string . ', ' . $dbh->quote($::sn{$victim}->{host});
+    $string = $string . ', ' . $dbh->quote($::sn{$victim}->{gecos});
+    my $vic_ip = ASM::Util->getNickIP($victim);
     if (defined($vic_ip)) { $vic_ip = $dbh->quote($vic_ip); } else { $vic_ip = 'NULL'; }
-    my $vic_account = $::sn{lc $event->{to}->[0]}->{account};
+    my $vic_account = $::sn{$victim}->{account};
     if (($vic_account eq '0') or ($vic_account eq '*')) { $vic_account = 'NULL'; } else { $vic_account = $dbh->quote($vic_account); }
     $string = $string . ', ' . $vic_ip . ',' . $vic_account . ',' . $dbh->quote($event->{args}->[1]) . ');';
     $dbh->do($string);
@@ -267,7 +271,7 @@ sub logg
   if ($table eq 'kick') {
     $string = $string . $dbh->quote($event->{args}->[0]) . ", ";
   }
-  my $geco = $::sn{lc $event->{nick}}->{gecos};
+  my $geco = $::sn{$nick}->{gecos};
   $string = $string . $dbh->quote($event->{nick}) . ", " . $dbh->quote($event->{user}) . ", " .
                       $dbh->quote($event->{host}) . ", " . $dbh->quote($geco);
   if (($table ne 'join') && ($table ne 'kick')) {
@@ -275,16 +279,16 @@ sub logg
   }
   if ($table eq 'kick') {
     $string = $string . ', ' . $dbh->quote($event->{to}->[0]);
-    $string = $string . ', ' . $dbh->quote($::sn{lc $event->{to}->[0]}->{user});
-    $string = $string . ', ' . $dbh->quote($::sn{lc $event->{to}->[0]}->{host});
-    $string = $string . ', ' . $dbh->quote($::sn{lc $event->{to}->[0]}->{gecos});
+    $string = $string . ', ' . $dbh->quote($::sn{$victim}->{user});
+    $string = $string . ', ' . $dbh->quote($::sn{$victim}->{host});
+    $string = $string . ', ' . $dbh->quote($::sn{$victim}->{gecos});
     $string = $string . ', ' . $dbh->quote($event->{args}->[1]);
   }
   if ($table eq 'mode') {
     $string = $string . ', ' . $dbh->quote($event->{args}->[1]);
   }
   if ($table eq 'join') {
-    my $account = $::sn{lc $event->{nick}}->{account};
+    my $account = $::sn{$nick}->{account};
     if (!defined($account) or ($account eq '0') or ($account eq '*')) {
       $account = 'NULL';
     } else {

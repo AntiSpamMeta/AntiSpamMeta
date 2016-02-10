@@ -78,7 +78,7 @@ sub inspect {
   my (@dnsbl, @uniq);
   my ($match, $txtz, $iaddr);
   my @override = [];
-  my $nick = ($event->{type} eq 'nick') ? $event->{args}->[0] : lc $event->{nick};
+  my $nick = ($event->{type} eq 'nick') ? lc $event->{args}->[0] : lc $event->{nick};
   my $xresult;
   return if (index($nick, ".") != -1);
   if ( $event->{type} eq 'join' ) {
@@ -119,6 +119,7 @@ sub inspect {
   my $evcontent = $event->{args}->[0];
   my $evhost = $event->{host};
   foreach $chan (@{$event->{to}}) {
+    $chan = lc $chan;
     foreach $id ( keys %dct ) {
       return unless (ASM::Util->notRestricted($nick, "notrigger") && ASM::Util->notRestricted($nick, "no$id"));
       $xresult = $dct{$id}{xresult};
@@ -128,7 +129,7 @@ sub inspect {
       }
       $txtz = "\x03" . $::RCOLOR{$::RISKS{$dct{$id}{risk}}} . "\u$dct{$id}{risk}\x03 risk threat [\x02$chan\x02] - ".
               "\x02$event->{nick}\x02 - ${nicereason}; ping ";
-      $txtz = $txtz . ASM::Util->commaAndify(ASM::Util->getAlert(lc $chan, $dct{$id}{risk}, 'hilights')) if (ASM::Util->getAlert(lc $chan, $dct{$id}{risk}, 'hilights'));
+      $txtz = $txtz . ASM::Util->commaAndify(ASM::Util->getAlert($chan, $dct{$id}{risk}, 'hilights')) if (ASM::Util->getAlert($chan, $dct{$id}{risk}, 'hilights'));
       $txtz = $txtz . ' !att-' . $chan . '-' . $dct{$id}{risk};
       my $uuid = $::log->incident($chan, "$chan: $dct{$id}{risk} risk: $event->{nick} - $nicereason\n");
       $txtz = $txtz . ' ' . ASM::Shortener->shorturl($::settings->{web}->{detectdir} . $uuid . '.txt');

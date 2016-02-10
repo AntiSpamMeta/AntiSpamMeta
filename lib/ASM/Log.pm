@@ -116,10 +116,11 @@ sub logg
       print "COULDN'T PRINT TO $path - $line";
     }
     my $spy;
+    my $nick = lc $event->{nick};
     if (defined($::spy{$chan})) {
       $spy = $::spy{$chan};
-    } elsif (defined($::spy{lc $event->{nick}})) {
-      $spy = $::spy{lc $event->{nick}};
+    } elsif (defined($::spy{$nick})) {
+      $spy = $::spy{$nick};
     }
     if (defined($spy)) {
       say $spy "$chan: $nostamp";

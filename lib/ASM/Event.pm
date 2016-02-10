@@ -11,6 +11,8 @@ use Array::Utils qw(:all);
 use Net::DNS::Async;
 no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
+my $cvt = Regexp::Wildcards->new(type => 'jokers');
+
 sub new
 {
   my $module = shift;
@@ -152,10 +154,11 @@ sub on_ping
 sub on_account
 {
   my ($conn, $event) = @_;
-  @{$::sa{$::sn{lc $event->{nick}}{account}}} = grep { $_ ne lc $event->{nick} } @{$::sa{$::sn{lc $event->{nick}}{account}}};
-  delete $::sa{$::sn{lc $event->{nick}}{account}} unless scalar @{$::sa{$::sn{lc $event->{nick}}{account}}};
-  $::sn{lc $event->{nick}}{account} = lc $event->{args}->[0];
-  push @{$::sa{$::sn{lc $event->{nick}}{account}}}, lc $event->{nick};
+  my $nick = lc $event->{nick};
+  @{$::sa{$::sn{$nick}{account}}} = grep { $_ ne $nick } @{$::sa{$::sn{$nick}{account}}};
+  delete $::sa{$::sn{$nick}{account}} unless scalar @{$::sa{$::sn{$nick}{account}}};
+  $::sn{$nick}{account} = lc $event->{args}->[0];
+  push @{$::sa{$::sn{$nick}{account}}}, $nick;
 }
 
 sub on_connect {
@@ -175,7 +178,7 @@ sub on_join {
   my $nick = lc $event->{nick};
   my $chan = lc $event->{to}->[0];
   my $rate;
-  if ( lc $conn->{_nick} eq lc $nick)  {
+  if ( lc $conn->{_nick} eq $nick)  {
     $::sc{$chan} = {};
     mkdir($::settings->{log}->{dir} . $chan);
     $::synced{$chan} = 0;
@@ -295,7 +298,8 @@ sub on_quit
   my @channels=();
   my $nick = lc $event->{nick};
   for ( keys %::sc ) {
-    push ( @channels, lc $_ ) if delete $::sc{lc $_}{users}{$nick};
+    my $chan = lc $_;
+    push ( @channels, $chan ) if delete $::sc{$chan}{users}{$nick};
   }
   $event->{to} = \@channels;
   if (defined $::db) {
@@ -336,16 +340,18 @@ sub blah
 sub irc_users
 {
   my ( $channel, @users ) = @_;
+  $channel = lc $channel;
   for (@users)
   {
+    my $nick = lc $_;
     my ( $op, $voice );
     $op = 0; $voice = 0;
     $op = 1 if s/^\@//;
     $voice = 1 if s/^\+//;
-    $::sc{lc $channel}{users}{lc $_} = {};
-    $::sc{lc $channel}{users}{lc $_}{op} = $op;
-    $::sc{lc $channel}{users}{lc $_}{voice} = $voice;
-    $::sc{lc $channel}{users}{lc $_}{jointime} = 0;
+    $::sc{$channel}{users}{$nick} = {};
+    $::sc{$channel}{users}{$nick}{op} = $op;
+    $::sc{$channel}{users}{$nick}{voice} = $voice;
+    $::sc{$channel}{users}{$nick}{jointime} = 0;
   }
 }
 
@@ -417,11 +423,11 @@ sub on_nick {
 
 sub on_kick {
   my ($conn, $event) = @_;
-  if (lc $event->{to}->[0] eq lc $conn->{_nick}) {
+  my $nick = lc $event->{to}->[0];
+  if ($nick eq lc $conn->{_nick}) {
     $conn->privmsg($::settings->{masterchan}, "I've been kicked from " . $event->{args}->[0] . ": " . $event->{args}->[1]);
 #    $conn->join($event->{args}->[0]);
   }
-  my $nick = lc $event->{to}->[0];
   my $chan = lc $event->{args}->[0];
   if (defined $::db) {
       $::db->logg( $event );
@@ -444,12 +450,12 @@ sub on_kick {
   }
   if ( lc $conn->{_nick} eq $nick )
   {
-    delete( $::sc{lc $event->{args}->[0]} );
-    on_byechan(lc $event->{to}->[0]);
+    delete( $::sc{$chan} );
+    on_byechan($chan);
   }
   else
   {
-    delete( $::sc{lc $event->{args}->[0]}{users}{$nick} );
+    delete( $::sc{$chan}{users}{$nick} );
   }
 }
 
@@ -517,7 +523,6 @@ sub on_channelmodeis
 sub whoGotHit
 {
   my ($chan, $mask) = @_;
-  my $cvt = Regexp::Wildcards->new(type => 'jokers');
   my @affected = ();
   if ($mask !~ /^\$/) {
     my @div = split(/\$/, $mask);
@@ -732,7 +737,8 @@ sub on_channelurlis
 sub on_ctcp_dcc
 {
   my ($conn, $event) = @_;
-  my $acct = lc $::sn{lc $event->{nick}}->{account};
+  my $nick = lc $event->{nick};
+  my $acct = lc $::sn{$nick}->{account};
   ASM::Util->dprint(Dumper($event), 'ctcp');
   if (($event->{type} eq 'cdcc') &&
       (defined($::users->{person}->{$acct})) &&
@@ -741,7 +747,7 @@ sub on_ctcp_dcc
     ASM::Util->dprint(Dumper($event), 'dcc');
     my @spit = split(/ /, $event->{args}->[0]);
     if (($spit[0] eq 'CHAT') && ($spit[1] eq 'CHAT')) {
-      $::chat = Net::IRC::DCC::CHAT->new($conn, 0, lc $event->{nick}, $spit[2], $spit[3]);
+      $::chat = Net::IRC::DCC::CHAT->new($conn, 0, $nick, $spit[2], $spit[3]);
     }
   }
 }
@@ -764,7 +770,7 @@ sub on_whoxreply
   my ($tgt, $magic, $chan, $user, $realip, $host, $nick, $account, $gecos) = @{$event->{args}};
   return unless $magic eq '314';
   $nick = lc $nick; $chan = lc $chan;
-  if (!defined $::sn{lc $nick}) {
+  if (!defined $::sn{$nick}) {
     $::sn{$nick} = {};
     $::sn{$nick}->{mship} = [$chan];
   } else {
