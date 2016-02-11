@@ -1,4 +1,6 @@
-use asm_main;
+CREATE DATABASE `asm_main` ;
+
+USE `asm_main`;
 
 CREATE TABLE `actionlog` (
   `index` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -41,7 +43,10 @@ CREATE TABLE `alertlog` (
   KEY `time` (`time`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
-use asm_log;
+CREATE DATABASE `asm_log` ;
+
+USE `asm_log`;
+
 CREATE TABLE `action` (
   `index` bigint(20) NOT NULL AUTO_INCREMENT,
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -63,7 +68,7 @@ CREATE TABLE `joins` (
   `host` varchar(63) NOT NULL,
   `geco` varchar(255) DEFAULT NULL,
   `account` varchar(16) DEFAULT NULL,
-  KEY `index` (`index`),
+  PRIMARY KEY (`index`),
   KEY `nick` (`nick`),
   KEY `user` (`user`),
   KEY `host` (`host`),
@@ -88,7 +93,7 @@ CREATE TABLE `kick` (
   `victim_geco` varchar(255) DEFAULT NULL,
   `victim_ip` int(10) unsigned DEFAULT NULL,
   `victim_account` varchar(17) DEFAULT NULL,
-  KEY `index` (`index`)
+  PRIMARY KEY (`index`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 CREATE TABLE `mode` (
@@ -112,7 +117,12 @@ CREATE TABLE `nick` (
   `host` varchar(63) NOT NULL,
   `geco` varchar(255) DEFAULT NULL,
   `content1` varchar(16) NOT NULL,
-  KEY `index` (`index`)
+  PRIMARY KEY (`index`),
+  KEY `nick` (`nick`),
+  KEY `user` (`user`),
+  KEY `host` (`host`),
+  KEY `geco` (`geco`),
+  KEY `newnick` (`content1`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 CREATE TABLE `notice` (
@@ -138,7 +148,14 @@ CREATE TABLE `part` (
   `ip` int(10) unsigned DEFAULT NULL,
   `account` varchar(17) DEFAULT NULL,
   `content1` varchar(1000) NOT NULL,
-  KEY `index` (`index`)
+  PRIMARY KEY (`index`),
+  KEY `nick` (`nick`),
+  KEY `user` (`user`),
+  KEY `host` (`host`),
+  KEY `geco` (`geco`),
+  KEY `ip` (`ip`),
+  KEY `account` (`account`),
+  KEY `partmsg` (`content1`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 CREATE TABLE `privmsg` (
@@ -163,7 +180,14 @@ CREATE TABLE `quit` (
   `ip` int(10) unsigned DEFAULT NULL,
   `account` varchar(17) DEFAULT NULL,
   `content1` varchar(1000) NOT NULL,
-  KEY `index` (`index`)
+  PRIMARY KEY (`index`),
+  KEY `nick` (`nick`),
+  KEY `user` (`user`),
+  KEY `host` (`host`),
+  KEY `geco` (`geco`),
+  KEY `account` (`account`),
+  KEY `ip` (`ip`),
+  KEY `quitmsg` (`content1`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 CREATE TABLE `topic` (
