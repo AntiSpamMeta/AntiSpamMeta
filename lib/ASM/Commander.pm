@@ -42,6 +42,9 @@ my $cmdtbl = {
 	'^;suppress (?<chan>\S+) *$' => {
 		'flag' => 's',
 		'cmd' => \&cmd_suppress },
+	'^;unsuppress (?<chan>\S+) *$' => {
+		'flag' => 's',
+		'cmd' => \&cmd_unsuppress },
 	'^;silence (?<chan>\S+) *$' => {
 		'flag' => 's',
 		'cmd' => \&cmd_silence },
@@ -371,19 +374,39 @@ sub cmd_monitor2 {
 sub cmd_suppress {
 	my ($conn, $event) = @_;
 
+	my $minutes  = 30;
+	my $duration = $minutes * 60;
+
 	my $chan = lc $1;
 	my $old = $::channels->{channel}->{$chan}->{monitor};
 	if ($old eq 'no') {
 		$conn->privmsg($event->replyto, "$chan is not currently monitored");
 		return;
 	}
-	$::channels->{channel}->{$chan}->{monitor} = "no";
-	$conn->schedule(30*60, sub {
-				$::channels->{channel}->{$chan}->{monitor} = $old;
-				$conn->privmsg($event->replyto, "Unsuppressed $chan");
-				ASM::XML->writeChannels();
+	$::channels->{channel}->{$chan}->{suppress} = time + $duration;
+	$conn->schedule($duration, sub {
+				if (($::channels->{channel}{$chan}{suppress} // 0) - 10 <= time) {
+					# we needn't actually delete this here, but doing so
+					# avoids cluttering the XML
+					delete $::channels->{channel}{$chan}{suppress};
+					$conn->privmsg($event->replyto, "Unsuppressed $chan");
+					ASM::XML->writeChannels();
+				}
 			});
-	$conn->privmsg($event->replyto, "Suppressing alerts from $chan for 30 minutes. If the bot restarts or the config is changed, you will need to do ;monitor $chan to check the status of the monitor flag");
+	$conn->privmsg($event->replyto, "Suppressing alerts from $chan for $minutes minutes.");
+}
+
+sub cmd_unsuppress {
+	my ($conn, $event) = @_;
+
+	my $chan = lc $1;
+	if (ASM::Util->isSuppressed($chan)) {
+		delete $::channels->{channel}{$chan}{suppress};
+		$conn->privmsg($event->replyto, "Unsuppressed $chan");
+	}
+	else {
+		$conn->privmsg($event->replyto, "Alerts for $chan are not currently suppressed");
+	}
 }
 
 sub cmd_silence {

@@ -94,7 +94,7 @@ sub inspect {
     # because we can't yet respect stuff like notrigger for these
     next unless $::synced{lc $chan};
     next unless $chan =~ /^#/;
-    next if ((defined($::channels->{channel}->{$chan}->{monitor})) and ($::channels->{channel}->{$chan}->{monitor} eq "no"));
+    next unless ASM::Util->mayAlert($chan);
     foreach $id (keys %aonx) {
       next unless ( grep { $event->{type} eq $_ } split(/[,:; ]+/, $aonx{$id}{type}) );
       if (defined($response)) {

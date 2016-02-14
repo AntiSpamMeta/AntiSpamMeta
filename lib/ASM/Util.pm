@@ -117,6 +117,20 @@ sub speak
   return 1;
 }
 
+sub isSuppressed {
+  my ($module, $chan) = @_;
+
+  # While we set a timer to remove the suppression, this check allows it to Just Work(tm) even across bot restarts.
+  my $expiration = $::channels->{channel}{lc $chan}{suppress} // 0;
+  return (($expiration > time) ? $expiration : undef);
+}
+
+sub mayAlert {
+  my ($module, $chan) = @_;
+
+  return !( ($::channels->{channel}{lc $chan}{monitor} // 'yes') eq 'no' || $module->isSuppressed($chan) );
+}
+
 #this item is a stub, dur
 sub hostip {
   return gethostbyname($_[0]);
