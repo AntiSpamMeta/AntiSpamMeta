@@ -53,7 +53,8 @@ sub new
   $conn->add_handler('quietlist', \&on_quietlist);
   $conn->add_handler('pong', \&on_pong);
   $conn->add_handler('channelurlis', \&on_channelurlis);
-  $conn->add_handler('480', \&on_jointhrottled);
+  $conn->add_handler('480', \&on_jointhrottled); # +j
+  $conn->add_handler('471', \&on_jointhrottled); # +l
   $conn->add_handler('servicesdown', \&on_servicesdown);
   $conn->add_handler('endofbanlist', \&on_banlistend);
   $conn->add_handler('quietlistend', \&on_quietlistend);
@@ -61,13 +62,12 @@ sub new
   return $self;
 }
 
-
 sub on_jointhrottled
 {
   my ($conn, $event) = @_;
   my $chan = $event->{args}->[1];
   ASM::Util->dprint("$event->{nick}: $chan: $event->{args}->[2]", 'snotice');
-  if ($event->{args}->[2] =~ /throttle exceeded, try again later/) {
+  if ($event->{args}->[2] =~ /try again later/) {
     $conn->schedule(5, sub { $conn->join($chan); });
   }
 }
