@@ -189,7 +189,11 @@ sub command {
 			}
 		}
 		if ($cmd=~/$command/) {
-			ASM::Util->dprint("$event->{from} told me: $cmd", "commander");
+			my $where = $event->{to}[0];
+			if ($where !~ /#/) {
+				$where = 'PM';
+			}
+			ASM::Util->dprint("$event->{from} told me in $where: $cmd", "commander");
 			if (!ASM::Util->notRestricted($nick, "nocommands")) {
 				$fail = 1;
 			}
