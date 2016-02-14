@@ -78,7 +78,8 @@ sub inspect {
   my (@dnsbl, @uniq);
   my ($match, $txtz, $iaddr);
   my @override = [];
-  my $nick = ($event->{type} eq 'nick') ? lc $event->{args}->[0] : lc $event->{nick};
+  my $displaynick = ($event->{type} eq 'nick') ? $event->{args}->[0] : $event->{nick};
+  my $nick = lc $displaynick;
   my $xresult;
   return if (index($nick, ".") != -1);
   if ( $event->{type} eq 'join' ) {
@@ -125,13 +126,13 @@ sub inspect {
       $xresult = $dct{$id}{xresult};
       my $nicereason = interpolate($dct{$id}{reason});
       if (defined $::db) {
-          $::db->record($chan, $nick, $event->{user}, $event->{host}, $::sn{lc $nick}->{gecos}, $dct{$id}{risk}, $id, $nicereason);
+          $::db->record($chan, $displaynick, $event->{user}, $event->{host}, $::sn{lc $nick}->{gecos}, $dct{$id}{risk}, $id, $nicereason);
       }
       $txtz = "\x03" . $::RCOLOR{$::RISKS{$dct{$id}{risk}}} . "\u$dct{$id}{risk}\x03 risk threat [\x02$chan\x02] - ".
-              "\x02$nick\x02 - ${nicereason}; ping ";
+              "\x02$displaynick\x02 - ${nicereason}; ping ";
       $txtz = $txtz . ASM::Util->commaAndify(ASM::Util->getAlert($chan, $dct{$id}{risk}, 'hilights')) if (ASM::Util->getAlert($chan, $dct{$id}{risk}, 'hilights'));
       $txtz = $txtz . ' !att-' . $chan . '-' . $dct{$id}{risk};
-      my $uuid = $::log->incident($chan, "$chan: $dct{$id}{risk} risk: $nick - $nicereason\n");
+      my $uuid = $::log->incident($chan, "$chan: $dct{$id}{risk} risk: $displaynick - $nicereason\n");
       $txtz = $txtz . ' ' . ASM::Shortener->shorturl($::settings->{web}->{detectdir} . $uuid . '.txt');
       if ($id eq 'last_measure_regex') { #TODO: Note that this is another example of things that shouldn't be hardcoded, but are.
 
