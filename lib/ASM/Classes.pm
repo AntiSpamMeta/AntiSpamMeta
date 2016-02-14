@@ -300,8 +300,14 @@ sub nickspam {
 my %cf=();
 my %bs=();
 my $cfc = 0;
+my %fpo_seen;
 sub process_cf
 {
+  for my $fpoid (values %fpo_seen) {
+    for my $fptext (keys %$fpoid) {
+      delete $fpoid->{$fptext} if $fpoid->{$fptext} <= time;
+    }
+  }
   foreach my $nid ( keys %cf ) {
     foreach my $xchan ( keys %{$cf{$nid}} ) {
       next if $xchan eq 'timeout';
@@ -321,6 +327,22 @@ sub process_cf
   }
 }
 
+# this is a mess, sorry about that
+sub fpo {
+  my ($chan, $nick, $text, $how_long) = @_;
+
+  return undef unless ASM::Util->isFloodedPhraseOK($chan, $text);
+
+  my $okay = 0;
+
+  if ( ( $fpo_seen{$chan}{ $::sn{$nick}{host} }{$text} // 0 ) <= time) {
+    $okay = 1;
+  }
+
+  $fpo_seen{$chan}{ $::sn{$nick}{host} }{$text} = time + $how_long;
+  return $okay;
+}
+
 sub splitflood {
   my ($chk, $id, $event, $chan) = @_;
   my $text;
@@ -337,6 +359,7 @@ sub splitflood {
   my $msgtime = $::sc{$chan}{users}{$nick}{msgtime} // 0;
   $msgtime ||= 1 if !$::sc{$chan}{users}{$nick}{jointime};
   return if $text =~ /^[^\w\s]+\w+\s*$/ && $msgtime && ($msgtime + $cf{$id}{timeout}) < time;
+  return if fpo($chan, $nick, $text, 2 * int($cut[1]));
 #  return unless length($text) >= 10;
   if (defined($bs{$id}{$text}) && (time <= $bs{$id}{$text} + 600)) {
     return 1;
@@ -367,6 +390,7 @@ sub advsplitflood {
     $text=$event->{args}->[0];
   }
   return unless defined($text);
+  return if fpo($chan, lc $event->{nick}, $text, 3 * int($cut[1]));
   $text=~s/^\d*(.*)\d*$/$1/;
   return unless length($text) >= 10;
   if (defined($bs{$id}{$text}) && (time <= $bs{$id}{$text} + 600)) {

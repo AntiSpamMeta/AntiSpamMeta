@@ -131,6 +131,15 @@ sub mayAlert {
   return !( ($::channels->{channel}{lc $chan}{monitor} // 'yes') eq 'no' || $module->isSuppressed($chan) );
 }
 
+sub isFloodedPhraseOK {
+  my ($module, $chan, $text) = @_;
+
+  return undef unless exists $::channels->{channel}{$chan}{floodedphraseok};
+  my $exempt_regex = $::channels->{channel}{$chan}{floodedphraseok};
+
+  return $text =~ $exempt_regex;
+}
+
 #this item is a stub, dur
 sub hostip {
   return gethostbyname($_[0]);
