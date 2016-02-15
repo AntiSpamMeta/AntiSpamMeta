@@ -190,7 +190,7 @@ sub command {
 		}
 		if ($cmd=~/$command/) {
 			my $where = $event->{to}[0];
-			if ($where !~ /#/) {
+			if (index($where, '#') == -1) {
 				$where = 'PM';
 			}
 			ASM::Util->dprint("$event->{from} told me in $where: $cmd", "commander");
