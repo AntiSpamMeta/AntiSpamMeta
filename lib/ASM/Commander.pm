@@ -725,7 +725,8 @@ sub cmd_showhilights {
 	my @channels = ();
 	foreach my $chan (keys(%{$::channels->{channel}})) {
 		foreach my $level (keys(%{$::channels->{channel}->{$chan}->{hilights}})) {
-			if ( $nick ~~ $::channels->{channel}->{$chan}->{hilights}->{$level}) {
+			my @nicks = map { lc } @{$::channels->{channel}->{$chan}->{hilights}->{$level}};
+			if ( $nick ~~ @nicks) {
 				push @channels, $chan . " ($level)";
 			}
 		}
