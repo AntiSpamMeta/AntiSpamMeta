@@ -836,7 +836,7 @@ sub cmd_sl {
 sub cmd_quit {
 	my ($conn, $event) = @_;
 
-	$conn->quit($+{reason});
+	$conn->quit('Restart requested by ' . $event->{nick} . ': ' . $+{reason});
 }
 
 sub cmd_ev {
