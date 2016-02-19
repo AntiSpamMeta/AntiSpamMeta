@@ -146,6 +146,9 @@ my $cmdtbl = {
 	'^;nicks (?<nick>\S+)\s*$' => {
 		'flag' => 's',
 		'cmd' => \&cmd_nicks },
+	'^;explain (?<nick1>\S+)\s+(?<nick2>\S+)\s*$' => {
+		'flag' => 's',
+		'cmd' => \&cmd_explain },
 };
 
 sub new {
@@ -1067,4 +1070,35 @@ sub cmd_nicks {
 	my $result = $DB->selectcol_arrayref( $doit );
 	$conn->privmsg($event->replyto, "Results for $nick: " . ASM::Util->commaAndify(sort @$result));
 }
+
+sub cmd_explain { # all hosts associated with two given nicks
+	my ($conn, $event) = @_;
+	my $nick1 = $+{nick1};
+	my $nick2 = $+{nick2};
+	my $header = sprintf ("Hosts for %s and %s: ", $nick1, $nick2);
+	if (!defined $::db) {
+		$conn->privmsg($event->replyto, "I am set to run without a database, fool.");
+		return;
+	}
+	my $DB = $::db->{DBH_LOG};
+	my $result = $DB->selectcol_arrayref (
+		sprintf ("
+			select distinct t1.host from joins as t1
+				inner join (
+					select host from joins
+					where
+						nick=%s and
+						host not like %s and
+						host <> %s) as t2
+				on t1.host=t2.host and
+				t1.nick=%s",
+			$DB->quote($nick1),
+			$DB->quote('%/session'),
+			$DB->quote('127.0.0.1'),
+			$DB->quote($nick2)
+		)
+	);
+	$conn->privmsg($event->replyto, $header . ASM::Util->commaAndify(sort @$result));
+}
+
 # vim: ts=8:sts=8:sw=8:noexpandtab
