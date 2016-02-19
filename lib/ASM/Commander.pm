@@ -1022,17 +1022,17 @@ sub cmd_blreason {
 
 sub cmd_bllookup {
 	my ($conn, $event) = @_;
-
-	if (defined($::blacklist->{string}->{$+{id}})) {
-		my $content = $::blacklist->{string}->{$+{id}}->{content};
-		my $setby = $::blacklist->{string}->{$+{id}}->{setby};
-		my $settime = $::blacklist->{string}->{$+{id}}->{settime};
-		my $reason = $::blacklist->{string}->{$+{id}}->{reason};
-		my $type = $::blacklist->{string}->{$+{id}}->{type};
+	my $id = $+{id};
+	if (defined($::blacklist->{string}->{$id})) {
+		my $content = $::blacklist->{string}->{$id}->{content};
+		my $setby = $::blacklist->{string}->{$id}->{setby};
+		my $settime = $::blacklist->{string}->{$id}->{settime};
+		my $reason = $::blacklist->{string}->{$id}->{reason};
+		my $type = $::blacklist->{string}->{$id}->{type};
 		$reason = 'none ever provided' unless defined($reason);
 		$conn->privmsg($event->nick, "'$content' $type blacklisted by $setby on $settime with reason $reason");
 		if ($event->{to}->[0] =~ /^#/) {
-			$conn->privmsg($event->replyto, "Info on blacklist ID $+{id} sent via PM");
+			$conn->privmsg($event->replyto, "Info on blacklist ID $id sent via PM");
 		}
 	} else {
 		$conn->privmsg($event->replyto, "ID is invalid");
