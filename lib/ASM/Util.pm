@@ -267,7 +267,9 @@ sub stripResp
     return undef;
   }
   my @answer = $response->answer;
-  if ($response->{header}->{rcode} ne "NOERROR") {
+  if ((!defined($response->{header})) ||
+      (!defined($response->{header}->{rcode})) ||
+      ($response->{header}->{rcode} ne "NOERROR")) {
     dprint($module, Dumper($response), 'dns');
     return undef;
   }
