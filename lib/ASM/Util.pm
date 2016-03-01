@@ -134,6 +134,8 @@ sub mayAlert {
 sub isFloodedPhraseOK {
   my ($module, $chan, $text) = @_;
 
+  $chan = lc $chan;
+
   return undef unless exists $::channels->{channel}{$chan}{floodedphraseok};
   my $exempt_regex = $::channels->{channel}{$chan}{floodedphraseok};
 
