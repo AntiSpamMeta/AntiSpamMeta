@@ -24,7 +24,7 @@ sub doServices {
   if ($event->{from} eq ($::settings->{nickserv} // 'NickServ!NickServ@services.'))
   {
     ASM::Util->dprint("NickServ: $event->{args}->[0]", 'snotice');
-    if ( $::no_autojoins && ( $event->{args}->[0] =~ /^Please identify/ || $event->{args}->[0] =~ /^This nickname is registered/ ) )
+    if ( $event->{args}->[0] =~ /^Please identify/ || $event->{args}->[0] =~ /^This nickname is registered/ )
     {
       $::no_autojoins = 0;
       $conn->sl("NickServ identify $::settings->{nick} $::settings->{pass}" );
