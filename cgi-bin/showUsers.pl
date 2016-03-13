@@ -23,7 +23,14 @@ print <<HTML;
 <img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
 </form></h3>
 <table>
-<tr><th>NickServ account</th><th>h</th><th>s</th><th>a</th><th>d</th></tr>
+<tr>
+  <th>NickServ account</th>
+  <th style="width:20px">s</th>
+  <th style="width:20px">h</th>
+  <th style="width:20px">a</th>
+  <th style="width:20px">d</th>
+  <th style="width:20px">p</th>
+</tr>
 HTML
 
 my $xs1 = XML::Simple->new( KeyAttr => ['id'], Cache => [ qw/memcopy/ ]);
@@ -32,44 +39,56 @@ my $users = $xs1->XMLin( "/home/icxcnika/AntiSpamMeta/config-main/users.xml", Fo
 sub printout
 {
   my ($user) = @_;
-  print "<tr><td style=\"text-align:right\">$user</td>";
-  print "<td>";
-  print "x" if (index($users->{person}->{$user}->{flags}, 'h') != -1);
+  print "<tr><td style=\"text-align:right\"><b>$user</b></td>";
+  print "<td style=\"text-align:center\">";
+  print "s" if (index($users->{person}->{$user}->{flags}, 's') != -1);
   print "</td>";
-  print "<td>";
-  print "x" if (index($users->{person}->{$user}->{flags}, 's') != -1);
+  print "<td style=\"text-align:center\">";
+  print "h" if (index($users->{person}->{$user}->{flags}, 'h') != -1);
   print "</td>";
-  print "<td>";
-  print "x" if (index($users->{person}->{$user}->{flags}, 'a') != -1);
+  print "<td style=\"text-align:center\">";
+  print "a" if (index($users->{person}->{$user}->{flags}, 'a') != -1);
   print "</td>";
-  print "<td>";
-  print "x" if (index($users->{person}->{$user}->{flags}, 'd') != -1);
+  print "<td style=\"text-align:center\">";
+  print "d" if (index($users->{person}->{$user}->{flags}, 'd') != -1);
+  print "</td>";
+  print "<td style=\"text-align:center\">";
+  print "p" if (index($users->{person}->{$user}->{flags}, 'p') != -1);
   print "</td>";
   print "</tr>\n";
 }
 
-foreach my $user (keys %{$users->{person}}) {
+foreach my $user (sort keys %{$users->{person}}) {
   if (index($users->{person}->{$user}->{flags}, 'd') != -1) {
     printout($user);
     delete $users->{person}->{$user};
   }
 }
-foreach my $user (keys %{$users->{person}}) {
+foreach my $user (sort keys %{$users->{person}}) {
   if (index($users->{person}->{$user}->{flags}, 'a') != -1) {
     printout($user);
     delete $users->{person}->{$user};
   }
 }
-foreach my $user (keys %{$users->{person}}) {
+foreach my $user (sort keys %{$users->{person}}) {
+  if (index($users->{person}->{$user}->{flags}, 'h') != -1) {
+    printout($user);
+    delete $users->{person}->{$user}
+  }
+}
+foreach my $user (sort keys %{$users->{person}}) {
   if (index($users->{person}->{$user}->{flags}, 's') != -1) {
     printout($user);
     delete $users->{person}->{$user}
   }
 }
-
-foreach my $user (keys %{$users->{person}}) {
-  printout($user);
+foreach my $user (sort keys %{$users->{person}}) {
+#  if (index($users->{person}->{$user}->{flags}, 's') != -1) {
+    printout($user);
+    delete $users->{person}->{$user}
+#  }
 }
+
 print "</table></body></html>";
 
 exit 0;
