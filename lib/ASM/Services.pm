@@ -21,7 +21,7 @@ sub new
 sub doServices {
   my ($conn, $event) = @_;
   my $i = 1;
-  if ($event->{from} eq 'NickServ!NickServ@services.')
+  if ($event->{from} eq ($::settings->{nickserv} // 'NickServ!NickServ@services.'))
   {
     ASM::Util->dprint("NickServ: $event->{args}->[0]", 'snotice');
     if ( $::no_autojoins && ( $event->{args}->[0] =~ /^Please identify/ || $event->{args}->[0] =~ /^This nickname is registered/ ) )
@@ -66,7 +66,7 @@ sub doServices {
       $conn->sl("PING :" . time);
     }
   }
-  elsif ($event->{from} eq 'ChanServ!ChanServ@services.')
+  elsif ($event->{from} eq ($::settings->{chanserv} // 'ChanServ!ChanServ@services.'))
   {
     if ( $event->{args}->[0] =~ /^\[#/ ) {
       return;
