@@ -87,7 +87,7 @@ sub on_pong
       $::settingschanged = 0;
     } else {
       $conn->privmsg($::settings->{masterchan}, "Config files changed, auto rehash triggered. Check console for possible errors.");
-      ASM::XML->readXML();
+      ASM::Config->readConfig();
     }
   }
   if ($lag > 1) {

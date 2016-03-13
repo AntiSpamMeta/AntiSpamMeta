@@ -377,7 +377,7 @@ sub cmd_monitor2 {
 	my $chan = lc $+{chan};
 	my $switch = lc $+{switch};
 	$::channels->{channel}->{$chan}->{monitor} = $switch;
-	ASM::XML->writeChannels();
+	ASM::Config->writeChannels();
 	$conn->privmsg($event->replyto, "Monitor flag for $chan set to $switch");
 }
 
@@ -397,10 +397,10 @@ sub cmd_suppress {
 	$conn->schedule($duration, sub {
 				if (($::channels->{channel}{$chan}{suppress} // 0) - 10 <= time) {
 					# we needn't actually delete this here, but doing so
-					# avoids cluttering the XML
+					# avoids cluttering the config
 					delete $::channels->{channel}{$chan}{suppress};
 					$conn->privmsg($event->replyto, "Unsuppressed $chan");
-					ASM::XML->writeChannels();
+					ASM::Config->writeChannels();
 				}
 			});
 	$conn->privmsg($event->replyto, "Suppressing alerts from $chan for $minutes minutes.");
@@ -433,7 +433,7 @@ sub cmd_silence2 {
 	my $chan = lc $+{chan};
 	my $switch = lc $+{switch};
 	$::channels->{channel}->{$chan}->{silence} = $switch;
-	ASM::XML->writeChannels();
+	ASM::Config->writeChannels();
 	$conn->privmsg($event->replyto, "Silence flag for $chan set to $switch");
 }
 
@@ -592,7 +592,7 @@ sub cmd_user_add {
 		return;
 	}
 	$::users->{person}->{$nick} = { 'flags' => $flags };
-	ASM::XML->writeUsers();
+	ASM::Config->writeUsers();
 	$conn->privmsg($event->replyto, "Flags for NickServ account $nick set to $flags");
 }
 
@@ -651,7 +651,7 @@ sub cmd_user_flags2 {
 		$o_Htgroup->save();
 	}
 	$::users->{person}->{$nick}->{flags} = $flags;
-	ASM::XML->writeUsers();
+	ASM::Config->writeUsers();
 	$conn->privmsg($event->replyto, "Flags for $nick set to $flags");
 }
 
@@ -665,7 +665,7 @@ sub cmd_user_del {
 		return $conn->privmsg($event->replyto, "Users with the 'd' flag are untouchable. Edit the config file manually.");
 	}
 	delete($::users->{person}->{$nick});
-	ASM::XML->writeUsers();
+	ASM::Config->writeUsers();
 	use Apache::Htpasswd; use Apache::Htgroup;
 	my $o_Htpasswd = new Apache::Htpasswd({passwdFile => $::settings->{web}->{userfile}, UseMD5 => 1});
 	my $o_Htgroup = new Apache::Htgroup($::settings->{web}->{groupfile});
@@ -697,7 +697,7 @@ sub cmd_target {
 	my @tmphl = @{$::channels->{channel}->{$chan}->{msgs}->{$level}};
 	push(@tmphl, $nick);
 	$::channels->{channel}->{$chan}->{msgs}->{$level} = \@tmphl;
-	ASM::XML->writeChannels();
+	ASM::Config->writeChannels();
 	$conn->privmsg($event->replyto, "$nick added to $level risk messages for $chan");
 }
 
@@ -717,7 +717,7 @@ sub cmd_detarget {
 		@ppl = grep { lc $_ ne $nick } @ppl;
 		$::channels->{channel}->{$chan}->{msgs}->{$risk} = \@ppl;
 	}
-	ASM::XML->writeChannels();
+	ASM::Config->writeChannels();
 	$conn->privmsg($event->replyto, "$nick removed from targets for $chan");
 }
 
@@ -778,7 +778,7 @@ sub cmd_hilight {
 		push(@tmphl, $nick);
 	}
 	$::channels->{channel}->{$chan}->{hilights}->{$level} = \@tmphl;
-	ASM::XML->writeChannels();
+	ASM::Config->writeChannels();
 	$conn->privmsg($event->replyto, ASM::Util->commaAndify(@nicks) . " added to $level risk hilights for $chan");
 }
 
@@ -798,7 +798,7 @@ sub cmd_dehilight {
 		@ppl = grep { !(lc $_ ~~ @nicks) } @ppl;
 		$::channels->{channel}->{$chan}->{hilights}->{$risk} = \@ppl;
 	}
-	ASM::XML->writeChannels();
+	ASM::Config->writeChannels();
 	$conn->privmsg($event->replyto, "Removing hilights for " . ASM::Util->commaAndify(@nicks) . " in $chan");
 }
 
@@ -808,14 +808,14 @@ sub cmd_join {
 	my $chan = lc $+{chan};
 	unless (defined($::channels->{channel}->{$chan})) {
 		$::channels->{channel}->{$chan} = { monitor => "yes", silence => "no" };
-		ASM::XML->writeChannels();
+		ASM::Config->writeChannels();
 	}
 	$conn->join($chan);
 	my @autojoins = @{$::settings->{autojoins}};
 	if (!grep { $chan eq lc $_ } @autojoins) {
 		@autojoins = (@autojoins, $chan);
 		$::settings->{autojoins} = \@autojoins;
-		ASM::XML->writeSettings();
+		ASM::Config->writeSettings();
 	}
 }
 
@@ -827,7 +827,7 @@ sub cmd_part {
 	my @autojoins = @{$::settings->{autojoins}};
 	@autojoins = grep { lc $_ ne $chan } @autojoins;
 	$::settings->{autojoins} = \@autojoins;
-	ASM::XML->writeSettings();
+	ASM::Config->writeSettings();
 }
 
 sub cmd_sl {
@@ -852,7 +852,7 @@ sub cmd_ev {
 sub cmd_rehash {
 	my ($conn, $event) = @_;
 
-	ASM::XML->readXML();
+	ASM::Config->readConfig();
 	$conn->privmsg($event->replyto, 'config files were re-read');
 }
 
@@ -871,7 +871,7 @@ sub cmd_restrict {
 		$::restrictions->{$+{type} . 's'}->{$+{type}}->{$who}->{$+{restriction}} = $+{restriction};
 		$conn->privmsg($event->replyto, "Added $+{restriction} restriction for $+{type} $who");
 	}
-	ASM::XML->writeRestrictions();
+	ASM::Config->writeRestrictions();
 }
 
 sub cmd_ops {
@@ -950,7 +950,7 @@ sub cmd_blacklist {
 	use String::CRC32;
 	my $id = sprintf("%08x", crc32($string));
 	$::blacklist->{string}->{$id} = { "content" => $string, "type" => "string", "setby" => $event->nick, "settime" => strftime('%F', gmtime) };
-	ASM::XML->writeBlacklist();
+	ASM::Config->writeBlacklist();
 	$conn->privmsg($event->replyto, "$string blacklisted with id $id, please use ;blreason $id reasonGoesHere to set a reason");
 }
 
@@ -960,7 +960,7 @@ sub cmd_blacklistpcre {
 	use String::CRC32;
 	my $id = sprintf("%08x", crc32($+{string}));
 	$::blacklist->{string}->{$id} = { "content" => $+{string}, "type" => "pcre", "setby" => $event->nick, "settime" => strftime('%F', gmtime) };
-	ASM::XML->writeBlacklist();
+	ASM::Config->writeBlacklist();
 	$conn->privmsg($event->replyto, "$+{string} blacklisted with id $id, please use ;blreason $id reasonGoesHere to set a reason");
 }
 
@@ -970,7 +970,7 @@ sub cmd_unblacklist {
 	if (defined($::blacklist->{string}->{$+{id}})) {
 		delete $::blacklist->{string}->{$+{id}};
 		$conn->privmsg($event->replyto, "blacklist id $+{id} removed");
-		ASM::XML->writeBlacklist();
+		ASM::Config->writeBlacklist();
 	} else {
 		$conn->privmsg($event->replyto, "invalid id");
 	}
@@ -1014,7 +1014,7 @@ sub cmd_blreason {
 	if (defined($::blacklist->{string}->{$+{id}})) {
 		$::blacklist->{string}->{$+{id}}->{reason} = $+{reason};
 		$conn->privmsg($event->replyto, "Reason set");
-		ASM::XML->writeBlacklist();
+		ASM::Config->writeBlacklist();
 	} else {
 		$conn->privmsg($event->replyto, "ID is invalid");
 	}

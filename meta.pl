@@ -20,7 +20,7 @@ use Tie::CPHash;
 use Net::DNS::Async;
 
 use ASM::Util;
-use ASM::XML;
+use ASM::Config;
 use ASM::Inspect;
 use ASM::Event;
 use ASM::Services;
@@ -107,7 +107,7 @@ sub init {
   }
   if ($::cset eq '') { $::cset = 'config-default'; }
                 else { $::cset = "config-$::cset"; }
-  ASM::XML->readXML();
+  ASM::Config->readConfig();
   $::pass = $::settings->{pass} if $::pass eq '';
   $::async = HTTP::Async->new();
   $::dns = Net::DNS::Async->new(QueueSize => 5000, Retries => 3);
@@ -161,7 +161,7 @@ sub init {
   }
   $::fm = File::Monitor->new();
   foreach my $file ("channels", "dnsbl", "mysql", "restrictions", "rules", "settings", "users", "blacklist") {
-    $::fm->watch("./" . $::cset . '/' . $file . ".xml");
+    $::fm->watch("./" . $::cset . '/' . $file . ".json");
   }
   $::fm->scan();
   $irc->start();
