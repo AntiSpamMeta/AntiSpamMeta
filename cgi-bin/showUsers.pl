@@ -4,8 +4,8 @@
 use Data::Dumper;
 use strict;
 use DBI; 
-use XML::Simple qw(:strict);
-
+use JSON qw(decode_json);
+use IO::All;
 
 print "Content-type: text/html", "\n\n";
 print <<HTML;
@@ -33,8 +33,7 @@ print <<HTML;
 </tr>
 HTML
 
-my $xs1 = XML::Simple->new( KeyAttr => ['id'], Cache => [ qw/memcopy/ ]);
-my $users = $xs1->XMLin( "/home/icxcnika/AntiSpamMeta/config-main/users.xml", ForceArray => 'person');
+my $users = decode_json(io->file("/home/icxcnika/AntiSpamMeta/config-main/users.json")->all);
 
 sub printout
 {

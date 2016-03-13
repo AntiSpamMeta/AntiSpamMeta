@@ -7,11 +7,10 @@ use DBI;
 
 use CGI;
 
-use XML::Simple qw(:strict);
-my $xs1 = XML::Simple->new( KeyAttr => ['id'], Cache => [ qw/memcopy/ ]);
-my $sqlconf = $xs1->XMLin( "/home/icxcnika/AntiSpamMeta/config-main/mysql.xml",
-                           ForceArray => ['ident', 'geco'],
-                           'GroupTags' => { ignoredidents => 'ident', ignoredgecos => 'geco' });
+use JSON qw(decode_json);
+use IO::All;
+
+my $sqlconf = decode_json(io->file("/home/icxcnika/AntiSpamMeta/config-main/mysql.json")->all);
 
 my $dbh = DBI->connect("DBI:mysql:database=" . $sqlconf->{db} . ";host=" . $sqlconf->{host} . ";port=" . $sqlconf->{port}, $sqlconf->{user}, $sqlconf->{pass});
 
