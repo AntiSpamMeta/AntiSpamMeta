@@ -18,9 +18,11 @@ sub shorturl
   }
   my $apikey = $::settings->{web}->{shortener}->{apikey};
   my $domain = $::settings->{web}->{shortener}->{domain};
+  my $secure = $::settings->{web}->{shortener}->{secure};
   my $ua = LWP::UserAgent->new;
   $ua->agent("AntiSpamMeta/13.37 ");
-  my $res = $ua->get('https://shortener.godaddy.com/v1/?apikey=' .$apikey . '&domain=' . $domain .'&url=' . uri_escape($url) );
+  my $res = $ua->get('http' . ($secure ? 's' : '') . '://' . $domain . '/yourls-api.php?' .
+                     'signature=' . $apikey . '&action=shorturl&format=simple&url=' . uri_escape($url) );
   if ($res->is_success) {
       return $res->content;
   }

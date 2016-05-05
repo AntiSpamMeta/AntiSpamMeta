@@ -29,8 +29,9 @@
     <groupfile>/var/www/.htgroup</groupfile>
     <userfile>/var/www/.htpasswd</userfile>
     <shortener>
-      <apikey>look.at.shortener.godaddy.com</apikey>
-      <domain></domain>
+      <apikey>yoursecretkey</apikey>
+      <domain>yourls.org</domain>
+      <secure>0</secure>
     </shortener>
   </web>
 </settings>
