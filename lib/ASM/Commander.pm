@@ -446,7 +446,7 @@ sub cmd_help {
 sub cmd_help2 {
 	my ($conn, $event) = @_;
 
-	my @cmds = grep { $_ =~ /$+{cmd}/} (keys %{$cmdtbl});
+	my @cmds = grep { $_ =~ /\Q$+{cmd}/} (keys %{$cmdtbl});
 	if ((scalar @cmds) > 2) {
 		$conn->privmsg($event->replyto, "Please refer to http://antispammeta.net and irc.freenode.net #antispammeta");
 	} else {
