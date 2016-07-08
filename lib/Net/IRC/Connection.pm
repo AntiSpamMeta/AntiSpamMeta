@@ -82,6 +82,7 @@ sub new {
     _format     => { 'default' => "[%f:%t]  %m  <%d>", },
     _rx         =>  0,
     _tx         =>  0,
+    _last       => [],
   };
   
   bless $self, $proto;
@@ -439,6 +440,9 @@ sub DESTROY {
 sub disconnect {
   my $self = shift;
   
+  if ($_[1] eq "Excess Flood") {
+    $self->_dump_last('excessflood.log');
+  }
   $self->{_connected} = 0;
   $self->parent->removeconn($self);
   $self->socket( undef );
@@ -878,6 +882,11 @@ sub parse {
    next unless $line;
    
    print STDERR "<<< $line\n" if ($self->{_debug} || $self->{_debugsock});
+   my @item = (time, '<<<', $line);
+   push @{$self->{_last}}, \@item;
+   if (scalar @{$self->{_last}} > 1000){
+     shift @{$self->{_last}};
+   }
    
    $::lastline = $line; #this is so __WARN__ can print the last line received on IRC.
    # Like the RFC says: "respond as quickly as possible..."
@@ -1062,7 +1071,7 @@ sub parse {
      if ($line =~ /^ERROR :Closing [Ll]ink/) {   # is this compatible?
        
        $ev = 'done';
-       $self->disconnect( 'error', ($line =~ /(.*)/) );
+       $self->disconnect( 'error', ($line =~ /\((.*)\)/) );
        
      } else {
        $ev = Net::IRC::Event->new( "error",
@@ -1408,6 +1417,11 @@ sub sl_real {
   if ($self->{_debug} || $self->{_debugsock}) {
     print STDERR ">>> $line\n";
   }
+  my @item = (time, '>>>', $line);
+  push @{$self->{_last}}, \@item;
+  if (scalar @{$self->{_last}} > 1000){
+    shift @{$self->{_last}};
+  }
   
   # RFC compliance can be kinda nice...
   my $rv = $self->ssl ?
@@ -1632,6 +1646,19 @@ sub _default {
   }
   
   return 1;
+}
+
+# Dump our _debugsock-like buffer to disk
+# Takes one argument: the file to append to
+sub _dump_last {
+  my ($self, $filename) = @_;
+
+  open(FH, '>>', $filename);
+  print FH "---\n";
+  for my $item (@{$self->{_last}}) {
+    print FH sprintf("%.6f %s %s\n", @{$item});
+  }
+  close(FH);
 }
 
 1;
