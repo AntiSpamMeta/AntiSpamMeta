@@ -25,6 +25,7 @@ sub new
 }
 
 my $clearstatsp = 1;
+my $ratelimited = 0;
 my %statsp = ();
 my %oldstatsp = ();
 
@@ -63,7 +64,8 @@ sub on_endofstats
 		}
 		# $event->{args}->[2] == "End of /STATS report"
 		#end of /stats p
-		$conn->schedule( 90, sub { $conn->sl('STATS p') } );
+		$conn->schedule( 90, sub { $conn->sl('STATS p') } ) unless $ratelimited;
+		$ratelimited = 0;
 	}
 }
 
@@ -71,6 +73,7 @@ sub on_whofuckedup
 {
 	my ($conn, $event) = @_;
 	if ($event->{args}->[1] eq "STATS") {
+		$ratelimited = 1;
 		$conn->schedule(30, sub { $conn->sl('STATS p') } );
 	}
 }
