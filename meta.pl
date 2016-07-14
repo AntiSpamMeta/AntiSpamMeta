@@ -47,6 +47,7 @@ $::pacealerts = 1;
 $::settingschanged = 0;
 %::wordlist = ();
 %::httpRequests = ();
+$::version = '';
 
 ## debug variables. 0 to turn off debugging, else set it to a Term::ANSIColor constant.
 %::debugx = (
@@ -97,6 +98,11 @@ alarm 300;
 
 sub init {
   my ( $conn, $host );
+  $::version .= `git merge-base remotes/origin/master HEAD`; chomp $::version;
+  $::version .= ' ';
+  $::version .= `git describe --long --all --dirty`; chomp $::version;
+  $::version .= ' ';
+  $::version .= `git rev-parse HEAD`; chomp $::version;
   my $irc = new Net::IRC;
   GetOptions( 'debug|d!'   => \$::debug,
               'pass|p=s'   => \$::pass,

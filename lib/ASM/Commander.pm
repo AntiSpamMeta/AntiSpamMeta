@@ -149,6 +149,8 @@ my $cmdtbl = {
 	'^;explain (?<nick1>\S+)\s+(?<nick2>\S+)\s*$' => {
 		'flag' => 's',
 		'cmd' => \&cmd_explain },
+	'^;version$' => {
+		'cmd' => \&cmd_version },
 };
 
 sub new {
@@ -1099,6 +1101,11 @@ sub cmd_explain { # all hosts associated with two given nicks
 		)
 	);
 	$conn->privmsg($event->replyto, $header . ASM::Util->commaAndify(sort @$result));
+}
+
+sub cmd_version {
+	my ($conn, $event) = @_;
+	$conn->privmsg($event->replyto, $::version);
 }
 
 # vim: ts=8:sts=8:sw=8:noexpandtab
