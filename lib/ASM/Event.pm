@@ -901,8 +901,8 @@ sub on_quietlistend
       ", have used " . $cputime . " of CPU time" .
       ", have sent $tx of data, and received $rx of data.");
     my %x = ();
-    foreach my $c (@{$::settings->{autojoins}}) { $x{$c} = 1; }
-    foreach my $cx (keys %::sc) { delete $x{$cx}; }
+    foreach my $c (@{$::settings->{autojoins}}) { $x{lc $c} = 1; }
+    foreach my $cx (keys %::sc) { delete $x{lc $cx}; }
     if (scalar (keys %x)) {
       $conn->privmsg($::settings->{masterchan}, "Syncing appears to have failed for " . ASM::Util->commaAndify(keys %x)) unless $::no_autojoins;
     }
