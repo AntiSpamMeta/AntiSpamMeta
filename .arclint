@@ -1,0 +1,17 @@
+{
+    "linters": {
+        "text": {
+            "type": "text",
+            "exclude": "(^lib/Net/|\\.json$)"
+        },
+        "chmod": {
+            "type": "chmod"
+        },
+        "filename": {
+            "type": "filename"
+        },
+        "merge-conflict": {
+            "type": "merge-conflict"
+        }
+    }
+}
