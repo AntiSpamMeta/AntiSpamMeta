@@ -5,3 +5,6 @@
 HTTP_ACCESS*
 *.stor
 *~
+
+# Carton
+/local
