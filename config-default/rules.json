@@ -1,0 +1,368 @@
+{
+   "event" : {
+      "advflood" : {
+         "class" : "advsplitflood",
+         "content" : "5:3",
+         "reason" : "advanced distributed flooding",
+         "risk" : "high",
+         "type" : "public,part,caction"
+      },
+      "appleexploit" : {
+         "class" : "re",
+         "content" : "Ø³ÙÙÙ",
+         "reason" : "using the apple corefont exploit",
+         "risk" : "high",
+         "type" : "public,caction,part"
+      },
+      "asciiflood" : {
+         "class" : "asciiflood",
+         "content" : "20:3:3",
+         "reason" : "ascii art algorithm",
+         "risk" : "medium",
+         "type" : "public"
+      },
+      "autoremove" : {
+         "class" : "re",
+         "content" : "^requested by ChanServ",
+         "reason" : "on chanserv autoremove",
+         "risk" : "info",
+         "type" : "part"
+      },
+      "banevade" : {
+         "class" : "banevade",
+         "content" : "contentisuseless",
+         "reason" : "appears to be ban evading",
+         "risk" : "info",
+         "type" : "join"
+      },
+      "blacklist2" : {
+         "class" : "strblnew",
+         "content" : "blah",
+         "reason" : "blacklist $xresult",
+         "risk" : "medium",
+         "type" : "public,part,quit,caction"
+      },
+      "blacklistpcre" : {
+         "class" : "strblpcre",
+         "content" : "blah",
+         "reason" : "pcre blacklist $xresult",
+         "risk" : "medium",
+         "type" : "public,part,quit,caction"
+      },
+      "botnickbl" : {
+         "class" : "nickbl",
+         "content" : "contentisuseless",
+         "reason" : "matches against a possible bot nick",
+         "risk" : "info",
+         "type" : "join,nick"
+      },
+      "botpattern1" : {
+         "class" : "nuhg",
+         "content" : "DISABLED[A-Za-z]{4}\\d+!~[A-Za-z]{4}@.*![A-Za-z]{4}",
+         "reason" : "matches probable botnet pattern",
+         "risk" : "debug",
+         "type" : "join"
+      },
+      "cloning" : {
+         "class" : "cloning",
+         "content" : "3",
+         "reason" : "excessive clones detected ($xresult) !clonesdetected ",
+         "risk" : "debug",
+         "type" : "join"
+      },
+      "ctcp-dcc" : {
+         "class" : "re",
+         "content" : ".*",
+         "reason" : "ctcp-dcc",
+         "risk" : "high",
+         "type" : "cdcc"
+      },
+      "ctcp-ping" : {
+         "class" : "re",
+         "content" : ".*",
+         "reason" : "channel-wide CTCP PING",
+         "risk" : "medium",
+         "type" : "cping"
+      },
+      "ctcp-version" : {
+         "class" : "re",
+         "content" : ".*",
+         "reason" : "channel-wide CTCP VERSION",
+         "risk" : "medium",
+         "type" : "cversion"
+      },
+      "cyclebotnet" : {
+         "class" : "cyclebotnet",
+         "content" : "4:4:30",
+         "reason" : "botnet cyclespam",
+         "risk" : "high",
+         "type" : "part"
+      },
+      "dcc" : {
+         "class" : "re",
+         "content" : "^DCC (SEND|S?CHAT) |\\bDCC (SEND|S?CHAT) \"?[A-Za-z0-9]+\"? \\d+ \\d+ \\d+",
+         "override" : "dcc-medium",
+         "reason" : "using the DC.C SE.ND exploit",
+         "risk" : "high",
+         "type" : "public"
+      },
+      "dcc-medium" : {
+         "class" : "re",
+         "content" : "\\bDCC SEND ",
+         "reason" : "using the DC.C SE.ND exploit",
+         "risk" : "medium",
+         "type" : "public"
+      },
+      "dcc-part" : {
+         "class" : "re",
+         "content" : "\\bDCC SEND ",
+         "reason" : "using the DC.C SE.ND exploit in a part message",
+         "risk" : "high",
+         "type" : "part"
+      },
+      "dcc-topic" : {
+         "class" : "re",
+         "content" : "\\bDCC SEND ",
+         "reason" : "setting a bad topic",
+         "risk" : "medium",
+         "type" : "topic"
+      },
+      "debugme" : {
+         "class" : "re",
+         "content" : "debugantispambotdebug",
+         "reason" : "sending a string designed to trigger a debug test alert, disregard this",
+         "risk" : "debug",
+         "type" : "public"
+      },
+      "fakechristel" : {
+         "class" : "nuhg",
+         "content" : "(?i)chr[i1]ste[l1]_?!.*",
+         "reason" : "christel's nick but not host",
+         "risk" : "medium",
+         "type" : "join"
+      },
+      "fakeglobal" : {
+         "class" : "re",
+         "content" : "(?i)\\[global notice\\]",
+         "override" : "notice",
+         "reason" : "fake global notice",
+         "risk" : "high",
+         "type" : "notice"
+      },
+      "floodqueue10-20" : {
+         "class" : "floodqueue",
+         "content" : "10:20",
+         "reason" : "flooding (10 msgs in 20 seconds)",
+         "risk" : "low",
+         "type" : "public,caction"
+      },
+      "genspammer2" : {
+         "class" : "nuhg",
+         "content" : ".*!~hyd@.*!.*",
+         "reason" : "suspicious NUHG, rule 3 (~hyd trolling 2012/12, 2013/03)",
+         "risk" : "info",
+         "type" : "join"
+      },
+      "gnaa-topic" : {
+         "class" : "re",
+         "content" : "(?i)\\bgnaa\\b",
+         "reason" : "setting a GNAA topic",
+         "risk" : "medium",
+         "type" : "topic"
+      },
+      "gnaaquit" : {
+         "class" : "re",
+         "content" : "(?i)\\bgnaa\\b",
+         "reason" : "quitting with a GNAA message",
+         "risk" : "medium",
+         "type" : "quit"
+      },
+      "invite" : {
+         "class" : "invite",
+         "content" : "blah",
+         "reason" : "invited to a channel",
+         "risk" : "debug",
+         "type" : "invite"
+      },
+      "joinflood" : {
+         "class" : "floodqueue",
+         "content" : "5:20",
+         "reason" : "join flood (5 joins in 20 seconds)",
+         "risk" : "medium",
+         "type" : "join"
+      },
+      "joinfloodquiet" : {
+         "class" : "floodqueue2",
+         "content" : "3:90",
+         "reason" : "join flood (3 joins in 90 seconds) by quieted user",
+         "risk" : "low",
+         "type" : "join"
+      },
+      "joinmsgquit" : {
+         "class" : "joinmsgquit",
+         "content" : "3",
+         "reason" : "joined, said something, parted/quit",
+         "risk" : "info",
+         "type" : "quit,part"
+      },
+      "keylogger" : {
+         "class" : "re",
+         "content" : "^startkeylogger$|^stopkeylogger$",
+         "override" : "keylogger-medium",
+         "reason" : "using the norton start-key-logger exploit",
+         "risk" : "high",
+         "type" : "public"
+      },
+      "keylogger-medium" : {
+         "class" : "re",
+         "content" : "\\bstartkeylogger\\b|\\bstopkeylogger\\b",
+         "reason" : "using the norton start-key-logger exploit",
+         "risk" : "medium",
+         "type" : "public"
+      },
+      "last_measure_regex" : {
+         "class" : "re",
+         "content" : "(?i)(http://(\\S+\\.)?on\\.nimp\\.org|http://(\\S+\\.)?feenode.net|http://wikipaste\\.eu|http://(\\S+\\.)?bioghost\\.com|http://(\\S+\\.)?on\\.zoy\\.org|http://(lastmeasure|dirtysanchez|doom3|freeipods|halflife2|halo2|lastmeasure4|lastmeasureunified|softmeasure|traceroute)\\.zoy\\.org)",
+         "reason" : "posting what appears to be a last measure link",
+         "risk" : "high",
+         "type" : "public"
+      },
+      "levenflood" : {
+         "class" : "levenflood",
+         "content" : "contentisuseless",
+         "override" : "flood-5to3",
+         "reason" : "levenshtein flood match",
+         "risk" : "low",
+         "type" : "public"
+      },
+      "malspreader1" : {
+         "class" : "nuhg",
+         "content" : ".*!~NUMONE@.*!REAL_NAME",
+         "reason" : "suspicious NUHG, rule 1",
+         "risk" : "low",
+         "type" : "join"
+      },
+      "massflood" : {
+         "class" : "splitflood",
+         "content" : "4:4",
+         "reason" : "distributed flooding",
+         "risk" : "high",
+         "type" : "public,caction"
+      },
+      "meepsheep1" : {
+         "class" : "nuhg",
+         "content" : "(?i).*..psh..p.*",
+         "reason" : "common troll (meepsheep)",
+         "risk" : "info",
+         "type" : "join"
+      },
+      "nickbl" : {
+         "class" : "nickfuzzy",
+         "content" : "1:chanserv,nickserv,hostserv,operserv,memoserv",
+         "reason" : "fuzzy matching against nick blacklist (services set)",
+         "risk" : "low",
+         "type" : "join,nick"
+      },
+      "nickbl2" : {
+         "class" : "nickfuzzy",
+         "content" : "1:incog,meepsheep,blackman,brthmthr,patroclus_rex",
+         "reason" : "fuzzy matching against nick blacklist (set 2)",
+         "risk" : "debug",
+         "type" : "join,nick"
+      },
+      "nickbl_impersonate" : {
+         "class" : "nickfuzzy",
+         "content" : "2:botchlab,bremmyfag,ilbelkyr,bremsstrahlung,ishanyx",
+         "reason" : "fuzzy matching against nick blacklist (impersonation set), see ;falsematch if in error",
+         "risk" : "medium",
+         "type" : "join,nick"
+      },
+      "nickspam" : {
+         "class" : "nickspam",
+         "content" : "60:10",
+         "reason" : "nickspamming",
+         "risk" : "high",
+         "type" : "public"
+      },
+      "notice" : {
+         "class" : "re",
+         "content" : ".*",
+         "reason" : "sending a notice to the channel",
+         "risk" : "medium",
+         "type" : "notice"
+      },
+      "phishing1" : {
+         "class" : "re",
+         "content" : "identify.*/msg .* identify <password>",
+         "override" : "notice",
+         "reason" : "trying to steal passwords (v1)",
+         "risk" : "high",
+         "type" : "notice"
+      },
+      "phishing2" : {
+         "class" : "re",
+         "content" : "^This nickname is registered",
+         "override" : "notice",
+         "reason" : "trying to steal passwords (v2)",
+         "risk" : "high",
+         "type" : "notice"
+      },
+      "proxylist" : {
+         "class" : "proxy",
+         "content" : "lolz",
+         "reason" : "IP is blacklisted",
+         "risk" : "info",
+         "type" : "join"
+      },
+      "redarmyoflol" : {
+         "class" : "re",
+         "content" : "RED ARMY OF LOL",
+         "reason" : "parting with 'red army of lol'",
+         "risk" : "low",
+         "type" : "part"
+      },
+      "sms_spam" : {
+         "class" : "re",
+         "content" : "\\.com/sms.exe",
+         "reason" : "spam link / virus",
+         "risk" : "low",
+         "type" : "public"
+      },
+      "suckmynick" : {
+         "class" : "re",
+         "content" : "(suck.*dick)",
+         "reason" : "using a potentially offensive nick",
+         "risk" : "low",
+         "type" : "join"
+      },
+      "urlcrunch" : {
+         "class" : "urlcrunch",
+         "content" : "^(https?:\\/\\/bitly.com\\/a\\/warning|https?://(?:i.)?imgur.com|https?://(?:www.)?hotxgirls.net)",
+         "reason" : "URL that resolves to some place that is bad",
+         "risk" : "medium",
+         "type" : "public"
+      },
+      "wikifags2" : {
+         "class" : "re",
+         "content" : "(?i)^sure are a ?lot of .*fags? in here",
+         "reason" : "saying 'sure are a lot of wikifag'...",
+         "risk" : "low",
+         "type" : "public"
+      },
+      "xchatbroad" : {
+         "class" : "re",
+         "content" : "THISHASBEENDISABLED[ð-÷][-¿]{3}",
+         "reason" : "using an x-chat for windows unicode exploit (broad detection version, may be error prone)",
+         "risk" : "low",
+         "type" : "public,part,quit,caction"
+      },
+      "xchatexploit" : {
+         "class" : "re",
+         "content" : "ó ",
+         "override" : "xchatbroad",
+         "reason" : "using an x-chat for windows unicode exploit",
+         "risk" : "high",
+         "type" : "public,part,quit,caction"
+      }
+   }
+}

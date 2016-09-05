@@ -18,7 +18,6 @@ requires 'String::Interpolate', '0.32';
 requires 'Text::LevenshteinXS', '0.03';
 requires 'Tie::CPHash', '1.06';
 requires 'URI::Escape', '3.31';
-requires 'XML::Simple', '2.20';
 
 requires 'DBI', '1.63';
 requires 'DBD::mysql', '4.025';

@@ -1,0 +1,35 @@
+{
+   "altnicks" : [
+      "AntiSpamMeta_",
+      "AntiSpamMeta2"
+   ],
+   "autojoins" : "#antispammeta",
+   "debugchan" : "#antispammeta-debug",
+   "log" : {
+      "actiondir" : "actionlogs/",
+      "detectdir" : "detectlogs/",
+      "dir" : "logs/",
+      "filefmt" : "-%Y-%m-%d.log",
+      "timefmt" : "%Y-%m-%d %T ",
+      "zone" : "GMT"
+   },
+   "masterchan" : "#antispammeta",
+   "nick" : "AntiSpamMeta",
+   "pass" : {},
+   "port" : "6697",
+   "realname" : "I am a new AntiSpamBot in the making.",
+   "server" : [
+      "irc.freenode.net"
+   ],
+   "ssl" : "1",
+   "username" : "MetaBot",
+   "web" : {
+      "groupfile" : "/var/www/.htgroup",
+      "shortener" : {
+         "apikey" : "yoursecretkey",
+         "domain" : "yourls.org",
+         "secure" : "0"
+      },
+      "userfile" : "/var/www/.htpasswd"
+   }
+}

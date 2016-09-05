@@ -1,0 +1,16 @@
+{
+   "actiontable" : "actionlog",
+   "db" : "asm_main",
+   "dblog" : "asm_log",
+   "host" : "localhost",
+   "ignoredgecos" : [
+      "new now know how"
+   ],
+   "ignoredidents" : [
+      "~chatzilla"
+   ],
+   "pass" : "PASS",
+   "port" : "3307",
+   "table" : "alertlog",
+   "user" : "USER"
+}

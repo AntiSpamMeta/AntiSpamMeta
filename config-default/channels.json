@@ -1,0 +1,19 @@
+{
+   "channel" : {
+      "#antispammeta" : {
+         "hilights" : {},
+         "msgs" : {}
+      },
+      "default" : {
+         "hilights" : {}
+      },
+      "master" : {
+         "hilights" : {},
+         "msgs" : {
+            "debug" : [
+               "#antispammeta"
+            ]
+         }
+      }
+   }
+}

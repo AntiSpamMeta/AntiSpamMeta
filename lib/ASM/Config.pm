@@ -4,10 +4,8 @@ use warnings;
 use strict;
 use feature 'state';
 
-use XML::Simple qw(:strict);
 use JSON;
 use IO::All;
-no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
 our $json = JSON->new->utf8->pretty->canonical;
 
@@ -18,41 +16,15 @@ sub deserialize {
   return $json->decode(@_);
 }
 
-sub readXML {
-  my ( $p ) = $::cset;
-  my @fchan = ( 'event', keys %::RISKS );
-  my $xs1 = XML::Simple->new( KeyAttr => ['id'], Cache => [ qw/memcopy/ ]);
-  $::settings     = $xs1->XMLin( "$p/settings.xml",     ForceArray => ['host'],
-                                 'GroupTags' => { altnicks => 'altnick', server => 'host',
-                                                 autojoins => 'autojoin' });
-  $::channels     = $xs1->XMLin( "$p/channels.xml",     ForceArray => \@fchan );
-  $::users        = $xs1->XMLin( "$p/users.xml",        ForceArray => 'person');
-  $::mysql        = $xs1->XMLin( "$p/mysql.xml",        ForceArray => ['ident', 'geco'],
-                                 'GroupTags' => { ignoredidents => 'ident', ignoredgecos => 'geco' });
-  $::dnsbl        = $xs1->XMLin( "$p/dnsbl.xml",        ForceArray => []);
-  $::rules        = $xs1->XMLin( "$p/rules.xml",        ForceArray => []);
-  $::restrictions = $xs1->XMLin( "$p/restrictions.xml", ForceArray => ['host', 'nick', 'account']);
-  $::blacklist    = $xs1->XMLin( "$p/blacklist.xml",    ForceArray => 'string');
-}
-
 sub readConfig {
-  if (!-e "$::cset/settings.json") {
-    state $in_readconfig = 0;
-    die "Unexpected readConfig recursion" if $in_readconfig++;
-    readXML();
-    writeConfig();
-    readConfig();
-  }
-  else {
-    $::settings     = deserialize(io->file("$::cset/settings.json")->all);
-    $::channels     = deserialize(io->file("$::cset/channels.json")->all);
-    $::users        = deserialize(io->file("$::cset/users.json")->all);
-    $::mysql        = deserialize(io->file("$::cset/mysql.json")->all);
-    $::dnsbl        = deserialize(io->file("$::cset/dnsbl.json")->all);
-    $::rules        = deserialize(io->file("$::cset/rules.json")->all);
-    $::restrictions = deserialize(io->file("$::cset/restrictions.json")->all);
-    $::blacklist    = deserialize(io->file("$::cset/blacklist.json")->all);
-  }
+  $::settings     = deserialize(io->file("$::cset/settings.json")->all);
+  $::channels     = deserialize(io->file("$::cset/channels.json")->all);
+  $::users        = deserialize(io->file("$::cset/users.json")->all);
+  $::mysql        = deserialize(io->file("$::cset/mysql.json")->all);
+  $::dnsbl        = deserialize(io->file("$::cset/dnsbl.json")->all);
+  $::rules        = deserialize(io->file("$::cset/rules.json")->all);
+  $::restrictions = deserialize(io->file("$::cset/restrictions.json")->all);
+  $::blacklist    = deserialize(io->file("$::cset/blacklist.json")->all);
 }
 
 sub writeConfig {

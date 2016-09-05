@@ -1,0 +1,95 @@
+{
+   "query" : {
+      "dnsbl.dronebl.org." : {
+         "response" : {
+            "127.0.0.1" : {
+               "content" : "Testing data"
+            },
+            "127.0.0.10" : {
+               "content" : "ProxyChain"
+            },
+            "127.0.0.14" : {
+               "content" : "Open Wingate Proxy"
+            },
+            "127.0.0.15" : {
+               "content" : "Compromised router / gateway"
+            },
+            "127.0.0.2" : {
+               "content" : "Sample"
+            },
+            "127.0.0.255" : {
+               "content" : "Unknown"
+            },
+            "127.0.0.3" : {
+               "content" : "IRC Drone"
+            },
+            "127.0.0.5" : {
+               "content" : "Bottler"
+            },
+            "127.0.0.6" : {
+               "content" : "Unknown spambot or drone"
+            },
+            "127.0.0.7" : {
+               "content" : "DDOS drone"
+            },
+            "127.0.0.8" : {
+               "content" : "SOCKS proxy"
+            },
+            "127.0.0.9" : {
+               "content" : "HTTP proxy"
+            }
+         }
+      },
+      "dnsbl.incredibl.org." : {
+         "response" : {
+            "127.0.0.2" : {
+               "content" : "SOCKS Proxy"
+            },
+            "127.0.0.3" : {
+               "content" : "IRC Proxy"
+            },
+            "127.0.0.4" : {
+               "content" : "HTTP Proxy"
+            },
+            "127.0.0.5" : {
+               "content" : "IRC Drone"
+            },
+            "127.0.0.6" : {
+               "content" : "TOR"
+            }
+         }
+      },
+      "dnsbl.sorbs.net." : {
+         "response" : {
+            "127.0.0.2" : {
+               "content" : "HTTP Proxy"
+            },
+            "127.0.0.3" : {
+               "content" : "SOCKS Proxy"
+            },
+            "127.0.0.4" : {
+               "content" : "Misc. proxy"
+            }
+         }
+      },
+      "rbl.efnetrbl.org." : {
+         "response" : {
+            "127.0.0.1" : {
+               "content" : "Open proxy"
+            },
+            "127.0.0.2" : {
+               "content" : "Trojan spreader"
+            },
+            "127.0.0.3" : {
+               "content" : "Trojan infected client"
+            },
+            "127.0.0.4" : {
+               "content" : "TOR exit server"
+            },
+            "127.0.0.5" : {
+               "content" : "Drones / Flooding"
+            }
+         }
+      }
+   }
+}
