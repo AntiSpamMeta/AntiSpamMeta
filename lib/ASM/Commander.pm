@@ -60,6 +60,7 @@ my $cmdtbl = {
 	'^;query (\S+) ?(\S+)?$' => {
 		'cmd' => \&cmd_query },
 	'^;investigate (?<nick>\S+) *$' => {
+		'flag' => 's',
 		'cmd' => \&cmd_investigate },
 	'^;investigate2 (?<nick>\S+) ?(?<skip>\d*) *$' => {
 		'flag' => 's',
