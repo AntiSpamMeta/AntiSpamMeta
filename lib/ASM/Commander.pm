@@ -144,12 +144,6 @@ my $cmdtbl = {
 	'^;falsematch\b' => {
 		'flag' => 's',
 		'cmd' => \&cmd_falsematch },
-	'^;nicks (?<nick>\S+)\s*$' => {
-		'flag' => 's',
-		'cmd' => \&cmd_nicks },
-	'^;explain (?<nick1>\S+)\s+(?<nick2>\S+)\s*$' => {
-		'flag' => 's',
-		'cmd' => \&cmd_explain },
 	'^;version$' => {
 		'cmd' => \&cmd_version },
 };
@@ -360,9 +354,6 @@ sub cmd_sql {
 	}
 	
 	my $dbh = $::db->{DBH};
-	if ($+{db} eq 'log') {
-		$dbh = $::db->{DBH_LOG};
-	}
 	$::db->raw($conn, $event->{to}->[0], $dbh, $+{string});
 }
 
@@ -1046,62 +1037,6 @@ sub cmd_falsematch {
 	my ($conn, $event) = @_;
 
 	$conn->privmsg($event->replyto, 'To whitelist false matches for the impersonation check, have someone with the "a" flag run ";restrict nick LegitimateNickGoesHere +nonickbl_impersonate". Contact ilbelkyr if this issue reoccurs.');
-}
-
-sub cmd_nicks {
-	my ($conn, $event) = @_;
-	my $nick = $+{nick};
-	if (!defined $::db) {
-		$conn->privmsg($event->replyto, "I am set to run without a database, fool.");
-		return;
-	}
-	my $DB = $::db->{DBH_LOG};
-	my $doit = sprintf ("select distinct nick from joins as v1
-			inner join (
-				select distinct host from joins where nick=%s
-				and host not like %s
-				and host <> %s
-			) as v2
-			on v1.host = v2.host
-		where v1.nick not like %s
-		",
-		$DB->quote($nick),
-		$DB->quote('gateway/%/session'),
-		$DB->quote('127.0.0.1'),
-		$DB->quote('guest%')
-	);
-	my $result = $DB->selectcol_arrayref( $doit );
-	$conn->privmsg($event->replyto, "Results for $nick: " . ASM::Util->commaAndify(sort @$result));
-}
-
-sub cmd_explain { # all hosts associated with two given nicks
-	my ($conn, $event) = @_;
-	my $nick1 = $+{nick1};
-	my $nick2 = $+{nick2};
-	my $header = sprintf ("Hosts for %s and %s: ", $nick1, $nick2);
-	if (!defined $::db) {
-		$conn->privmsg($event->replyto, "I am set to run without a database, fool.");
-		return;
-	}
-	my $DB = $::db->{DBH_LOG};
-	my $result = $DB->selectcol_arrayref (
-		sprintf ("
-			select distinct t1.host from joins as t1
-				inner join (
-					select host from joins
-					where
-						nick=%s and
-						host not like %s and
-						host <> %s) as t2
-				on t1.host=t2.host and
-				t1.nick=%s",
-			$DB->quote($nick1),
-			$DB->quote('%/session'),
-			$DB->quote('127.0.0.1'),
-			$DB->quote($nick2)
-		)
-	);
-	$conn->privmsg($event->replyto, $header . ASM::Util->commaAndify(sort @$result));
 }
 
 sub cmd_version {

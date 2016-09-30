@@ -12,9 +12,7 @@ sub new {
   my ($db, $host, $port, $user, $pass, $table, $actiontable, $dblog) = @_;
   my $self = {};
   $self->{DBH} = DBI->connect("DBI:mysql:database=$db;host=$host;port=$port", $user, $pass);
-  $self->{DBH_LOG} = DBI->connect("DBI:mysql:database=$dblog;host=$host;port=$port", $user, $pass);
   $self->{DBH}->{mysql_auto_reconnect} = 1;
-  $self->{DBH_LOG}->{mysql_auto_reconnect} = 1;
   $self->{TABLE} = $table;
   $self->{ACTIONTABLE} = $actiontable;
   bless($self);
@@ -171,134 +169,6 @@ sub actionlog
 #          "host" => "freenode/weird-exception/network-troll/afterdeath"
 #        };
 
-}
-
-#FIXME: This function is shit. Also, it doesn't work like I want it to with mode.
-sub logg
-{
-  my $self = shift;
-  my ($event) = @_;
-  my $dbh = $self->{DBH_LOG};
-  my $table = $event->{type};
-  my $nick = lc $event->{nick};
-  my $victim;
-  $table = 'action' if ($table eq 'caction');
-  $table = 'privmsg' if ($table eq 'public');
-  return if (($table eq 'action') or ($table eq 'privmsg')); #Disabling logging of privmsg stuffs to mysql. no point.
-  my $realtable = $table;
-  $realtable = 'joins' if $realtable eq 'join'; #mysql doesn't like a table named join
-  my $string = 'INSERT INTO `' . $realtable . '` (';
-## begin saner code for this function
-  if ($table eq 'quit') {
-    $string = 'INSERT INTO `quit` (nick, user, host, geco, ip, account, content1) VALUES (' .
-           $dbh->quote($event->{nick}) . ',' . $dbh->quote($event->{user}) . ',' .
-           $dbh->quote($event->{host}) . ',' . $dbh->quote($::sn{$nick}->{gecos}) . ',';
-    my $ip = ASM::Util->getNickIP($nick, $event->{host});
-    if (defined($ip)) { $ip = $dbh->quote($ip); } else { $ip = 'NULL'; }
-    my $account = $::sn{$nick}->{account};
-    if (!defined($account) or ($account eq '0') or ($account eq '*')) {
-      $account = 'NULL';
-    } else {
-      $account = $dbh->quote($account);
-    }
-    $string = $string . $ip . ',' . $account . ',' . $dbh->quote($event->{args}->[0]) . ');';
-    $dbh->do($string);
-    ASM::Util->dprint($string, 'mysql');
-    return;
-  } elsif ($table eq 'part') {
-    $string = 'INSERT INTO `part` (channel, nick, user, host, geco, ip, account, content1) VALUES (' .
-              $dbh->quote($event->{to}->[0]) . ',' .
-              $dbh->quote($event->{nick}) . ',' . $dbh->quote($event->{user}) . ',' .
-              $dbh->quote($event->{host}) . ',' . $dbh->quote($::sn{$nick}->{gecos}) . ',';
-    my $ip = ASM::Util->getNickIP($nick, $event->{host});
-    if (defined($ip)) { $ip = $dbh->quote($ip); } else { $ip = 'NULL'; }
-    my $account = $::sn{$nick}->{account};
-    if (!defined($account) or ($account eq '0') or ($account eq '*')) {
-      $account = 'NULL';
-    } else {
-      $account = $dbh->quote($account);
-    }
-    $string = $string . $ip . ',' . $account . ',' . $dbh->quote($event->{args}->[0]) . ');';
-    $dbh->do($string);
-    ASM::Util->dprint($string, 'mysql');
-    return;
-  } elsif ($table eq 'kick') {
-    $victim = lc $event->{to}->[0];
-    $string = 'INSERT INTO `kick` (channel, nick, user, host, geco, ip, account, ' . 
-                      'victim_nick, victim_user, victim_host, victim_geco, victim_ip, victim_account, content1) VALUES (' .
-              $dbh->quote($event->{args}->[0]) . ',' .
-              $dbh->quote($event->{nick}) . ',' . $dbh->quote($event->{user}) . ',' .
-              $dbh->quote($event->{host}) . ',' . $dbh->quote($::sn{$nick}->{gecos}) . ',';
-    my $ip = ASM::Util->getNickIP($nick);
-    if (defined($ip)) { $ip = $dbh->quote($ip); } else { $ip = 'NULL'; }
-    my $account = $::sn{$nick}->{account};
-    if (($account eq '0') or ($account eq '*')) { $account = 'NULL'; } else { $account = $dbh->quote($account); }
-    $string = $string . $ip . ',' . $account;
-    $string = $string . ', ' . $dbh->quote($event->{to}->[0]);
-    $string = $string . ', ' . $dbh->quote($::sn{$victim}->{user});
-    $string = $string . ', ' . $dbh->quote($::sn{$victim}->{host});
-    $string = $string . ', ' . $dbh->quote($::sn{$victim}->{gecos});
-    my $vic_ip = ASM::Util->getNickIP($victim);
-    if (defined($vic_ip)) { $vic_ip = $dbh->quote($vic_ip); } else { $vic_ip = 'NULL'; }
-    my $vic_account = $::sn{$victim}->{account};
-    if (($vic_account eq '0') or ($vic_account eq '*')) { $vic_account = 'NULL'; } else { $vic_account = $dbh->quote($vic_account); }
-    $string = $string . ', ' . $vic_ip . ',' . $vic_account . ',' . $dbh->quote($event->{args}->[1]) . ');';
-    $dbh->do($string);
-    ASM::Util->dprint($string, 'mysql');
-    return;
-  }
-## end saner code for this function
-  if (($table ne 'nick') && ($table ne 'quit')) {
-    $string = $string . 'channel, ';
-  }
-  $string = $string . 'nick, user, host, geco';
-  if (($table ne 'join') && ($table ne 'kick')) {
-    $string = $string . ', content1';
-  }
-  if ($table eq 'mode') {
-    $string = $string . ', content2';
-  }
-  if ($table eq 'kick') {
-    $string = $string . ', victim_nick, victim_user, victim_host, victim_geco, content1';
-  }
-  if ($table eq 'join') {
-    $string .= ', account';
-  }
-  $string = $string . ') VALUES (';
-  if (($table ne 'nick') && ($table ne 'quit') && ($table ne 'kick')) {
-    $string = $string . $dbh->quote($event->{to}->[0]) . ", ";
-  }
-  if ($table eq 'kick') {
-    $string = $string . $dbh->quote($event->{args}->[0]) . ", ";
-  }
-  my $geco = $::sn{$nick}->{gecos};
-  $string = $string . $dbh->quote($event->{nick}) . ", " . $dbh->quote($event->{user}) . ", " .
-                      $dbh->quote($event->{host}) . ", " . $dbh->quote($geco);
-  if (($table ne 'join') && ($table ne 'kick')) {
-    $string = $string. ', ' . $dbh->quote($event->{args}->[0]);
-  }
-  if ($table eq 'kick') {
-    $string = $string . ', ' . $dbh->quote($event->{to}->[0]);
-    $string = $string . ', ' . $dbh->quote($::sn{$victim}->{user});
-    $string = $string . ', ' . $dbh->quote($::sn{$victim}->{host});
-    $string = $string . ', ' . $dbh->quote($::sn{$victim}->{gecos});
-    $string = $string . ', ' . $dbh->quote($event->{args}->[1]);
-  }
-  if ($table eq 'mode') {
-    $string = $string . ', ' . $dbh->quote($event->{args}->[1]);
-  }
-  if ($table eq 'join') {
-    my $account = $::sn{$nick}->{account};
-    if (!defined($account) or ($account eq '0') or ($account eq '*')) {
-      $account = 'NULL';
-    } else {
-      $account = $dbh->quote($account);
-    }
-    $string .= ', ' . $account;
-  }
-  $string = $string . ');';
-  ASM::Util->dprint($string, 'mysql');
-  $dbh->do($string);
 }
   
 sub query

@@ -214,7 +214,6 @@ sub on_join {
   $::sn{$nick}->{host} = $event->{host};
   $::sn{$nick}->{account} = lc $event->{args}->[0];
   push @{$::sa{$::sn{$nick}->{account}}}, $nick;
-  $::db->logg($event) if defined $::db;
 }
 
 sub on_part
@@ -222,7 +221,6 @@ sub on_part
   my ($conn, $event) = @_;
   my $nick = lc $event->{nick};
   my $chan = lc $event->{to}->[0];
-  $::db->logg( $event ) if defined $::db;
   # Ignore channels that are +s and not monitored
   if (defined $::db and $event->{args}->[0] =~ /^requested by/ and (not ((grep { /^s$/ } @{$::sc{$chan}{modes}} ) && ($::channels->{channel}->{$chan}->{monitor} eq "no"))) ) {
     my $idx = $::db->actionlog( $event);
@@ -265,7 +263,6 @@ sub on_public
   my ($conn, $event) = @_;
   my $chan = lc $event->{to}[0];
   $chan =~ s/^[+@]//;
-  $::db->logg( $event ) if defined $::db;
   $::sc{$chan}{users}{lc $event->{nick}}{msgtime} = time;
 }
 
@@ -273,7 +270,6 @@ sub on_notice
 {
   my ($conn, $event) = @_;
   return if ( $event->{to}->[0] eq '$*' ); # if this is a global notice FUCK THAT SHIT
-  $::db->logg( $event ) if defined $::db;
 }
 
 sub on_errnickinuse
@@ -307,7 +303,6 @@ sub on_quit
       # Ignore channels that are +s and not monitored
       my @actionlog_channels = grep { not ((grep { /^s$/ } @{$::sc{$_}{modes}}) && ($::channels->{channel}->{$_}->{monitor} eq "no")) } @channels;
       $::log->sqlIncident( join(',', @actionlog_channels), $idx ) if $idx;
-      $::db->logg( $event );
   }
   if (
       ($event->{args}->[0] eq "*.net *.split") && #special, netsplit situation
@@ -384,7 +379,6 @@ sub irc_topic {
       $::sc{$chan}{topic}{time} = time;
       $::sc{$chan}{topic}{by} = $event->{from};
     }
-    $::db->logg( $event ) if defined $::db;
   }
 }
 
@@ -414,7 +408,6 @@ sub on_nick {
   }
 
   $::sn{$newnick} = $::sn{$oldnick} if ($oldnick ne $newnick);
-  $::db->logg( $event ) if defined $::db;
   @{$::sa{$::sn{$oldnick}{account}}} = grep { $_ ne $oldnick } @{$::sa{$::sn{$oldnick}{account}}};
   push @{$::sa{$::sn{$newnick}{account}}}, $newnick;
   delete( $::sn{$oldnick}) if ($oldnick ne $newnick);
@@ -430,7 +423,6 @@ sub on_kick {
   }
   my $chan = lc $event->{args}->[0];
   if (defined $::db) {
-      $::db->logg( $event );
       # Ignore channels that are +s and not monitored
       if ( not ((grep { /^s$/ } @{$::sc{$chan}{modes}}) && ($::channels->{channel}->{$chan}->{monitor} eq "no")) ) {
           my $idx = $::db->actionlog($event);

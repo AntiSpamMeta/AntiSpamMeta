@@ -108,23 +108,6 @@ sub logg
     }
     push @backlog, $line;
     $self->{backlog}->{$chan} = \@backlog;
-    if (open(FH, $path)) { # or die "Can't open $path: $!";
-      print FH $line;
-      ASM::Util->dprint($line, 'logger');
-      close(FH);
-    } else {
-      print "COULDN'T PRINT TO $path - $line";
-    }
-    my $spy;
-    my $nick = lc $event->{nick};
-    if (defined($::spy{$chan})) {
-      $spy = $::spy{$chan};
-    } elsif (defined($::spy{$nick})) {
-      $spy = $::spy{$nick};
-    }
-    if (defined($spy)) {
-      say $spy "$chan: $nostamp";
-    }
   }
 }
 
