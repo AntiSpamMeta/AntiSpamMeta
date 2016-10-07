@@ -868,6 +868,8 @@ sub cmd_restrict {
 	ASM::Config->writeRestrictions();
 }
 
+my %ops_ignored;
+
 sub cmd_ops {
 	my ($conn, $event) = @_;
 
@@ -920,21 +922,31 @@ sub cmd_ops {
 		my $txtz = "[\x02$tgt\x02] - $event->{nick} wants op attention";
 		if ((time-$::sc{$tgt}{users}{$nick}{jointime}) > 90) {
 			$txtz .= " ($msg) $hilite !att-$tgt-opalert";
+			$::ignored{$tgt} = $::RISKS{'opalert'};
+			$conn->schedule(45, sub { delete($::ignored{$tgt}) if $::ignored{$tgt} == $::RISKS{'opalert'} });
+		}
+		elsif ($ops_ignored{$tgt}) {
+			return;
+		}
+		else {
+			$ops_ignored{$tgt} = 1;
+			$conn->schedule(45, sub { delete $ops_ignored{$tgt} });
 		}
 		my $uuid = $::log->incident($tgt, "$tgt: $event->{nick} requested op attention\n");
 		$txtz = $txtz . ' ' . ASM::Shortener->shorturl($::settings->{web}->{detectdir} . $uuid . '.txt');
 		my @tgts = ASM::Util->getAlert($tgt, 'opalert', 'msgs');
 		ASM::Util->sendLongMsg($conn, \@tgts, $txtz);
 	} else {
-		unless (defined($::ignored{$tgt}) && ($::ignored{$tgt} >= $::RISKS{'opalert'})) {
+		unless (defined($::ignored{$tgt}) && ($::ignored{$tgt} >= $::RISKS{'opalert'})
+				or $ops_ignored{$tgt}) {
 			my @tgts = ASM::Util->getAlert($tgt, 'opalert', 'msgs');
 			foreach my $chan (@tgts) {
 				$conn->privmsg($chan, $event->{nick} . " tried to use the ops trigger for $tgt but is restricted from doing so.");
 			}
+			$ops_ignored{$tgt} = 1;
+			$conn->schedule(45, sub { delete $ops_ignored{$tgt} });
 		}
 	}
-	$::ignored{$tgt} = $::RISKS{'opalert'};
-	$conn->schedule(45, sub { delete($::ignored{$tgt}) if $::ignored{$tgt} == $::RISKS{'opalert'} });
 }
 
 sub cmd_blacklist {
@@ -1044,4 +1056,5 @@ sub cmd_version {
 	$conn->privmsg($event->replyto, $::version);
 }
 
+1;
 # vim: ts=8:sts=8:sw=8:noexpandtab
