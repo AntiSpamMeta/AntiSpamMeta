@@ -21,5 +21,7 @@ requires 'URI::Escape', '3.31';
 
 requires 'DBI', '1.63';
 requires 'DBD::mysql', '4.025';
+requires 'DBIx::Class', '0.082840';
+requires 'DateTime::Format::MySQL', '0.06';
 
 # vim: ft=perl

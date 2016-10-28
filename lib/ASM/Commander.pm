@@ -30,9 +30,6 @@ my $cmdtbl = {
 		'cmd' => \&cmd_mship },
 	'^;source$' => {
 		'cmd' => \&cmd_source },
-	'^;sql (?<db>main|log) (?<string>.*)' => {
-		'flag' => 'd',
-		'cmd' => \&cmd_sql },
 	'^;monitor (?<chan>\S+) *$' => {
 		'flag' => 's',
 		'cmd' => \&cmd_monitor },
@@ -345,18 +342,6 @@ sub cmd_source {
 	$conn->privmsg($event->replyto, 'source is at http://asm.rocks/source');
 }
 
-sub cmd_sql {
-	my ($conn, $event) = @_;
-
-	if (!defined $::db) {
-		$conn->privmsg($event->replyto, "I am set to run without a database, fool.");
-		return;
-	}
-	
-	my $dbh = $::db->{DBH};
-	$::db->raw($conn, $event->{to}->[0], $dbh, $+{string});
-}
-
 sub cmd_monitor {
 	my ($conn, $event) = @_;
 
@@ -456,13 +441,29 @@ sub cmd_db {
 	$conn->privmsg($event->replyto, "db is at http://antispammeta.net/query.html");
 }
 
+sub sql_wildcard {
+	my ($str) = @_;
+	# Ugh ...
+	$str =~  s/\*/%/g;
+	$str =~ s/_/\\_/g;
+	$str =~  s/\?/_/g;
+
+	return $str;
+}
+
 sub cmd_query {
 	my ($conn, $event) = @_;
 
 	return unless defined $::db;
 	my $channel = defined($2) ? $1 : '%';
-	my @nuh = split(/(\!|\@)/, defined($2) ? $2 : $1);
-	my $result = $::db->query($channel, $nuh[0], $nuh[2], $nuh[4]);
+	my ($nick, $user, $host) = split(/(\!|\@)/, defined($2) ? $2 : $1);
+
+	my $result = $::db->resultset('Alertlog')->count( {
+			channel => { like => sql_wildcard($channel) },
+			nick => { like => sql_wildcard($nick) },
+			user => { like => sql_wildcard($user) },
+			host => { like => sql_wildcard($host) },
+		});
 	$conn->privmsg($event->replyto, "$result results found.");
 }
 
@@ -479,33 +480,62 @@ sub cmd_investigate {
 	my $person = $::sn{$nick};
 	my $user = lc $person->{user};
 	my $gecos = lc $person->{gecos};
-	my $dbh = $::db->{DBH};
+	my $acc = $person->{account};
 	
-	my $mnicks = $dbh->do("SELECT * from $::db->{ACTIONTABLE} WHERE nick like " . $dbh->quote($nick) . ';');
-	my $musers = ($user ~~ $::mysql->{ignoredidents}) ? "didn't check" : $dbh->do("SELECT * from $::db->{ACTIONTABLE} WHERE user like " . $dbh->quote($person->{user}) . ';');
-	my $mhosts = $dbh->do("SELECT * from $::db->{ACTIONTABLE} WHERE host like " . $dbh->quote($person->{host}) . ';');
-	my $maccts = $dbh->do("SELECT * from $::db->{ACTIONTABLE} WHERE account like " . $dbh->quote($person->{account}) . ';');
-	my $mgecos = ($gecos ~~ $::mysql->{ignoredgecos}) ? "didn't check" : $dbh->do("SELECT * from $::db->{ACTIONTABLE} WHERE gecos like " . $dbh->quote($person->{gecos}) . ';');
+	my $actions = $::db->resultset('Actionlog');
+	my $mnicks = $actions->count({ nick => $nick });
+	my $mhosts = $actions->count({ host => $person->{host} });
+	my $maccts;
+	my $musers;
+	my $mgecos;
+
+	if (defined $acc and $acc ne '0' and $acc ne '*') {
+		$maccts = $actions->count({ account => $acc });
+	}
+
+	if ($user !~ $::mysql->{ignoredidents}) {
+		$musers = $actions->count({ user => $person->{user} });
+	}
+
+	if ($gecos !~ $::mysql->{ignoredgecos}) {
+		$mgecos = $actions->count({ gecos => $person->{gecos} });
+	}
 	
+	my $matchedip;
 	my $ip = ASM::Util->getNickIP($nick);
-	my $matchedip = 0;
-	$matchedip = $dbh->do("SELECT * from $::db->{ACTIONTABLE} WHERE ip = " . $dbh->quote($ip) . ';') if defined($ip);
-	$mnicks =~ s/0E0/0/;
-	$musers =~ s/0E0/0/;
-	$mhosts =~ s/0E0/0/;
-	$maccts =~ s/0E0/0/;
-	$mgecos =~ s/0E0/0/;
-	$matchedip =~ s/0E0/0/;
-	my $dq = '';
+	if (defined $ip) {
+		$matchedip = $actions->count({ ip => $ip });
+	}
+
+	my $dq;
 	if (defined($ip)) {
 		$dq = join '.', unpack 'C4', pack 'N', $ip;
 	}
-	$conn->privmsg($event->replyto, "I found $mnicks matches by nick ($nick), $musers by user ($person->{user}), $mhosts by hostname ($person->{host}), " .
-		       "$maccts by NickServ account ($person->{account}), $mgecos by gecos field ($person->{gecos}), and $matchedip by real IP ($dq). " .
-		       ASM::Shortener->shorturl('https://antispammeta.net/cgi-bin/secret/investigate.pl?nick=' . uri_escape($nick) .
-		       (($user ~~ $::mysql->{ignoredidents}) ? '' : '&user=' . uri_escape($person->{user})) .
-		       '&host=' . uri_escape($person->{host}) . '&account=' . uri_escape($person->{account}) .
-		       (($gecos ~~ $::mysql->{ignoredgecos}) ? '' : '&gecos=' . uri_escape($person->{gecos})) . '&realip=' . $dq));
+
+	my $found_by_fmt = '%s%s by %s (%s)';
+	my @found;
+
+	push @found, sprintf $found_by_fmt, $mnicks,             ' matches', 'nick',             $nick;
+	push @found, sprintf $found_by_fmt, ($musers // "didn't check"), '', 'user',             $person->{user};
+	push @found, sprintf $found_by_fmt, $mhosts,                     '', 'hostname',         $person->{host};
+	push @found, sprintf $found_by_fmt, $maccts,                     '', 'NickServ account', $person->{account} if defined $maccts;
+	push @found, sprintf $found_by_fmt, ($mgecos // "didn't check"), '', 'gecos field',      $person->{gecos};
+	push @found, sprintf $found_by_fmt, $matchedip,                  '', 'real IP',          $dq if defined $ip;
+
+	my $all_found = ASM::Util->commaAndify(@found);
+
+	my @queries;
+	push @queries, 'nick='    . uri_escape($nick);
+	push @queries, 'user='    . uri_escape($person->{user}) if defined $musers;
+	push @queries, 'host='    . uri_escape($person->{host});
+	push @queries, 'account=' . uri_escape($person->{account}) if defined $maccts;
+	push @queries, 'gecos='   . uri_escape($person->{gecos}) if defined $mgecos;
+	push @queries, 'realip='  . uri_escape($dq) if defined $ip;
+
+	my $query_string = join '&', @queries;
+
+	$conn->privmsg( $event->replyto, "I found $all_found. " .
+		ASM::Shortener->shorturl("https://antispammeta.net/cgi-bin/secret/investigate.pl?$query_string") );
 }
 
 sub cmd_investigate2 {
@@ -515,46 +545,53 @@ sub cmd_investigate2 {
 	my $nick = lc $+{nick};
 	my $skip = 0;
 	$skip = $+{skip} if (defined($+{skip}) and ($+{skip} ne ""));
+	$skip = 1 if $skip < 1;
+	$skip = int(2**31-1) if $skip > int(2**31-1);
 	cmd_investigate($conn, $event);
 	unless (defined($::sn{$nick})) {
 		return;
 	}
 	my $person = $::sn{$nick};
-	my $dbh = $::db->{DBH};
 
-	my $query = "SELECT * from $::db->{ACTIONTABLE} WHERE nick like " . $dbh->quote($nick) .
-	             ((lc $person->{user} ~~ $::mysql->{ignoredidents}) ? '' : ' or user like ' . $dbh->quote($person->{user})) .
-	             ' or host like ' . $dbh->quote($person->{host}) .
-		     ' or account like ' . $dbh->quote($person->{account}) .
-	             ((lc $person->{gecos} ~~ $::mysql->{ignoredgecos}) ? '' : ' or gecos like ' . $dbh->quote($person->{gecos}));
+	my $acc = $person->{account};
+	undef $acc if $acc eq '0' or $acc eq '*';
+
 	my $ip = ASM::Util->getNickIP($nick);
-	if (defined($ip)) {
-		$query = $query . ' or ip = ' . $dbh->quote($ip);
-	}
-	$query = $query . " order by time desc limit $skip,10;";
-	ASM::Util->dprint($query, 'mysql');
-	my $query_handle = $dbh->prepare($query);
-	$query_handle->execute();
-	my @data = @{$query_handle->fetchall_arrayref()};
-	if (@data) {
+
+	my $query = [
+		nick => $nick,
+		host => $person->{host},
+		(defined $acc ? (account => $acc) : ()),
+		(defined $ip ? (ip => $ip) : ()),
+		($person->{user} ~~ $::mysql->{ignoredidents} ? () : (user => $person->{user})),
+		($person->{gecos} ~~ $::mysql->{ignoredgecos} ? () : (gecos => $person->{gecos})),
+	];
+
+	my @incidents = $::db->resultset('Actionlog')->search($query, {
+			order_by => { -desc => 'time' },
+			rows => 10,
+			page => $skip,
+		})->all;
+
+	if (@incidents) {
 		$conn->privmsg($event->replyto, 'Sending you the results...');
 	} else {
 		$conn->privmsg($event->replyto, 'No results to send!');
+		return;
 	}
-#		 reverse @data;
-#$data will be an array of arrays,
-	my ($xindex, $xtime, $xaction, $xreason, $xchannel, $xnick, $xuser, $xhost, $xip, $xgecos, $xaccount, $xbynick, $xbyuser, $xbyhost, $xbygecos, $xbyaccount ) = ( 0 .. 15 );
-	foreach my $line (@data) {
-		my $reason = ''; my $channel = '';
-		$reason = ' (' . $line->[$xreason] . ')' if defined($line->[$xreason]);
-		$channel = ' on ' . $line->[$xchannel] if defined($line->[$xchannel]);
-		$conn->privmsg($event->nick, '#' . $line->[$xindex] . ': ' . $line->[$xtime] . ' ' .
-			       $line->[$xnick] . '!' . $line->[$xuser] . '@' . $line->[$xhost] . ' (' . $line->[$xgecos] . ') ' . 
-			       $line->[$xaction] . $reason . $channel . ' by ' . $line->[$xbynick]); # . "\n";
+
+	my $format = '#%d: %s %s!%s@%s (%s) %s%s%s%s';
+	for my $line (@incidents) {
+		my $out = sprintf $format, ($line->index, $line->time, $line->nick, $line->user, $line->host, $line->gecos, $line->action,
+			(defined $line->reason ? ' (' . $line->reason . ')' : ''),
+			(defined $line->channel ? ' on ' . $line->channel : ''),
+			(defined $line->bynick ? ' by ' . $line->bynick : ''),
+		);
+
+		$conn->privmsg($event->nick, $out);
 	}
-	if (@data) {
-		$conn->privmsg($event->nick, "Only 10 results are shown at a time. For more, do ;investigate2 $nick " . ($skip+10) . '.');
-	}
+
+	$conn->privmsg($event->nick, "Only 10 results are shown at a time. For more, do ;investigate2 $nick " . ($skip+1) . '.');
 }
 
 sub cmd_user_add {

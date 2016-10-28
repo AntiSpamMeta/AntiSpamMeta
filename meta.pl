@@ -123,10 +123,44 @@ sub init {
   if (-e "debugsock") {
     $irc->debugsock(1);
   }
+
+  my $mysql_config_bad = 0;
+
+  if (exists $::mysql->{table}) {
+    if ($::mysql->{table} ne 'alertlog') {
+      warn "The 'table' option in mysql.json is no longer supported. Please ensure your table is named 'alertlog'.\n";
+      $mysql_config_bad++;
+    }
+    else {
+      warn "The 'table' option in mysql.json is no longer supported. Please remove it from the configuration.\n";
+    }
+  }
+  if (exists $::mysql->{actiontable}) {
+    if ($::mysql->{actiontable} ne 'actionlog') {
+      warn "The 'actiontable' option in mysql.json is no longer supported. Please ensure your table is named 'actionlog'.\n";
+      $mysql_config_bad++;
+    }
+    else {
+      warn "The 'actiontable' option in mysql.json is no longer supported. Please remove it from the configuration.\n";
+    }
+  }
+
+  if ($mysql_config_bad) {
+    die "The bot cannot operate with the current database configuration.\n";
+  }
+
   if (!$::mysql->{disable}) {
-      $::db = ASM::DB->new($::mysql->{db}, $::mysql->{host}, $::mysql->{port},
-                           $::mysql->{user}, $::mysql->{pass}, $::mysql->{table},
-                           $::mysql->{actiontable}, $::mysql->{dblog});
+    my $dsn;
+    if (exists $::mysql->{dsn}) {
+      $dsn = $::mysql->{dsn};
+    }
+    else {
+      # This isn't what we *should* do - notably, we'd have to wrap IPv6 addresses given
+      # as host in brackets. It's what the old code did, though, and all we need is
+      # compatibility with that.
+      $dsn = sprintf 'DBI:mysql:database=%s;host=%s;port=%s', @{ $::mysql }{'db', 'host', 'port'};
+    }
+    $::db = ASM::DB->connect($dsn, $::mysql->{user}, $::mysql->{pass});
   }
   $conn = $irc->newconn( Server => $host,
                          Port => $::settings->{port} || '6667',
