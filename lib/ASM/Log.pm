@@ -162,7 +162,7 @@ sub incident
   print FH "\n\n";
   close(FH);
 
-  return if $is_opalert;
+  return $uuid if $is_opalert;
 
   $gecos //= "NOT_DEFINED";
 
