@@ -969,7 +969,7 @@ sub cmd_ops {
 			$ops_ignored{$tgt} = 1;
 			$conn->schedule(45, sub { delete $ops_ignored{$tgt} });
 		}
-		my $uuid = $::log->incident($tgt, "$tgt: $event->{nick} requested op attention\n");
+		my $uuid = $::log->incident($tgt, $event->{nick}, undef, undef, undef, 'opalert');
 		$txtz = $txtz . ' ' . ASM::Shortener->shorturl($::settings->{web}->{detectdir} . $uuid . '.txt');
 		my @tgts = ASM::Util->getAlert($tgt, 'opalert', 'msgs');
 		ASM::Util->sendLongMsg($conn, \@tgts, $txtz);

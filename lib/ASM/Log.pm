@@ -144,7 +144,15 @@ sub incident
   $chan = lc $chan;
   my $uuid = $self->{UUID}->create_str();
 
-  my $header = "$chan: $risk risk: $nick - $reason\n";
+  my $is_opalert = ($risk eq 'opalert');
+
+  my $header;
+  if ($is_opalert) {
+    $header = "$chan: $nick requested op attention\n";
+  }
+  else {
+    $header = "$chan: $risk risk: $nick - $reason\n";
+  }
 
   open(FH, '>', $self->{CONFIG}->{detectdir} . $uuid . '.txt');
   print FH $header;
@@ -153,6 +161,8 @@ sub incident
   }
   print FH "\n\n";
   close(FH);
+
+  return if $is_opalert;
 
   $gecos //= "NOT_DEFINED";
 
