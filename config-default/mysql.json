@@ -1,8 +1,5 @@
 {
-   "actiontable" : "actionlog",
-   "db" : "asm_main",
-   "dblog" : "asm_log",
-   "host" : "localhost",
+   "dsn" : "DBI:mysql:database=asm_main;host=localhost;port=3307",
    "ignoredgecos" : [
       "new now know how"
    ],
@@ -10,7 +7,4 @@
       "~chatzilla"
    ],
    "pass" : "PASS",
-   "port" : "3307",
-   "table" : "alertlog",
-   "user" : "USER"
 }
