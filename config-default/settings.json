@@ -3,7 +3,10 @@
       "AntiSpamMeta_",
       "AntiSpamMeta2"
    ],
-   "autojoins" : "#antispammeta",
+   "autojoins" : [
+      "#antispammeta",
+      "#antispammeta-debug"
+   ],
    "debugchan" : "#antispammeta-debug",
    "log" : {
       "actiondir" : "actionlogs/",
@@ -15,9 +18,9 @@
    },
    "masterchan" : "#antispammeta",
    "nick" : "AntiSpamMeta",
-   "pass" : {},
+   "pass" : "NICKSERV/SERVER PASSWORD GOES HERE",
    "port" : "6697",
-   "realname" : "I am a new AntiSpamBot in the making.",
+   "realname" : "https://antispammeta.net/",
    "server" : [
       "irc.freenode.net"
    ],
