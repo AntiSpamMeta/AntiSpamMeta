@@ -1,0 +1,22 @@
+#!/usr/bin/env perl
+use v5.20;
+use strict;
+use warnings;
+
+use FindBin;
+use lib "$FindBin::Bin/../lib";
+
+use ASM::DB;
+use DBIx::Class::DeploymentHandler;
+
+my $schema = ASM::DB->clone;
+
+my $dh = DBIx::Class::DeploymentHandler->new({
+        schema => $schema,
+        schema_version => '' . $schema->schema_version,
+        sql_translator_args => { add_drop_table => 0, quote_identifiers => 1 },
+        databases => [],
+        ignore_ddl => 1,
+    });
+
+$dh->prepare_install;

@@ -1,0 +1,313 @@
+---
+schema:
+  procedures: {}
+  tables:
+    actionlog:
+      constraints:
+        - deferrable: 1
+          expression: ''
+          fields:
+            - index
+          match_type: ''
+          name: ''
+          on_delete: ''
+          on_update: ''
+          options: []
+          reference_fields: []
+          reference_table: ''
+          type: PRIMARY KEY
+      fields:
+        account:
+          data_type: varchar
+          default_value: ~
+          is_nullable: 1
+          is_primary_key: 0
+          is_unique: 0
+          name: account
+          order: 11
+          size:
+            - 17
+        action:
+          data_type: varchar
+          default_value: ~
+          is_nullable: 0
+          is_primary_key: 0
+          is_unique: 0
+          name: action
+          order: 3
+          size:
+            - 20
+        byaccount:
+          data_type: varchar
+          default_value: ~
+          is_nullable: 1
+          is_primary_key: 0
+          is_unique: 0
+          name: byaccount
+          order: 16
+          size:
+            - 17
+        bygecos:
+          data_type: varchar
+          default_value: ~
+          is_nullable: 1
+          is_primary_key: 0
+          is_unique: 0
+          name: bygecos
+          order: 15
+          size:
+            - 512
+        byhost:
+          data_type: varchar
+          default_value: ~
+          is_nullable: 1
+          is_primary_key: 0
+          is_unique: 0
+          name: byhost
+          order: 14
+          size:
+            - 64
+        bynick:
+          data_type: varchar
+          default_value: ~
+          is_nullable: 1
+          is_primary_key: 0
+          is_unique: 0
+          name: bynick
+          order: 12
+          size:
+            - 17
+        byuser:
+          data_type: varchar
+          default_value: ~
+          is_nullable: 1
+          is_primary_key: 0
+          is_unique: 0
+          name: byuser
+          order: 13
+          size:
+            - 11
+        channel:
+          data_type: varchar
+          default_value: ~
+          is_nullable: 1
+          is_primary_key: 0
+          is_unique: 0
+          name: channel
+          order: 5
+          size:
+            - 51
+        gecos:
+          data_type: varchar
+          default_value: ~
+          is_nullable: 1
+          is_primary_key: 0
+          is_unique: 0
+          name: gecos
+          order: 10
+          size:
+            - 512
+        host:
+          data_type: varchar
+          default_value: ~
+          is_nullable: 1
+          is_primary_key: 0
+          is_unique: 0
+          name: host
+          order: 8
+          size:
+            - 64
+        index:
+          data_type: bigint
+          default_value: ~
+          is_auto_increment: 1
+          is_nullable: 0
+          is_primary_key: 1
+          is_unique: 0
+          name: index
+          order: 1
+          size:
+            - 0
+        ip:
+          data_type: integer
+          default_value: ~
+          extra:
+            unsigned: 1
+          is_nullable: 1
+          is_primary_key: 0
+          is_unique: 0
+          name: ip
+          order: 9
+          size:
+            - 0
+        nick:
+          data_type: varchar
+          default_value: ~
+          is_nullable: 0
+          is_primary_key: 0
+          is_unique: 0
+          name: nick
+          order: 6
+          size:
+            - 17
+        reason:
+          data_type: varchar
+          default_value: ~
+          is_nullable: 1
+          is_primary_key: 0
+          is_unique: 0
+          name: reason
+          order: 4
+          size:
+            - 512
+        time:
+          data_type: timestamp
+          default_value: !!perl/ref
+            =: current_timestamp
+          is_nullable: 0
+          is_primary_key: 0
+          is_unique: 0
+          name: time
+          order: 2
+          size:
+            - 0
+        user:
+          data_type: varchar
+          default_value: ~
+          is_nullable: 1
+          is_primary_key: 0
+          is_unique: 0
+          name: user
+          order: 7
+          size:
+            - 11
+      indices: []
+      name: actionlog
+      options: []
+      order: 1
+    alertlog:
+      constraints:
+        - deferrable: 1
+          expression: ''
+          fields:
+            - id
+          match_type: ''
+          name: ''
+          on_delete: ''
+          on_update: ''
+          options: []
+          reference_fields: []
+          reference_table: ''
+          type: PRIMARY KEY
+      fields:
+        channel:
+          data_type: text
+          default_value: ~
+          is_nullable: 0
+          is_primary_key: 0
+          is_unique: 0
+          name: channel
+          order: 2
+          size:
+            - 0
+        gecos:
+          data_type: text
+          default_value: ~
+          is_nullable: 0
+          is_primary_key: 0
+          is_unique: 0
+          name: gecos
+          order: 6
+          size:
+            - 0
+        host:
+          data_type: text
+          default_value: ~
+          is_nullable: 0
+          is_primary_key: 0
+          is_unique: 0
+          name: host
+          order: 5
+          size:
+            - 0
+        id:
+          data_type: tinytext
+          default_value: ~
+          is_nullable: 0
+          is_primary_key: 1
+          is_unique: 0
+          name: id
+          order: 8
+          size:
+            - 0
+        level:
+          data_type: tinytext
+          default_value: ~
+          is_nullable: 0
+          is_primary_key: 0
+          is_unique: 0
+          name: level
+          order: 7
+          size:
+            - 0
+        nick:
+          data_type: text
+          default_value: ~
+          is_nullable: 0
+          is_primary_key: 0
+          is_unique: 0
+          name: nick
+          order: 3
+          size:
+            - 0
+        reason:
+          data_type: text
+          default_value: ~
+          is_nullable: 0
+          is_primary_key: 0
+          is_unique: 0
+          name: reason
+          order: 9
+          size:
+            - 0
+        time:
+          data_type: timestamp
+          default_value: !!perl/ref
+            =: current_timestamp
+          is_nullable: 0
+          is_primary_key: 0
+          is_unique: 0
+          name: time
+          order: 1
+          size:
+            - 0
+        user:
+          data_type: text
+          default_value: ~
+          is_nullable: 0
+          is_primary_key: 0
+          is_unique: 0
+          name: user
+          order: 4
+          size:
+            - 0
+      indices: []
+      name: alertlog
+      options: []
+      order: 2
+  triggers: {}
+  views: {}
+translator:
+  add_drop_table: 0
+  filename: ~
+  no_comments: 0
+  parser_args:
+    sources:
+      - Actionlog
+      - Alertlog
+  parser_type: SQL::Translator::Parser::DBIx::Class
+  producer_args: {}
+  producer_type: SQL::Translator::Producer::YAML
+  show_warnings: 0
+  trace: 0
+  version: 0.11021

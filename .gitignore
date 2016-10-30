@@ -8,3 +8,7 @@ HTTP_ACCESS*
 
 # Carton
 /local
+
+# DBIx::Class::DeploymentHandler
+/sql/*/
+!/sql/_source/
