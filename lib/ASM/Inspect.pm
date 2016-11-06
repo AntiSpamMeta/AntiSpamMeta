@@ -98,6 +98,7 @@ sub inspect {
     next unless ASM::Util->mayAlert($chan);
     foreach $id (keys %aonx) {
       next unless ( grep { $event->{type} eq $_ } split(/[,:; ]+/, $aonx{$id}{type}) );
+      next if exists $::channels->{channel}{$chan}{disable_rules}{$id};
       if (defined($response)) {
         if ($aonx{$id}{class} ne 'urlcrunch') { next; } #don't run our regular checks if this is being called from a URL checking function
         else { $xresult = $::classes->check($aonx{$id}{class}, $aonx{$id}, $id, $event, $chan, $response); }
