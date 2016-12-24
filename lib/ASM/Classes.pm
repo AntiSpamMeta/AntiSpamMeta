@@ -268,7 +268,7 @@ sub asciiflood {
   my ($chk, $id, $event, $chan, $rev) = @_;
   my @cut = split(/:/, $chk->{content});
   return 0 if (length($event->{args}->[0]) < $cut[0]);
-  return 0 if ($event->{args}->[0] =~ /[A-Za-z0-9]/);
+  return 0 if ($event->{args}->[0] =~ /\pL/);
   return 1 if ( flood_add( $chan, $id, $event->{host}, int($cut[2]) ) == int($cut[1]) );
   return 0;
 }
