@@ -166,9 +166,9 @@ sub on_connect {
   $conn->sl("MODE $event->{args}->[0] +Q");
   if (lc $event->{args}->[0] ne lc $::settings->{nick}) {
     ASM::Util->dprint('Attempting to regain my main nick', 'startup');
-    $conn->sl("NickServ regain $::settings->{nick} $::settings->{pass}");
+    $conn->sl("NickServ regain $::settings->{nick} $::settings->{account_pass}");
   }# else {
-#    $conn->sl("NickServ identify $::settings->{nick} $::settings->{pass}");
+#    $conn->sl("NickServ identify $::settings->{nick} $::settings->{account_pass}");
 #  }
   $conn->sl('CAP REQ :extended-join multi-prefix account-notify'); #god help you if you try to use this bot off freenode
 }

@@ -1,4 +1,5 @@
 {
+   "account_pass" : "NICKSERV PASSWORD GOES HERE",
    "altnicks" : [
       "AntiSpamMeta_",
       "AntiSpamMeta2"
@@ -18,12 +19,12 @@
    },
    "masterchan" : "#antispammeta",
    "nick" : "AntiSpamMeta",
-   "pass" : "NICKSERV/SERVER PASSWORD GOES HERE",
    "port" : "6697",
    "realname" : "https://antispammeta.net/",
    "server" : [
       "irc.freenode.net"
    ],
+   "server_pass" : "SERVER PASSWORD GOES HERE",
    "ssl" : "1",
    "username" : "MetaBot",
    "web" : {

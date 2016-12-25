@@ -36,7 +36,6 @@ no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 $|++;
 $Data::Dumper::Useqq=1;
 
-$::pass = '';
 @::nick_blacklist=();
 $::netsplit = 0;
 $::netsplit_ignore_lag = 0;
@@ -96,6 +95,38 @@ sub alarmdeath
 $SIG{ALRM} = \&alarmdeath;
 alarm 300;
 
+sub startup_checks {
+  my $config_bad = 0;
+
+  if (exists $::mysql->{table}) {
+    if ($::mysql->{table} ne 'alertlog') {
+      warn "FATAL - The 'table' option in mysql.json is no longer supported. Please ensure your table is named 'alertlog'.\n";
+      $config_bad++;
+    }
+    else {
+      warn "The 'table' option in mysql.json is no longer supported. Please remove it from the configuration.\n";
+    }
+  }
+  if (exists $::mysql->{actiontable}) {
+    if ($::mysql->{actiontable} ne 'actionlog') {
+      warn "FATAL - The 'actiontable' option in mysql.json is no longer supported. Please ensure your table is named 'actionlog'.\n";
+      $config_bad++;
+    }
+    else {
+      warn "The 'actiontable' option in mysql.json is no longer supported. Please remove it from the configuration.\n";
+    }
+  }
+
+  if (exists $::settings->{pass}) {
+    warn "The 'pass' option in settings.json has been split into 'server_pass' and 'account_pass'. Please update your configuration accordingly.\n";
+    $::settings->{server_pass} //= $::settings->{account_pass} //= $::settings->{pass};
+  }
+
+  if ($config_bad) {
+    die "The bot cannot operate with the current configuration.\n";
+  }
+}
+
 sub init {
   my ( $conn, $host );
   $::version .= `git merge-base remotes/origin/master HEAD`; chomp $::version;
@@ -105,7 +136,6 @@ sub init {
   $::version .= `git rev-parse HEAD`; chomp $::version;
   my $irc = new Net::IRC;
   GetOptions( 'debug|d!'   => \$::debug,
-              'pass|p=s'   => \$::pass,
               'config|c=s' => \$::cset
             );
   if (-e "debugmode") {
@@ -114,7 +144,9 @@ sub init {
   if ($::cset eq '') { $::cset = 'config-default'; }
                 else { $::cset = "config-$::cset"; }
   ASM::Config->readConfig();
-  $::pass = $::settings->{pass} if $::pass eq '';
+
+  startup_checks();
+
   $::async = HTTP::Async->new();
   $::dns = Net::DNS::Async->new(QueueSize => 5000, Retries => 3);
   $host = ${$::settings->{server}}[rand @{$::settings->{server}}];
@@ -122,31 +154,6 @@ sub init {
   $irc->debug($::debug);
   if (-e "debugsock") {
     $irc->debugsock(1);
-  }
-
-  my $mysql_config_bad = 0;
-
-  if (exists $::mysql->{table}) {
-    if ($::mysql->{table} ne 'alertlog') {
-      warn "The 'table' option in mysql.json is no longer supported. Please ensure your table is named 'alertlog'.\n";
-      $mysql_config_bad++;
-    }
-    else {
-      warn "The 'table' option in mysql.json is no longer supported. Please remove it from the configuration.\n";
-    }
-  }
-  if (exists $::mysql->{actiontable}) {
-    if ($::mysql->{actiontable} ne 'actionlog') {
-      warn "The 'actiontable' option in mysql.json is no longer supported. Please ensure your table is named 'actionlog'.\n";
-      $mysql_config_bad++;
-    }
-    else {
-      warn "The 'actiontable' option in mysql.json is no longer supported. Please remove it from the configuration.\n";
-    }
-  }
-
-  if ($mysql_config_bad) {
-    die "The bot cannot operate with the current database configuration.\n";
   }
 
   if (!$::mysql->{disable}) {
@@ -168,7 +175,7 @@ sub init {
                          Nick => $::settings->{nick},
                          Ircname => $::settings->{realname},
                          Username => $::settings->{username},
-                         Password => $::settings->{pass},
+                         Password => $::settings->{server_pass},
                          Pacing => 0 );
   $conn->debug($::debug);
   if (-e "debugsock") {

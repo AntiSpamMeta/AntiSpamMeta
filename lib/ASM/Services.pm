@@ -27,7 +27,7 @@ sub doServices {
     if ( $event->{args}->[0] =~ /^Please identify/ || $event->{args}->[0] =~ /^This nickname is registered/ )
     {
       $::no_autojoins = 0;
-      $conn->sl("NickServ identify $::settings->{nick} $::settings->{pass}" );
+      $conn->sl("NickServ identify $::settings->{nick} $::settings->{account_pass}" );
     }
     elsif ( $event->{args}->[0] =~ /^You are now identified/ )
     {
