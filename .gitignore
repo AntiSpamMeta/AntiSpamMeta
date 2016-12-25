@@ -1,6 +1,5 @@
-/config
-/config-main
-/config-backup
+/config-*/
+!/config-default/
 /actionlogs
 HTTP_ACCESS*
 *.stor
