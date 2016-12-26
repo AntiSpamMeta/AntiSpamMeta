@@ -69,8 +69,6 @@ $::version = '';
   "logger" => 0,
   "dns" => MAGENTA
 );
-%::dsock = ();
-%::spy = ();
 $::starttime = time;
 @::syncqueue = ();
 @::bansyncqueue = ();

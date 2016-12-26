@@ -40,15 +40,12 @@ sub new
   $conn->add_handler('bannickchange', \&on_bannickchange);
   $conn->add_handler('kick', \&on_kick);
   $conn->add_handler('csource', \&on_ctcp_source);
-  $conn->add_handler('cdcc', \&on_ctcp_dcc);
   $conn->add_handler('354', \&on_whoxreply);
   $conn->add_handler('315', \&on_whoxover);
   $conn->add_handler('263', \&on_whofuckedup);
   $conn->add_handler('account', \&on_account);
   $conn->add_handler('ping', \&on_ping);
   $conn->add_handler('banlist', \&on_banlist);
-  $conn->add_handler('dcc_open', \&dcc_open);
-  $conn->add_handler('chat', \&on_dchat);
   $conn->add_handler('channelmodeis', \&on_channelmodeis);
   $conn->add_handler('quietlist', \&on_quietlist);
   $conn->add_handler('pong', \&on_pong);
@@ -114,33 +111,6 @@ sub on_pong
     $lagcycles--;
 #    $conn->privmsg( $::settings->{masterchan}, "Warning: Heavy lag cycle count has been reduced to $lagcycles" );
     ASM::Util->dprint('$lag = ' . $lag . '; $lagcycles = ' . $lagcycles, 'latency');
-  }
-}
-
-sub on_dchat
-{
-  my ($conn, $event) = @_;
-  ASM::Util->dprint(Dumper($event), 'dcc');
-  if ( #(lc $event->{nick} eq 'afterdeath') && 
-      ($event->{args}->[0] ne '')) {
-    my $msg = $event->{args}->[0];
-    if ($msg =~ /^SPY (.*)/) {
-      my $chan = $1;
-      $::spy{lc $chan} = $event->{to}[0];
-    } elsif ($msg =~ /^STOPSPY (.*)/) {
-      delete $::spy{lc $1};
-    } elsif ($msg =~ /^RETRIEVE (\S+)/) {
-      my $chan = lc $1;
-      my $out = $event->{to}[0];
-      my @time = ($::settings->{log}->{zone} eq 'local') ? localtime : gmtime;
-      say $out 'Retrieving ' . "$::settings->{log}->{dir}${chan}/${chan}" . strftime($::settings->{log}->{filefmt}, @time);
-      open(FHX, "$::settings->{log}->{dir}${chan}/${chan}" . strftime($::settings->{log}->{filefmt}, @time));
-      while (<FHX>) {
-        print $out $_;
-      }
-      close FHX;
-    }
-    #lols we gots a chat message! :D
   }
 }
 
@@ -724,30 +694,6 @@ sub on_channelurlis
 {
   my ($conn, $event) = @_;
   $::sc{lc $event->{args}->[1]}{url} = $event->{args}->[2];
-}
-
-sub on_ctcp_dcc
-{
-  my ($conn, $event) = @_;
-  my $nick = lc $event->{nick};
-  my $acct = lc $::sn{$nick}->{account};
-  ASM::Util->dprint(Dumper($event), 'ctcp');
-  if (($event->{type} eq 'cdcc') &&
-      (defined($::users->{person}->{$acct})) &&
-      (defined($::users->{person}->{$acct}->{flags})) &&
-      (grep {$_ eq 'c'} split('', $::users->{person}->{$acct}->{flags}))) {
-    ASM::Util->dprint(Dumper($event), 'dcc');
-    my @spit = split(/ /, $event->{args}->[0]);
-    if (($spit[0] eq 'CHAT') && ($spit[1] eq 'CHAT')) {
-      $::chat = Net::IRC::DCC::CHAT->new($conn, 0, $nick, $spit[2], $spit[3]);
-    }
-  }
-}
-
-sub dcc_open
-{
-  my ($conn, $event) = @_;
-  $::dsock{lc $event->{nick}} = $event->{args}->[1];
 }
 
 sub on_ctcp_source
