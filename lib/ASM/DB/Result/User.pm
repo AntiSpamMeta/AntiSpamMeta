@@ -27,7 +27,7 @@ __PACKAGE__->add_columns(
             cost => 13,
             salt_random => 1,
         },
-        passphrase_check_method => 'check_passphrase',
+        passphrase_check_method => 'check_password',
         is_nullable => 0,
     },
 );
