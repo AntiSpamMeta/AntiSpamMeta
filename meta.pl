@@ -188,21 +188,27 @@ sub init {
   ASM::Statsp->new($conn);
   $::classes = ASM::Classes->new();
   ASM::Fifo->new($irc, $conn);
-  my @nickbl = io('nick_blacklist.txt')->getlines;
-  chomp @nickbl;
-  @::nick_blacklist = @nickbl;
+  if (-e 'nick_blacklist.txt') {
+    my @nickbl = io('nick_blacklist.txt')->getlines;
+    chomp @nickbl;
+    @::nick_blacklist = @nickbl;
+  }
   %::proxies = ();
-  my @proxy = io('proxy.txt')->getlines;
-  chomp @proxy;
-  foreach my $line (@proxy) {
-    if ($line =~ /(\d+\.\d+\.\d+\.\d+):\d+/) {
-      $::proxies{$1} = 1;
+  if (-e 'proxy.txt') {
+    my @proxy = io('proxy.txt')->getlines;
+    chomp @proxy;
+    foreach my $line (@proxy) {
+      if ($line =~ /(\d+\.\d+\.\d+\.\d+):\d+/) {
+        $::proxies{$1} = 1;
+      }
     }
   }
-  my @wl=io('wordlist.txt')->getlines;
-  chomp @wl;
-  foreach my $item (@wl) {
-    $::wordlist{lc $item} = 1;
+  if (-e 'wordlist.txt') {
+    my @wl=io('wordlist.txt')->getlines;
+    chomp @wl;
+    foreach my $item (@wl) {
+      $::wordlist{lc $item} = 1;
+    }
   }
   $::fm = File::Monitor->new();
   foreach my $file ("channels", "dnsbl", "mysql", "restrictions", "rules", "settings", "users", "blacklist") {
