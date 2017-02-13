@@ -186,7 +186,19 @@ schema:
       options: []
       order: 1
     alertlog:
-      constraints: []
+      constraints:
+        - deferrable: 1
+          expression: ''
+          fields:
+            - sqlid
+          match_type: ''
+          name: ''
+          on_delete: ''
+          on_update: ''
+          options: []
+          reference_fields: []
+          reference_table: ''
+          type: PRIMARY KEY
       fields:
         channel:
           data_type: text
@@ -256,6 +268,17 @@ schema:
           is_unique: 0
           name: reason
           order: 9
+          size:
+            - 0
+        sqlid:
+          data_type: bigint
+          default_value: ~
+          is_auto_increment: 1
+          is_nullable: 0
+          is_primary_key: 1
+          is_unique: 0
+          name: sqlid
+          order: 10
           size:
             - 0
         time:

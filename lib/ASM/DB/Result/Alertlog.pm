@@ -23,8 +23,9 @@ __PACKAGE__->add_columns(
     level   => { data_type => 'tinytext', is_nullable => 0 },
     id      => { data_type => 'tinytext', is_nullable => 0 },
     reason  => { data_type => 'text',     is_nullable => 0 },
+    sqlid   => { data_type => 'bigint', is_auto_increment => 1, is_nullable => 0 },
 );
 
-__PACKAGE__->set_primary_key('id');
+__PACKAGE__->set_primary_key('sqlid');
 
 1;

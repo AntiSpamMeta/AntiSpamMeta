@@ -24,8 +24,9 @@ my $dh = DBIx::Class::DeploymentHandler->new({
         schema => $schema,
         schema_version => '' . $schema->schema_version,
         sql_translator_args => { add_drop_table => 0, quote_identifiers => 1 },
+        databases => [],
+        ignore_ddl => 1,
     });
 
-$dh->prepare_version_storage_install;
 $dh->install_version_storage;
 $dh->add_database_version({ version => 1 });
