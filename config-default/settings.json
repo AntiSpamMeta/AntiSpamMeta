@@ -20,6 +20,7 @@
    "masterchan" : "#antispammeta",
    "nick" : "AntiSpamMeta",
    "port" : "6697",
+   "quitmsg_lag": "Automatic restart triggered due to persistent lag. freenode staff: If this is happening too frequently, please set a nickserv freeze on my account, and once my connection is stable, unfreeze the account and /kill me to trigger a reconnect.",
    "realname" : "https://antispammeta.net/",
    "server" : [
       "irc.freenode.net"

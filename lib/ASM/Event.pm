@@ -99,9 +99,7 @@ sub on_pong
   if ($lag >= 5) {
     $lagcycles++;
     if ($lagcycles >= 3) {
-      $conn->quit("Automatic restart triggered due to persistent lag. Freenode staff: If this is happening too frequently, please " .
-                  "set a nickserv freeze on my account, and once my connection is stable, unfreeze the account and /kill me to tri" .
-                  "gger a reconnect.");
+      $conn->quit( $::settings->{quitmsg_lag} // 'Automatic restart triggered due to persistent lag.' );
     } else {
       $conn->privmsg( $::settings->{masterchan}, "Warning: I'm currently lagging by $lag seconds. This marks heavy lag cycle " .
                       "$lagcycles - automatic restart will be triggered after 3 lag cycles." );
