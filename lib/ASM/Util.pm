@@ -147,48 +147,48 @@ sub hostip {
   return gethostbyname($_[0]);
 }
 
-# If $tgts="#antispammeta" that's fine, and if $tgts = ["#antispammeta", "##linux-ops"] that's cool too
+# If $targets="#antispammeta" that's fine, and if $targets = ["#antispammeta", "##linux-ops"] that's cool too
 sub sendLongMsg {
-  my ($module, $conn, $tgts, $txtz) = @_;
-  if (length($txtz) <= 380) {
-    $conn->privmsg($tgts, $txtz);
+  my ($module, $conn, $targets, $message) = @_;
+  if (length($message) <= 380) {
+    $conn->privmsg($targets, $message);
   } else {
-    my $splitpart = rindex($txtz, " ", 380);
-    $conn->privmsg($tgts, substr($txtz, 0, $splitpart));
-    $conn->privmsg($tgts, substr($txtz, $splitpart));
+    my $splitpart = rindex($message, " ", 380);
+    $conn->privmsg($targets, substr($message, 0, $splitpart));
+    $conn->privmsg($targets, substr($message, $splitpart));
   }
 }
 
 sub getAlert {
-  my ($module, $c, $risk, $t) = @_;
+  my ($module, $channel, $risk, $type) = @_;
   my @disable = ();
-  my @x = ();
-  $c = lc $c;
-  $c =~ s/^[@+]//;
+  my @result = ();
+  $channel = lc $channel;
+  $channel =~ s/^[@+]//;
   foreach my $prisk ( keys %::RISKS) {
     if ( $::RISKS{$risk} >= $::RISKS{$prisk} ) {
-      if (defined $::channels->{channel}->{master}->{$t}->{$prisk}) {
-        foreach my $nick (@{$::channels->{channel}->{master}->{$t}->{$prisk}}) {
+      if (defined $::channels->{channel}->{master}->{$type}->{$prisk}) {
+        foreach my $nick (@{$::channels->{channel}->{master}->{$type}->{$prisk}}) {
           if ($nick =~ /^\$a:/) {
-            push @x, @{accountToNicks($module, $nick)};
+            push @result, @{accountToNicks($module, $nick)};
           } else {
-            push @x, $nick;
+            push @result, $nick;
           }
         }
       }
-      if (defined cs($module, $c)->{$t}->{$prisk}) {
-        foreach my $nick (@{cs($module, $c)->{$t}->{$prisk}}) {
+      if (defined cs($module, $channel)->{$type}->{$prisk}) {
+        foreach my $nick (@{cs($module, $channel)->{$type}->{$prisk}}) {
           if ($nick =~ /^\$a:/) {
-            push @x, @{accountToNicks($module, $nick)};
+            push @result, @{accountToNicks($module, $nick)};
           } else {
-            push @x, $nick;
+            push @result, $nick;
           }
         }
       }
     }
   }
-  if (defined $::channels->{channel}->{master}->{$t}->{disable}) {
-    foreach my $nick (@{$::channels->{channel}->{master}->{$t}->{disable}}) {
+  if (defined $::channels->{channel}->{master}->{$type}->{disable}) {
+    foreach my $nick (@{$::channels->{channel}->{master}->{$type}->{disable}}) {
       if ($nick =~ /^\$a:/) {
         push @disable, @{accountToNicks($module, $nick)};
       } else {
@@ -196,8 +196,8 @@ sub getAlert {
       }
     }
   }
-  if (defined cs($module, $c)->{$t}->{disable}) {
-    foreach my $nick (@{cs($module, $c)->{$t}->{disable}}) {
+  if (defined cs($module, $channel)->{$type}->{disable}) {
+    foreach my $nick (@{cs($module, $channel)->{$type}->{disable}}) {
       if ($nick =~ /^\$a:/) {
         push @disable, @{accountToNicks($module, $nick)};
       } else {
@@ -205,9 +205,9 @@ sub getAlert {
       }
     }
   }
-  @x = unique(@x);
-  @x = array_diff(@x, @disable);
-  return @x;
+  @result = unique(@result);
+  @result = array_diff(@result, @disable);
+  return @result;
 }
 
 sub commaAndify {

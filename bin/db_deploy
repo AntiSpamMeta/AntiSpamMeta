@@ -11,21 +11,19 @@ use ASM::DB;
 use Getopt::Long;
 use DBIx::Class::DeploymentHandler;
 
-GetOptions(
-    'config|c=s' => \$::cset,
-);
-if ($::cset eq '') { $::cset = 'config-default'; }
-else { $::cset = "config-$::cset"; }
+GetOptions( 'config|c=s' => \$::cset );
+if   ( $::cset eq '' ) { $::cset = 'config-default'; }
+else                   { $::cset = "config-$::cset"; }
 ASM::Config->readConfig();
 
-my $schema = ASM::DB->connect($::mysql->{dsn}, $::mysql->{user}, $::mysql->{pass});
+my $schema = ASM::DB->connect( $::mysql->{dsn}, $::mysql->{user}, $::mysql->{pass} );
 
-my $dh = DBIx::Class::DeploymentHandler->new({
-        schema => $schema,
-        schema_version => '' . $schema->schema_version,
-        sql_translator_args => { add_drop_table => 0, quote_identifiers => 1 },
-        databases => [],
-        ignore_ddl => 1,
-    });
+my $dh = DBIx::Class::DeploymentHandler->new( {
+    schema              => $schema,
+    schema_version      => '' . $schema->schema_version,
+    sql_translator_args => { add_drop_table => 0, quote_identifiers => 1 },
+    databases           => [],
+    ignore_ddl          => 1,
+} );
 
 $dh->install;
