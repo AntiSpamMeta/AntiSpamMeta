@@ -57,7 +57,7 @@ sub cloning {
                     ($chan ~~ $::sn{$_}->{mship})
                    } keys %::sn;
   if ($#nicks >= $max) {
-    return ASM::Util->commaAndify(@nicks);
+    return ASM::Util->commaAndify(@nicks) . " [\@$event->{host}]";
   }
   return 0;
 }
