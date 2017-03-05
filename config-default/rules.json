@@ -65,7 +65,7 @@
       },
       "cloning" : {
          "class" : "cloning",
-         "content" : "3",
+         "content" : "4",
          "reason" : "excessive clones detected ($xresult) !clonesdetected ",
          "risk" : "debug",
          "type" : "join"
