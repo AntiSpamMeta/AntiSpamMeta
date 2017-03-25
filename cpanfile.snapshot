@@ -438,18 +438,19 @@ DISTRIBUTIONS
       Test::More 0.47
       Tie::Hash 0
       perl 5.006
-  DBD-mysql-4.036
-    pathname: M/MI/MICHIELB/DBD-mysql-4.036.tar.gz
+  DBD-mysql-4.042
+    pathname: M/MI/MICHIELB/DBD-mysql-4.042.tar.gz
     provides:
-      Bundle::DBD::mysql 4.036
-      DBD::mysql 4.036
+      Bundle::DBD::mysql 4.042
+      DBD::mysql 4.042
       DBD::mysql::GetInfo undef
-      DBD::mysql::db 4.036
-      DBD::mysql::dr 4.036
-      DBD::mysql::st 4.036
+      DBD::mysql::db 4.042
+      DBD::mysql::dr 4.042
+      DBD::mysql::st 4.042
     requirements:
       DBI 1.609
       Data::Dumper 0
+      Devel::CheckLib 0
       ExtUtils::MakeMaker 0
       perl 5.008001
   DBI-1.636
@@ -668,35 +669,35 @@ DISTRIBUTIONS
       Try::Tiny 0.07
       namespace::clean 0.24
       perl 5.008001
-  DBIx-Class-DeploymentHandler-0.002218
-    pathname: F/FR/FREW/DBIx-Class-DeploymentHandler-0.002218.tar.gz
+  DBIx-Class-DeploymentHandler-0.002219
+    pathname: F/FR/FREW/DBIx-Class-DeploymentHandler-0.002219.tar.gz
     provides:
-      DBIx::Class::DeploymentHandler 0.002218
-      DBIx::Class::DeploymentHandler::Dad 0.002218
-      DBIx::Class::DeploymentHandler::DeployMethod::SQL::Translator 0.002218
-      DBIx::Class::DeploymentHandler::DeployMethod::SQL::Translator::Deprecated 0.002218
-      DBIx::Class::DeploymentHandler::DeployMethod::SQL::Translator::ScriptHelpers 0.002218
-      DBIx::Class::DeploymentHandler::Deprecated 0.002218
-      DBIx::Class::DeploymentHandler::HandlesDeploy 0.002218
-      DBIx::Class::DeploymentHandler::HandlesVersionStorage 0.002218
-      DBIx::Class::DeploymentHandler::HandlesVersioning 0.002218
-      DBIx::Class::DeploymentHandler::LogImporter 0.002218
-      DBIx::Class::DeploymentHandler::LogRouter 0.002218
-      DBIx::Class::DeploymentHandler::Logger 0.002218
-      DBIx::Class::DeploymentHandler::Types 0.002218
-      DBIx::Class::DeploymentHandler::VersionHandler::DatabaseToSchemaVersions 0.002218
-      DBIx::Class::DeploymentHandler::VersionHandler::ExplicitVersions 0.002218
-      DBIx::Class::DeploymentHandler::VersionHandler::Monotonic 0.002218
-      DBIx::Class::DeploymentHandler::VersionStorage::Deprecated 0.002218
-      DBIx::Class::DeploymentHandler::VersionStorage::Deprecated::Component 0.002218
-      DBIx::Class::DeploymentHandler::VersionStorage::Deprecated::VersionResult 0.002218
-      DBIx::Class::DeploymentHandler::VersionStorage::Deprecated::VersionResultSet 0.002218
-      DBIx::Class::DeploymentHandler::VersionStorage::Standard 0.002218
-      DBIx::Class::DeploymentHandler::VersionStorage::Standard::Component 0.002218
-      DBIx::Class::DeploymentHandler::VersionStorage::Standard::VersionResult 0.002218
-      DBIx::Class::DeploymentHandler::VersionStorage::Standard::VersionResultSet 0.002218
-      DBIx::Class::DeploymentHandler::WithApplicatorDumple 0.002218
-      DBIx::Class::DeploymentHandler::WithReasonableDefaults 0.002218
+      DBIx::Class::DeploymentHandler 0.002219
+      DBIx::Class::DeploymentHandler::Dad 0.002219
+      DBIx::Class::DeploymentHandler::DeployMethod::SQL::Translator 0.002219
+      DBIx::Class::DeploymentHandler::DeployMethod::SQL::Translator::Deprecated 0.002219
+      DBIx::Class::DeploymentHandler::DeployMethod::SQL::Translator::ScriptHelpers 0.002219
+      DBIx::Class::DeploymentHandler::Deprecated 0.002219
+      DBIx::Class::DeploymentHandler::HandlesDeploy 0.002219
+      DBIx::Class::DeploymentHandler::HandlesVersionStorage 0.002219
+      DBIx::Class::DeploymentHandler::HandlesVersioning 0.002219
+      DBIx::Class::DeploymentHandler::LogImporter 0.002219
+      DBIx::Class::DeploymentHandler::LogRouter 0.002219
+      DBIx::Class::DeploymentHandler::Logger 0.002219
+      DBIx::Class::DeploymentHandler::Types 0.002219
+      DBIx::Class::DeploymentHandler::VersionHandler::DatabaseToSchemaVersions 0.002219
+      DBIx::Class::DeploymentHandler::VersionHandler::ExplicitVersions 0.002219
+      DBIx::Class::DeploymentHandler::VersionHandler::Monotonic 0.002219
+      DBIx::Class::DeploymentHandler::VersionStorage::Deprecated 0.002219
+      DBIx::Class::DeploymentHandler::VersionStorage::Deprecated::Component 0.002219
+      DBIx::Class::DeploymentHandler::VersionStorage::Deprecated::VersionResult 0.002219
+      DBIx::Class::DeploymentHandler::VersionStorage::Deprecated::VersionResultSet 0.002219
+      DBIx::Class::DeploymentHandler::VersionStorage::Standard 0.002219
+      DBIx::Class::DeploymentHandler::VersionStorage::Standard::Component 0.002219
+      DBIx::Class::DeploymentHandler::VersionStorage::Standard::VersionResult 0.002219
+      DBIx::Class::DeploymentHandler::VersionStorage::Standard::VersionResultSet 0.002219
+      DBIx::Class::DeploymentHandler::WithApplicatorDumple 0.002219
+      DBIx::Class::DeploymentHandler::WithReasonableDefaults 0.002219
     requirements:
       Carp 0
       Carp::Clan 0
@@ -1340,6 +1341,18 @@ DISTRIBUTIONS
       perl 5.008004
       strict 0
       warnings 0
+  Devel-CheckLib-1.09
+    pathname: M/MA/MATTN/Devel-CheckLib-1.09.tar.gz
+    provides:
+      Devel::CheckLib 1.09
+    requirements:
+      Exporter 0
+      ExtUtils::MakeMaker 0
+      File::Spec 0
+      File::Temp 0.16
+      IO::CaptureOutput 1.0801
+      Test::More 0.62
+      perl 5.00405
   Devel-GlobalDestruction-0.13
     pathname: H/HA/HAARG/Devel-GlobalDestruction-0.13.tar.gz
     provides:
@@ -1613,11 +1626,11 @@ DISTRIBUTIONS
       HTML::Tagset 3.20
     requirements:
       ExtUtils::MakeMaker 0
-  HTTP-Async-0.31
-    pathname: K/KA/KAORU/HTTP-Async-0.31.tar.gz
+  HTTP-Async-0.33
+    pathname: K/KA/KAORU/HTTP-Async-0.33.tar.gz
     provides:
-      HTTP::Async 0.31
-      HTTP::Async::Polite 0.31
+      HTTP::Async 0.33
+      HTTP::Async::Polite 0.33
     requirements:
       Carp 0
       Data::Dumper 0
@@ -1766,6 +1779,21 @@ DISTRIBUTIONS
       ExtUtils::MakeMaker 0
       Scalar::Util 0
       perl 5.008001
+  IO-CaptureOutput-1.1104
+    pathname: D/DA/DAGOLDEN/IO-CaptureOutput-1.1104.tar.gz
+    provides:
+      IO::CaptureOutput 1.1104
+    requirements:
+      Carp 0
+      Exporter 0
+      ExtUtils::MakeMaker 6.17
+      File::Basename 0
+      File::Temp 0.16
+      Symbol 0
+      perl 5.006
+      strict 0
+      vars 0
+      warnings 0
   IO-HTML-1.001
     pathname: C/CJ/CJM/IO-HTML-1.001.tar.gz
     provides:
@@ -1789,7 +1817,6 @@ DISTRIBUTIONS
       IO::Socket::SSL::Utils 2.014
     requirements:
       ExtUtils::MakeMaker 0
-      Mozilla::CA 0
       Net::SSLeay 1.46
       Scalar::Util 0
   Import-Into-1.002005
@@ -2449,104 +2476,106 @@ DISTRIBUTIONS
       namespace::autoclean 0
       namespace::clean 0.19
       perl 5.008001
-  Mozilla-CA-20160104
-    pathname: A/AB/ABH/Mozilla-CA-20160104.tar.gz
+  Net-DNS-1.09
+    pathname: N/NL/NLNETLABS/Net-DNS-1.09.tar.gz
     provides:
-      Mozilla::CA 20160104
-    requirements:
-      ExtUtils::MakeMaker 0
-      Test 0
-      perl 5.006
-  Net-DNS-1.06
-    pathname: N/NL/NLNETLABS/Net-DNS-1.06.tar.gz
-    provides:
-      Net::DNS 1.06
-      Net::DNS::Domain 1456
-      Net::DNS::DomainName 1456
-      Net::DNS::DomainName1035 1456
-      Net::DNS::DomainName2535 1456
-      Net::DNS::Header 1381
-      Net::DNS::Mailbox 1406
-      Net::DNS::Mailbox1035 1406
-      Net::DNS::Mailbox2535 1406
-      Net::DNS::Nameserver 1406
-      Net::DNS::Packet 1446
-      Net::DNS::Parameters 1484
-      Net::DNS::Question 1381
-      Net::DNS::RR 1475
-      Net::DNS::RR::A 1388
-      Net::DNS::RR::AAAA 1441
-      Net::DNS::RR::AFSDB 1406
-      Net::DNS::RR::APL 1390
-      Net::DNS::RR::APL::Item 1390
-      Net::DNS::RR::CAA 1406
-      Net::DNS::RR::CDNSKEY 1339
-      Net::DNS::RR::CDS 1339
-      Net::DNS::RR::CERT 1390
-      Net::DNS::RR::CNAME 1406
-      Net::DNS::RR::CSYNC 1390
-      Net::DNS::RR::DHCID 1390
-      Net::DNS::RR::DLV 1339
-      Net::DNS::RR::DNAME 1456
-      Net::DNS::RR::DNSKEY 1468
-      Net::DNS::RR::DS 1456
-      Net::DNS::RR::EUI48 1390
-      Net::DNS::RR::EUI64 1390
-      Net::DNS::RR::GPOS 1382
-      Net::DNS::RR::HINFO 1406
-      Net::DNS::RR::HIP 1390
-      Net::DNS::RR::IPSECKEY 1390
-      Net::DNS::RR::ISDN 1406
-      Net::DNS::RR::KEY 1381
-      Net::DNS::RR::KX 1406
-      Net::DNS::RR::L32 1408
-      Net::DNS::RR::L64 1408
-      Net::DNS::RR::LOC 1390
-      Net::DNS::RR::LP 1406
-      Net::DNS::RR::MB 1406
-      Net::DNS::RR::MG 1406
-      Net::DNS::RR::MINFO 1406
-      Net::DNS::RR::MR 1406
-      Net::DNS::RR::MX 1406
-      Net::DNS::RR::NAPTR 1406
-      Net::DNS::RR::NID 1408
-      Net::DNS::RR::NS 1406
-      Net::DNS::RR::NSEC 1406
-      Net::DNS::RR::NSEC3 1456
-      Net::DNS::RR::NSEC3PARAM 1390
-      Net::DNS::RR::NULL 1348
-      Net::DNS::RR::OPENPGPKEY 1390
-      Net::DNS::RR::OPT 1474
-      Net::DNS::RR::PTR 1406
-      Net::DNS::RR::PX 1406
-      Net::DNS::RR::RP 1406
-      Net::DNS::RR::RRSIG 1456
-      Net::DNS::RR::RT 1406
-      Net::DNS::RR::SIG 1456
-      Net::DNS::RR::SMIMEA 1456
-      Net::DNS::RR::SOA 1408
-      Net::DNS::RR::SPF 1382
-      Net::DNS::RR::SRV 1406
-      Net::DNS::RR::SSHFP 1456
-      Net::DNS::RR::TKEY 1406
-      Net::DNS::RR::TLSA 1456
-      Net::DNS::RR::TSIG 1475
-      Net::DNS::RR::TXT 1382
-      Net::DNS::RR::URI 1406
-      Net::DNS::RR::X25 1406
-      Net::DNS::Resolver 1480
-      Net::DNS::Resolver::Base 1482
-      Net::DNS::Resolver::MSWin32 1456
-      Net::DNS::Resolver::Recurse 1472
-      Net::DNS::Resolver::UNIX 1408
-      Net::DNS::Resolver::android 1406
-      Net::DNS::Resolver::cygwin 1406
-      Net::DNS::Resolver::os2 1406
-      Net::DNS::Text 1406
-      Net::DNS::Update 1455
-      Net::DNS::ZoneFile 1466
-      Net::DNS::ZoneFile::Generator 1466
-      Net::DNS::ZoneFile::Text 1466
+      Net::DNS 1.09
+      Net::DNS::Domain 1555
+      Net::DNS::DomainName 1555
+      Net::DNS::DomainName1035 1555
+      Net::DNS::DomainName2535 1555
+      Net::DNS::Header 1527
+      Net::DNS::Mailbox 1527
+      Net::DNS::Mailbox1035 1527
+      Net::DNS::Mailbox2535 1527
+      Net::DNS::Nameserver 1537
+      Net::DNS::Packet 1546
+      Net::DNS::Parameters 1552
+      Net::DNS::Question 1530
+      Net::DNS::RR 1552
+      Net::DNS::RR::A 1528
+      Net::DNS::RR::AAAA 1528
+      Net::DNS::RR::AFSDB 1528
+      Net::DNS::RR::APL 1548
+      Net::DNS::RR::APL::Item 1548
+      Net::DNS::RR::CAA 1528
+      Net::DNS::RR::CDNSKEY 1552
+      Net::DNS::RR::CDS 1552
+      Net::DNS::RR::CERT 1552
+      Net::DNS::RR::CNAME 1528
+      Net::DNS::RR::CSYNC 1528
+      Net::DNS::RR::DHCID 1528
+      Net::DNS::RR::DLV 1528
+      Net::DNS::RR::DNAME 1528
+      Net::DNS::RR::DNSKEY 1552
+      Net::DNS::RR::DS 1552
+      Net::DNS::RR::EUI48 1528
+      Net::DNS::RR::EUI64 1528
+      Net::DNS::RR::GPOS 1528
+      Net::DNS::RR::HINFO 1528
+      Net::DNS::RR::HIP 1528
+      Net::DNS::RR::IPSECKEY 1552
+      Net::DNS::RR::ISDN 1528
+      Net::DNS::RR::KEY 1528
+      Net::DNS::RR::KX 1528
+      Net::DNS::RR::L32 1528
+      Net::DNS::RR::L64 1528
+      Net::DNS::RR::LOC 1528
+      Net::DNS::RR::LP 1528
+      Net::DNS::RR::MB 1528
+      Net::DNS::RR::MG 1528
+      Net::DNS::RR::MINFO 1528
+      Net::DNS::RR::MR 1528
+      Net::DNS::RR::MX 1528
+      Net::DNS::RR::NAPTR 1528
+      Net::DNS::RR::NID 1528
+      Net::DNS::RR::NS 1528
+      Net::DNS::RR::NSEC 1528
+      Net::DNS::RR::NSEC3 1528
+      Net::DNS::RR::NSEC3PARAM 1528
+      Net::DNS::RR::NULL 1528
+      Net::DNS::RR::OPENPGPKEY 1528
+      Net::DNS::RR::OPT 1555
+      Net::DNS::RR::OPT::CHAIN 1555
+      Net::DNS::RR::OPT::CLIENT_SUBNET 1555
+      Net::DNS::RR::OPT::COOKIE 1555
+      Net::DNS::RR::OPT::DAU 1555
+      Net::DNS::RR::OPT::DHU 1555
+      Net::DNS::RR::OPT::EXPIRE 1555
+      Net::DNS::RR::OPT::KEY_TAG 1555
+      Net::DNS::RR::OPT::N3U 1555
+      Net::DNS::RR::OPT::PADDING 1555
+      Net::DNS::RR::OPT::TCP_KEEPALIVE 1555
+      Net::DNS::RR::PTR 1528
+      Net::DNS::RR::PX 1528
+      Net::DNS::RR::RP 1528
+      Net::DNS::RR::RRSIG 1552
+      Net::DNS::RR::RT 1528
+      Net::DNS::RR::SIG 1552
+      Net::DNS::RR::SMIMEA 1528
+      Net::DNS::RR::SOA 1546
+      Net::DNS::RR::SPF 1528
+      Net::DNS::RR::SRV 1528
+      Net::DNS::RR::SSHFP 1528
+      Net::DNS::RR::TKEY 1528
+      Net::DNS::RR::TLSA 1528
+      Net::DNS::RR::TSIG 1528
+      Net::DNS::RR::TXT 1528
+      Net::DNS::RR::URI 1528
+      Net::DNS::RR::X25 1528
+      Net::DNS::Resolver 1527
+      Net::DNS::Resolver::Base 1545
+      Net::DNS::Resolver::MSWin32 1527
+      Net::DNS::Resolver::Recurse 1555
+      Net::DNS::Resolver::UNIX 1527
+      Net::DNS::Resolver::android 1527
+      Net::DNS::Resolver::cygwin 1527
+      Net::DNS::Resolver::os2 1527
+      Net::DNS::Text 1555
+      Net::DNS::Update 1527
+      Net::DNS::ZoneFile 1526
+      Net::DNS::ZoneFile::Generator 1526
+      Net::DNS::ZoneFile::Text 1526
     requirements:
       Digest::HMAC 1.03
       Digest::MD5 2.13
@@ -2554,12 +2583,10 @@ DISTRIBUTIONS
       ExtUtils::MakeMaker 0
       File::Spec 0.86
       IO::Socket 1.16
-      IO::Socket::INET 1.25
-      IO::Socket::IP 0.32
       MIME::Base64 2.11
       Test::More 0.52
       Time::Local 1.19
-      perl 5.00404
+      perl 5.006
   Net-DNS-Async-1.07
     pathname: S/SH/SHEVEK/Net-DNS-Async-1.07.tar.gz
     provides:
@@ -3395,76 +3422,6 @@ DISTRIBUTIONS
       Fcntl 0
       URI 1.10
       perl 5.008001
-  XML-NamespaceSupport-1.11
-    pathname: P/PE/PERIGRIN/XML-NamespaceSupport-1.11.tar.gz
-    provides:
-      XML::NamespaceSupport 1.11
-    requirements:
-      ExtUtils::MakeMaker 6.42
-      Test::More 0.47
-  XML-Parser-2.44
-    pathname: T/TO/TODDR/XML-Parser-2.44.tar.gz
-    provides:
-      XML::Parser 2.44
-      XML::Parser::Expat 2.44
-      XML::Parser::Style::Debug undef
-      XML::Parser::Style::Objects undef
-      XML::Parser::Style::Stream undef
-      XML::Parser::Style::Subs undef
-      XML::Parser::Style::Tree undef
-    requirements:
-      ExtUtils::MakeMaker 0
-      LWP::UserAgent 0
-      Test::More 0
-      perl 5.00405
-  XML-SAX-0.99
-    pathname: G/GR/GRANTM/XML-SAX-0.99.tar.gz
-    provides:
-      XML::SAX 0.99
-      XML::SAX::DocumentLocator undef
-      XML::SAX::ParserFactory 1.01
-      XML::SAX::PurePerl 0.99
-      XML::SAX::PurePerl::DebugHandler undef
-      XML::SAX::PurePerl::Exception undef
-      XML::SAX::PurePerl::Productions undef
-      XML::SAX::PurePerl::Reader undef
-      XML::SAX::PurePerl::Reader::Stream undef
-      XML::SAX::PurePerl::Reader::String undef
-      XML::SAX::PurePerl::Reader::URI undef
-    requirements:
-      ExtUtils::MakeMaker 0
-      File::Temp 0
-      XML::NamespaceSupport 0.03
-      XML::SAX::Base 1.05
-  XML-SAX-Base-1.08
-    pathname: G/GR/GRANTM/XML-SAX-Base-1.08.tar.gz
-    provides:
-      XML::SAX::Base 1.08
-      XML::SAX::Base::NoHandler 1.08
-      XML::SAX::Exception 1.08
-    requirements:
-      ExtUtils::MakeMaker 6.31
-      Test::More 0.88
-  XML-SAX-Expat-0.51
-    pathname: B/BJ/BJOERN/XML-SAX-Expat-0.51.tar.gz
-    provides:
-      XML::SAX::Expat 0.51
-    requirements:
-      ExtUtils::MakeMaker 0
-      XML::NamespaceSupport 0.03
-      XML::Parser 2.27
-      XML::SAX 0.03
-      XML::SAX::Base 1.00
-  XML-Simple-2.22
-    pathname: G/GR/GRANTM/XML-Simple-2.22.tar.gz
-    provides:
-      XML::Simple 2.22
-    requirements:
-      ExtUtils::MakeMaker 0
-      XML::NamespaceSupport 1.04
-      XML::SAX 0.15
-      XML::SAX::Expat 0
-      perl 5.008
   XML-Writer-0.625
     pathname: J/JO/JOSEPHW/XML-Writer-0.625.tar.gz
     provides:
@@ -3473,13 +3430,6 @@ DISTRIBUTIONS
       XML::Writer::_String 0.625
     requirements:
       ExtUtils::MakeMaker 0
-  XSLoader-0.24
-    pathname: S/SA/SAPER/XSLoader-0.24.tar.gz
-    provides:
-      XSLoader 0.24
-    requirements:
-      ExtUtils::MakeMaker 0
-      Test::More 0.47
   YAML-1.18
     pathname: T/TI/TINITA/YAML-1.18.tar.gz
     provides:
@@ -3620,6 +3570,70 @@ DISTRIBUTIONS
       URI::Escape 0
       WWW::RobotRules 6
       perl 5.008001
+  libwww-perl-6.24
+    pathname: O/OA/OALDERS/libwww-perl-6.24.tar.gz
+    provides:
+      LWP 6.24
+      LWP::Authen::Basic 6.24
+      LWP::Authen::Digest 6.24
+      LWP::Authen::Ntlm 6.24
+      LWP::ConnCache 6.24
+      LWP::Debug 6.24
+      LWP::Debug::TraceHTTP 6.24
+      LWP::Debug::TraceHTTP::Socket 6.24
+      LWP::DebugFile 6.24
+      LWP::MemberMixin 6.24
+      LWP::Protocol 6.24
+      LWP::Protocol::MyFTP 6.24
+      LWP::Protocol::cpan 6.24
+      LWP::Protocol::data 6.24
+      LWP::Protocol::file 6.24
+      LWP::Protocol::ftp 6.24
+      LWP::Protocol::gopher 6.24
+      LWP::Protocol::http 6.24
+      LWP::Protocol::http::Socket 6.24
+      LWP::Protocol::http::SocketMethods 6.24
+      LWP::Protocol::loopback 6.24
+      LWP::Protocol::mailto 6.24
+      LWP::Protocol::nntp 6.24
+      LWP::Protocol::nogo 6.24
+      LWP::RobotUA 6.24
+      LWP::Simple 6.24
+      LWP::UserAgent 6.24
+      libwww::perl undef
+    requirements:
+      Digest::MD5 0
+      Encode 2.12
+      Encode::Locale 0
+      ExtUtils::MakeMaker 0
+      File::Copy 0
+      File::Listing 6
+      Getopt::Long 0
+      HTML::Entities 0
+      HTML::HeadParser 0
+      HTTP::Cookies 6
+      HTTP::Daemon 6
+      HTTP::Date 6
+      HTTP::Negotiate 6
+      HTTP::Request 6
+      HTTP::Request::Common 6
+      HTTP::Response 6
+      HTTP::Status 6
+      IO::Select 0
+      IO::Socket 0
+      LWP::MediaTypes 6
+      MIME::Base64 2.1
+      Net::FTP 2.58
+      Net::HTTP 6.07
+      Scalar::Util 0
+      Try::Tiny 0
+      URI 1.10
+      URI::Escape 0
+      WWW::RobotRules 6
+      base 0
+      perl 5.008001
+      strict 0
+      warnings 0
   multidimensional-0.012
     pathname: I/IL/ILMARI/multidimensional-0.012.tar.gz
     provides:
