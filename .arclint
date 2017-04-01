@@ -2,7 +2,11 @@
     "linters": {
         "text": {
             "type": "text",
-            "exclude": "(^lib/Net/|\\.json$)"
+            "exclude": "(^lib/Net/|\\.json$)",
+            "text.max-line-length": 120,
+            "severity": {
+                "2": "disabled"
+            }
         },
         "chmod": {
             "type": "chmod"
