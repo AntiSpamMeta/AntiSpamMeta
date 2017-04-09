@@ -5,6 +5,7 @@ use warnings;
 use Text::LevenshteinXS qw(distance);
 use Data::Dumper;
 use Regexp::Wildcards;
+use List::Util qw(uniq);
 no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
 my %sf = ();
@@ -291,8 +292,8 @@ sub nickspam {
   if ( length $event->{args}->[0] >= int($cut[0]) ) {
     my %users = %{$::sc{lc $chan}->{users}};
     my %x = map { $_=>$_ } keys %users;
-    my @uniq = grep( $x{$_}, split( /[^a-zA-Z0-9_\\|`[\]{}^-]+/ , lc $event->{args}->[0]) );
-    return 1 if ( @uniq >= int($cut[1]) );
+    my @nicks = grep( $x{$_}, split( /[^a-zA-Z0-9_\\|`[\]{}^-]+/ , lc $event->{args}->[0]) );
+    return 1 if ( uniq(@nicks) >= int($cut[1]) );
   }
   return 0;
 }
