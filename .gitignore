@@ -11,3 +11,4 @@ HTTP_ACCESS*
 # DBIx::Class::DeploymentHandler
 /sql/*/
 !/sql/_source/
+!/sql/_common/

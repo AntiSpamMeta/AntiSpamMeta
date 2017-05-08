@@ -1,5 +1,3 @@
-requires 'Apache::Htgroup', '1.23';
-requires 'Apache::Htpasswd', '1.8';
 requires 'Array::Utils', '0.5';
 requires 'autovivification', '0.12';
 requires 'Data::UUID', '1.219';
@@ -18,6 +16,7 @@ requires 'String::Interpolate', '0.32';
 requires 'Text::LevenshteinXS', '0.03';
 requires 'Tie::CPHash', '1.06';
 requires 'URI::Escape', '3.31';
+requires 'Const::Fast', '0.014';
 
 requires 'DBI', '1.63';
 requires 'DBD::mysql', '4.025';
