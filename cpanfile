@@ -25,5 +25,6 @@ requires 'DateTime::Format::MySQL', '0.06';
 requires 'DBIx::Class::PassphraseColumn', '0.02';
 requires 'Authen::Passphrase::BlowfishCrypt', '0.008';
 requires 'DBIx::Class::DeploymentHandler', '0.002218';
+requires 'DBIx::Class::Schema::Loader', '0.07046';
 
 # vim: ft=perl
