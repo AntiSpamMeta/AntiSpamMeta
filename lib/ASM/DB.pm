@@ -1,5 +1,5 @@
 use utf8;
-package ASM::DB 4;
+package ASM::DB 3;
 
 use strict;
 use warnings;

@@ -29,10 +29,12 @@
    "ssl" : "1",
    "username" : "MetaBot",
    "web" : {
+      "groupfile" : "/var/www/.htgroup",
       "shortener" : {
          "apikey" : "yoursecretkey",
          "domain" : "yourls.org",
          "secure" : "0"
       },
+      "userfile" : "/var/www/.htpasswd"
    }
 }

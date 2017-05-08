@@ -19,6 +19,7 @@ sub deserialize {
 sub readConfig {
   $::settings     = deserialize(io->file("$::cset/settings.json")->all);
   $::channels     = deserialize(io->file("$::cset/channels.json")->all);
+  $::users        = deserialize(io->file("$::cset/users.json")->all);
   $::mysql        = deserialize(io->file("$::cset/mysql.json")->all);
   $::dnsbl        = deserialize(io->file("$::cset/dnsbl.json")->all);
   $::rules        = deserialize(io->file("$::cset/rules.json")->all);
@@ -29,6 +30,7 @@ sub readConfig {
 sub writeConfig {
   writeMysql();
   writeChannels();
+  writeUsers();
   writeSettings();
   writeRestrictions();
   writeBlacklist();
@@ -54,6 +56,11 @@ sub writeDnsbl {
 sub writeChannels {
   $::settingschanged=1;
   serialize($::channels) > io("$::cset/channels.json");
+}
+
+sub writeUsers {
+  $::settingschanged=1;
+  serialize($::users) > io("$::cset/users.json");
 }
 
 sub writeSettings {

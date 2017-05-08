@@ -1,7 +1,6 @@
 package ASM::Commander;
 no autovivification;
 
-use v5.10;
 use warnings;
 use strict;
 use IO::All;
@@ -9,60 +8,45 @@ use POSIX qw(strftime);
 use Data::Dumper;
 use URI::Escape;
 use ASM::Shortener;
-use Const::Fast;
 
 no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
-const my $secret   => 'flag_secret';
-const my $hilights => 'flag_hilights';
-const my $admin    => 'flag_admin';
-const my $plugin   => 'flag_plugin';
-const my $debug    => 'flag_debug';
-
-const my %letter_to_flag => (
-	s => $secret,
-	h => $hilights,
-	a => $admin,
-	p => $plugin,
-	d => $debug,
-);
-
-const my %flag_to_letter => reverse(%letter_to_flag);
-
 my $cmdtbl = {
 	'^;wallop' => {
-		'flag' => $debug,
+		'flag' => 'd',
 		'cmd' => \&cmd_wallop },
 	'^;;addwebuser (?<pass>.{6,})' => {
-		'flag' => $secret,
-		'txn' => 1,
+		'flag' => 's',
 		'cmd' => \&cmd_addwebuser },
+	'^;delwebuser (?<user>\S+)' => {
+		'flag' => 'a',
+		'cmd' => \&cmd_delwebuser },
 	'^;teredo (?<ip>\S+)' => {
 		'cmd' => \&cmd_teredo },
 	'^;status$' => {
 		'cmd' => \&cmd_status },
 	'^;mship (?<nick>\S+)' => {
-		'flag' => $secret,
+		'flag' => 's',
 		'cmd' => \&cmd_mship },
 	'^;source$' => {
 		'cmd' => \&cmd_source },
 	'^;monitor (?<chan>\S+) *$' => {
-		'flag' => $secret,
+		'flag' => 's',
 		'cmd' => \&cmd_monitor },
 	'^;monitor (?<chan>\S+) ?(?<switch>yes|no)$' => {
-		'flag' => $admin,
+		'flag' => 'a',
 		'cmd' => \&cmd_monitor2 },
 	'^;suppress (?<chan>\S+) *$' => {
-		'flag' => $secret,
+		'flag' => 's',
 		'cmd' => \&cmd_suppress },
 	'^;unsuppress (?<chan>\S+) *$' => {
-		'flag' => $secret,
+		'flag' => 's',
 		'cmd' => \&cmd_unsuppress },
 	'^;silence (?<chan>\S+) *$' => {
-		'flag' => $secret,
+		'flag' => 's',
 		'cmd' => \&cmd_silence },
 	'^;silence (?<chan>\S+) (?<switch>yes|no) *$' => {
-		'flag' => $admin,
+		'flag' => 'a',
 		'cmd' => \&cmd_silence2 },
 	'^;help$' => {
 		'cmd' => \&cmd_help },
@@ -73,88 +57,89 @@ my $cmdtbl = {
 	'^;query (\S+) ?(\S+)?$' => {
 		'cmd' => \&cmd_query },
 	'^;investigate (?<nick>\S+) *$' => {
-		'flag' => $secret,
+		'flag' => 's',
 		'cmd' => \&cmd_investigate },
 	'^;investigate2 (?<nick>\S+) ?(?<skip>\d*) *$' => {
-		'flag' => $secret,
+		'flag' => 's',
 		'cmd' => \&cmd_investigate2 },
-	'^;userx? (?:add|flags) (?<account>\S+) (?<flags>\S+)$' => {
-		'flag' => $admin,
-		'txn' => 1,
-		'cmd' => \&cmd_user_set_flags },
+	'^;userx? add (?<account>\S+) (?<flags>\S+)$' => {
+		'flag' => 'a',
+		'cmd' => \&cmd_user_add },
 	'^;userx? flags (?<account>\S+) ?$' => {
-		'cmd' => \&cmd_user_get_flags },
+		'cmd' => \&cmd_user_flags },
+	'^;userx? flags (?<account>\S+) (?<flags>\S+)$' => {
+		'flag' => 'a',
+		'cmd' => \&cmd_user_flags2 },
 	'^;userx? del (?<account>\S+)$' => {
-		'flag' => $admin,
-		'txn' => 1,
+		'flag' => 'a',
 		'cmd' => \&cmd_user_del },
 	'^;target (?<chan>\S+) (?<nickchan>\S+) ?(?<level>[a-z]*)$' => {
-		'flag' => $admin,
+		'flag' => 'a',
 		'cmd' => \&cmd_target },
 	'^;detarget (?<chan>\S+) (?<nickchan>\S+)' => {
-		'flag' => $admin,
+		'flag' => 'a',
 		'cmd' => \&cmd_detarget },
 	'^;showhilights (?<nick>\S+) *$' => {
-		'flag' => $hilights,
+		'flag' => 'h',
 		'cmd' => \&cmd_showhilights },
 	'^;hilight (?<chan>\S+) (?<nicks>\S+) ?(?<level>[a-z]*)$' => {
-		'flag' => $hilights,
+		'flag' => 'h',
 		'cmd' => \&cmd_hilight },
 	'^;dehilight (?<chan>\S+) (?<nicks>\S+)' => {
-		'flag' => $hilights,
+		'flag' => 'h',
 		'cmd' => \&cmd_dehilight },
 	'^;join (?<chan>\S+)' => {
-		'flag' => $admin,
+		'flag' => 'a',
 		'cmd' => \&cmd_join },
 	'^;part (?<chan>\S+)' => {
-		'flag' => $admin,
+		'flag' => 'a',
 		'cmd' => \&cmd_part },
 	'^;sl (?<string>.+)' => {
-		'flag' => $debug,
+		'flag' => 'd',
 		'cmd' => \&cmd_sl },
 	'^;quit ?(?<reason>.*)' => {
-		'flag' => $admin,
+		'flag' => 'a',
 		'cmd' => \&cmd_quit },
 	'^;ev (?<string>.*)' => {
-		'flag' => $debug,
+		'flag' => 'd',
 		'cmd' => \&cmd_ev },
 	'^;rehash$' => {
-		'flag' => $admin,
+		'flag' => 'a',
 		'cmd' => \&cmd_rehash },
 	'^;restrict (?<type>nick|account|host) (?<who>\S+) (?<mode>\+|-)(?<restriction>[a-z0-9_-]+)$' => {
-		'flag' => $admin,
+		'flag' => 'a',
 		'cmd' => \&cmd_restrict },
 	'^\s*\!ops ?(?<chan>#\S+)? ?(?<reason>.*)' => {
 		'nohush' => 'nohush',
 		'cmd' => \&cmd_ops },
 	'^;blacklist (?<string>.+)' => {
-		'flag' => $secret,
+		'flag' => 's',
 		'cmd' => \&cmd_blacklist },
 	'^;blacklistpcre (?<string>.+)' => {
-		'flag' => $admin,
+		'flag' => 'a',
 		'cmd' => \&cmd_blacklistpcre },
 	'^;unblacklist (?<id>[0-9a-f]+)$' => {
-		'flag' => $secret,
+		'flag' => 's',
 		'cmd' => \&cmd_unblacklist },
 	'^;plugin (?<chan>\S+) (?<risk>\S+) (?<reason>.*)' => {
-		'flag' => $plugin,
+		'flag' => 'p',
 		'cmd' => \&cmd_plugin },
 	'^;sync (?<chan>\S+)' => {
-		'flag' => $admin,
+		'flag' => 'a',
 		'cmd' => \&cmd_sync },
 	'^;ping\s*$' => {
 		'cmd' => \&cmd_ping },
 	'^;ping (?<string>\S.*)$' => {
-		'flag' => $secret,
+		'flag' => 's',
 		'cmd' => \&cmd_ping2 },
 	'^;blreason (?<id>[0-9a-f]+) (?<reason>.*)' => {
-		'flag' => $secret,
+		'flag' => 's',
 		'cmd' => \&cmd_blreason },
 	'^;bllookup (?<id>[0-9a-f]+)$' => {
-		'flag' => $secret,
+		'flag' => 's',
 		'cmd' => \&cmd_bllookup },
 	'^;falsematch\b' => {
-		'flag' => $secret,
+		'flag' => 's',
 		'cmd' => \&cmd_falsematch },
 	'^;version$' => {
 		'cmd' => \&cmd_version },
@@ -189,50 +174,34 @@ sub command {
 		unless ( (ASM::Util->speak($event->{to}->[0])) ) {
 			next unless (defined($self->{cmdtbl}->{$command}->{nohush}));
 		}
+		if (defined($self->{cmdtbl}->{$command}->{flag})) { #If the command is restricted,
+			if (!defined($acct)) {
+				$fail = 1;
+			}
+			elsif (!defined($::users->{person}->{$acct})) { #make sure the requester has an account
+				$fail = 1;
+			}
+			elsif (!defined($::users->{person}->{$acct}->{flags})) { #make sure the requester has flags defined
+				$fail = 1;
+			}
+			elsif (!(grep {$_ eq $self->{cmdtbl}->{$command}->{flag}} split('', $::users->{person}->{$acct}->{flags}))) { #make sure the requester has the needed flags
+				$fail = 1;
+			}
+		}
 		if ($cmd=~/$command/) {
 			my $where = $event->{to}[0];
 			if (index($where, '#') == -1) {
 				$where = 'PM';
 			}
 			ASM::Util->dprint("$event->{from} told me in $where: $cmd", "commander");
-
 			if (!ASM::Util->notRestricted($nick, "nocommands")) {
 				$fail = 1;
 			}
-
-			my $check_and_run_command = sub {
-				# If the command is restricted,
-				if ( my $flag = $self->{cmdtbl}->{$command}->{flag} ) {
-					# require an account
-					if (!defined($acct)) {
-						$fail = 1;
-					}
-					else {
-						# and check for the flag
-						my $user = $::db->resultset('User')->by_name($acct);
-						if (!defined $user || !$user->$flag) {
-							$fail = 1;
-						}
-					}
-				}
-
-				if ($fail == 1) {
-					$conn->privmsg($nick, "You don't have permission to use that command, or you're not signed into nickserv.");
-				} else {
-					&{$self->{cmdtbl}->{$command}->{cmd}}($conn, $event);
-				}
-			};
-
-			# Do we need to wrap the entire command - including the permission check - in a transaction?
-			# Be careful; due to re-establishing a DB connection, this requires the command's code to
-			# be idempotent. See the DBIx::Class::Storage documentation on the txn_do method for details.
-			if ($self->{cmdtbl}{$command}{txn}) {
-				$::db->txn_do($check_and_run_command);
+			if ($fail == 1) {
+				$conn->privmsg($nick, "You don't have permission to use that command, or you're not signed into nickserv.");
+			} else {
+				&{$self->{cmdtbl}->{$command}->{cmd}}($conn, $event);
 			}
-			else {
-				$check_and_run_command->();
-			}
-
 			last;
 		}
 	}
@@ -265,12 +234,30 @@ sub cmd_addwebuser {
 		$conn->privmsg($event->replyto, "This command must be used in PM. Try again WITH A DIFFERENT PASSWORD!");
 		return;
 	}
-	my $user = $::db->resultset('User')->by_name(lc $::sn{lc $event->{nick}}->{account});
-	$user->passphrase($pass);
-	$user->update;
+	use Apache::Htpasswd; use Apache::Htgroup;
+	my $o_Htpasswd = new Apache::Htpasswd({passwdFile => $::settings->{web}->{userfile}, UseMD5 => 1});
+	my $o_Htgroup = new Apache::Htgroup($::settings->{web}->{groupfile});
+	my $user = lc $::sn{lc $event->{nick}}->{account};
+	$o_Htpasswd->htDelete($user);
+	$o_Htpasswd->htpasswd($user, $pass);
+	$o_Htpasswd->writeInfo($user, strftime("%F %T", gmtime));
+	$o_Htgroup->adduser($user, 'actionlogs');
+	$o_Htgroup->save();
+	$conn->privmsg($event->replyto, "Added $user to the list of authorized web users.")
+}
 
-	my $name = $user->name;
-	$conn->privmsg($event->replyto, "Added $name to the list of authorized web users.")
+sub cmd_delwebuser {
+	my ($conn, $event) = @_;
+
+	my $user = lc $+{user};
+	use Apache::Htpasswd;
+	use Apache::Htgroup;
+	my $o_Htpasswd = new Apache::Htpasswd({passwdFile => $::settings->{web}->{userfile}, UseMD5 => 1});
+	my $o_Htgroup = new Apache::Htgroup($::settings->{web}->{groupfile});
+	$o_Htpasswd->htDelete($user);
+	$o_Htgroup->deleteuser($user, 'actionlogs');
+	$o_Htgroup->save();
+	$conn->privmsg($event->replyto, "Removed $user from the list of authorized web users.")
 }
 
 sub cmd_teredo {
@@ -607,89 +594,40 @@ sub cmd_investigate2 {
 	$conn->privmsg($event->nick, "Only 10 results are shown at a time. For more, do ;investigate2 $nick " . ($skip+1) . '.');
 }
 
-sub get_user_flagstring {
-	my ($user) = @_;
-
-	my $string = '';
-
-	for my $letter (sort keys %letter_to_flag) {
-		my $flag = $letter_to_flag{$letter};
-
-		$string .= $letter if $user->$flag;
-	}
-
-	return $string;
-}
-
-sub set_user_flagstring {
-	my ($user, $string) = @_;
-
-	while (my ($letter, $flag) = each %letter_to_flag) {
-		if (index($string, $letter) != -1) {
-			$user->$flag(1);
-		}
-		else {
-			$user->$flag(0);
-		}
-	}
-}
-
-sub is_flagstring_superset {
-	my ($super, $sub) = @_;
-	for my $letter (split //, $sub) {
-		return 0 if index($super, $letter) == -1;
-	}
-	return 1;
-}
-
-sub cmd_user_set_flags {
+sub cmd_user_add {
 	my ($conn, $event) = @_;
 
 	my $nick = lc $+{account};
 	my $account;
 	my $flags = $+{flags};
-
-	# we need to be idempotent if interrupted halfway.
-	# TODO: this is rather ugly / error-prone.
-	state $sent_message = 0;
-
-	if ( (defined($::sn{$nick}->{account})) && ( ($account = lc $::sn{$nick}->{account}) ne $nick ) ) {
-		$conn->privmsg($event->replyto, "I'm assuming you mean " . $nick . "'s nickserv account, " . $account . '.')
-			if !($sent_message++);
-		$nick = $account;
+	my %hasflagshash = ();
+	foreach my $item (split(//, $::users->{person}->{lc $::sn{lc $event->{nick}}->{account}}->{flags})) {
+		$hasflagshash{$item} = 1;
 	}
-
-	my $giver = $::db->resultset('User')->by_name( lc $::sn{lc $event->{nick}}{account} );
-
-	my $own_flags = get_user_flagstring($giver);
-
-	if (!is_flagstring_superset($own_flags, $flags)) {
-		$conn->privmsg($event->replyto, "You can't give a flag you don't already have.");
-		$sent_message = 0;
-		return;
+	foreach my $flag (split(//, $flags)) {
+		if (!defined($hasflagshash{$flag})) {
+			$conn->privmsg($event->replyto, "You can't give a flag you don't already have.");
+			return;
+		}
 	}
 	if ($flags =~ /d/) {
-		$conn->privmsg($event->replyto, "The d flag may not be assigned over IRC. Edit the database manually.");
-		$sent_message = 0;
+		$conn->privmsg($event->replyto, "The d flag may not be assigned over IRC. Edit the configuration manually.");
 		return;
 	}
-
-	my $target = $::db->resultset('User')->by_name_or_new( $nick );
-
-	if ($target->flag_debug) {
-		$conn->privmsg($event->replyto, "Users with the 'd' flag are untouchable. Edit the database manually.");
-		$sent_message = 0;
+	if ( (defined($::sn{$nick}->{account})) && ( ($account = lc $::sn{$nick}->{account}) ne $nick ) ) {
+		$conn->privmsg($event->replyto, "I'm assuming you mean " . $nick . "'s nickserv account, " . $account . '.');
+		$nick = $account;
+	}
+	if (defined($::users->{person}->{$nick})) {
+		$conn->privmsg($event->replyto, "The user $nick already exists.  Use ;user flags $nick $flags to set their flags");
 		return;
 	}
-
-	set_user_flagstring($target, $flags);
-	$target->update_or_insert;
-
-	$sent_message = 0;
+	$::users->{person}->{$nick} = { 'flags' => $flags };
+	ASM::Config->writeUsers();
 	$conn->privmsg($event->replyto, "Flags for NickServ account $nick set to $flags");
 }
 
-sub cmd_user_get_flags {
+sub cmd_user_flags {
 	my ($conn, $event) = @_;
 
 	my $nick = lc $+{account};
@@ -699,32 +637,72 @@ sub cmd_user_get_flags {
 		$nick = $account;
 	}
 	my $sayNick = substr($nick, 0, 1) . "\x02\x02" . substr($nick, 1);
-
-	my $user = $::db->resultset('User')->by_name($nick);
-
-	if (defined $user and length( my $flags = get_user_flagstring($user) )) {
-		$conn->privmsg($event->replyto, "Flags for $sayNick: $flags");
-	}
-	else {
+	if (defined($::users->{person}->{$nick}->{flags})) {
+		$conn->privmsg($event->replyto, "Flags for $sayNick: $::users->{person}->{$nick}->{flags}");
+	} else {
 		$conn->privmsg($event->replyto, "$sayNick has no flags");
 	}
+}
+
+sub cmd_user_flags2 {
+	my ($conn, $event) = @_;
+
+	my $nick = lc $+{account};
+	my $flags = $+{flags};
+	my $account;
+	my %hasflagshash = ();
+	foreach my $item (split(//, $::users->{person}->{lc $::sn{lc $event->{nick}}->{account}}->{flags})) {
+		$hasflagshash{$item} = 1;
+	}
+	foreach my $flag (split(//, $flags)) {
+		if (!defined($hasflagshash{$flag})) {
+			$conn->privmsg($event->replyto, "You can't give a flag you don't already have.");
+			return;
+		}
+	}
+	if ($flags =~ /d/) {
+		$conn->privmsg($event->replyto, "The d flag may not be assigned over IRC. Edit the configuration manually.");
+		return;
+	}
+	if ( (defined($::sn{$nick}->{account})) && ( ($account = lc $::sn{$nick}->{account}) ne $nick ) ) {
+		$conn->privmsg($event->replyto, "I'm assuming you mean " . $nick . "'s nickserv account, " . $account . '.');
+		$nick = $account;
+	}
+	if (defined($::users->{person}->{$nick}) &&
+	    defined($::users->{person}->{$nick}->{flags}) &&
+	    ($::users->{person}->{$nick}->{flags} =~ /d/)) {
+		return $conn->privmsg($event->replyto, "Users with the 'd' flag are untouchable. Edit the config file manually.");
+	}
+	if ($flags !~ /s/) {
+		use Apache::Htpasswd; use Apache::Htgroup;
+		my $o_Htpasswd = new Apache::Htpasswd({passwdFile => $::settings->{web}->{userfile}, UseMD5 => 1});
+		my $o_Htgroup = new Apache::Htgroup($::settings->{web}->{groupfile});
+		$o_Htpasswd->htDelete($nick);
+		$o_Htgroup->deleteuser($nick, 'actionlogs');
+		$o_Htgroup->save();
+	}
+	$::users->{person}->{$nick}->{flags} = $flags;
+	ASM::Config->writeUsers();
+	$conn->privmsg($event->replyto, "Flags for $nick set to $flags");
 }
 
 sub cmd_user_del {
 	my ($conn, $event) = @_;
 
 	my $nick = lc $+{account};
-
-	my $target = $::db->resultset('User')->by_name($nick);
-	if (!defined $target) {
-		$conn->privmsg($event->replyto, "I know no user by that name. Make sure you specified the account name.");
-		return;
+	if (defined($::users->{person}->{$nick}) &&
+	    defined($::users->{person}->{$nick}->{flags}) &&
+	    ($::users->{person}->{$nick}->{flags} =~ /d/)) {
+		return $conn->privmsg($event->replyto, "Users with the 'd' flag are untouchable. Edit the config file manually.");
 	}
-	if ($target->flag_debug) {
-		$conn->privmsg($event->replyto, "Users with the 'd' flag are untouchable. Edit the database manually.");
-		return;
-	}
-	$target->delete;
+	delete($::users->{person}->{$nick});
+	ASM::Config->writeUsers();
+	use Apache::Htpasswd; use Apache::Htgroup;
+	my $o_Htpasswd = new Apache::Htpasswd({passwdFile => $::settings->{web}->{userfile}, UseMD5 => 1});
+	my $o_Htgroup = new Apache::Htgroup($::settings->{web}->{groupfile});
+	$o_Htpasswd->htDelete($nick);
+	$o_Htgroup->deleteuser($nick, 'actionlogs');
+	$o_Htgroup->save();
 	$conn->privmsg($event->replyto, "Removed $nick from authorized users." .
 		       " MAKE SURE YOU PROVIDED a nickserv account to this command, rather than an altnick of the accountholder");
 }
