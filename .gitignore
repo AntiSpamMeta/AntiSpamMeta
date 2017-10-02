@@ -11,3 +11,6 @@ HTTP_ACCESS*
 # DBIx::Class::DeploymentHandler
 /sql/*/
 !/sql/_source/
+
+# plenv
+/.perl-version
