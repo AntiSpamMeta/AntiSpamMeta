@@ -121,7 +121,7 @@ sub actionlog
       byhost    => $byhost,
       bygecos   => $bygecos,
       byaccount => $byaccount,
-    })->id;
+    })->id if defined $::db;
 # $::sn{ow} looks like:
 #$VAR1 = { 
 #          "account" => "afterdeath",
@@ -175,7 +175,7 @@ sub incident
       level   => $risk,
       id      => $id,
       reason  => $reason,
-    });
+    }) if defined $::db;
 
   return $uuid;
 }
