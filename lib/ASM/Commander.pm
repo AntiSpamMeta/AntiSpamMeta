@@ -109,7 +109,19 @@ my $cmdtbl = {
 	'^;restrict (?<type>nick|account|host) (?<who>\S+) (?<mode>\+|-)(?<restriction>[a-z0-9_-]+)$' => {
 		'flag' => 'a',
 		'cmd' => \&cmd_restrict },
-	'^\s*\!ops(?:\s+(?<chan>#\S+))?[\s|]+(?<reason>.*)' => {
+	q{(?x)
+		^ \s*                 # start of line, optional whitespace
+		\!ops                 # actual command
+		(?:                   # optionally:
+		    \s+               #   spaces
+		    (?<chan> \# \S+ ) #   channel name
+		)?
+		(?:                   # optionally:
+		    [\s|]+            #   spaces (or "|", used to separate reason with some bots)
+		    (?<reason>.*?)    #   reason/message. Uses .*? so preceding and following
+		)?                    #   \s+ / \s* will "strip" whitespace.
+		\s* $                 # optional whitespace, end of line
+	} => {
 		'nohush' => 'nohush',
 		'cmd' => \&cmd_ops },
 	'^;blacklist (?<string>.+)' => {
